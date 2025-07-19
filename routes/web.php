@@ -28,15 +28,6 @@ use App\Http\Controllers\UserController;
 
 
 
-  //Translation
-// Route::group(
-//     [
-//         'prefix' => LaravelLocalization::setLocale(),
-        // 'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath', 'auth', 'verified']
-//         'middleware' => [  'auth', 'verified']
-//     ],
-//     function () {
-
 
 
 
@@ -82,7 +73,7 @@ Route::group(['middleware' => ['auth']], function() {
         // /*Milestones  */
                 Route::resource('milestones', MilestonesController::class);
 
-                
+
 
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);

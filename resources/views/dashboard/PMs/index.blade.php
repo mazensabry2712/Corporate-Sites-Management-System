@@ -107,7 +107,7 @@
 
                                     <td>{{ $i }}</td>
                                     <td>
-                                        @can(' Edit')
+                                        @can('Edit')
                                         <a class="modal-effect btn btn-sm btn-info" data-effect="effect-scale"
                                             data-id="{{ $x->id }}" data-name="{{ $x->name }}"
                                             data-email="{{ $x->email }}" data-phone="{{ $x->phone }}"
