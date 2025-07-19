@@ -40,7 +40,15 @@ Route::group(['middleware' => ['auth']], function() {
 
         Route::resource('dashboard', controller: DashboardController::class);
           /*Project*/
-          Route::resource('project', controller: ProjectsController::class);
+          Route::resource('project', controller: ProjectsController::class)->names([
+              'index' => 'projects.index',
+              'create' => 'projects.create',
+              'store' => 'projects.store',
+              'show' => 'projects.show',
+              'edit' => 'projects.edit',
+              'update' => 'projects.update',
+              'destroy' => 'projects.destroy',
+          ]);
         // Route::resource('/project/{id}', 'ProjectsController@getprojects');
         /*Customer*/
         Route::resource('customer', CustController::class);

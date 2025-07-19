@@ -81,9 +81,8 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header pb-0">
-                    @endcan
-                    @can('Add')
 
+                    @can('Add')
                     <a class=" btn btn-outline-primary btn-block"
                         href="{{ route('pstatus.create') }}"> Add project status </a>
                     @endcan
@@ -96,7 +95,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th> Operations </th>
-                                    <th>project_id </th>
+                                    <th>project id </th>
                                     <th>date_time </th>
                                     <th>pm_name </th>
                                     <th>status </th>
@@ -120,14 +119,14 @@
 
                                     <td>{{ $i }}</td>
                                     <td>
-                                        @can(' Edit')
+                                        @can('Edit')
                                         <a class=" btn btn-sm btn-info"
 
                                             href="{{ route('pstatus.edit',$x->id) }}" title="Upadte"><i
                                                 class="las la-pen"></i></a>
                                         @endcan
 
-                                        @can(' Delete')
+                                        @can('Delete')
                                         <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
                                             data-id="{{ $x->id }}" data-name="{{ $x->date_time }}"
                                             data-toggle="modal" href="#modaldemo9" title="Delete"><i

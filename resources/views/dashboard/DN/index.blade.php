@@ -11,7 +11,18 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
-
+    <style>
+        .image-thumbnail {
+            cursor: pointer;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .image-thumbnail:hover {
+            border-color: #007bff;
+            transform: scale(1.05);
+        }
+    </style>
 @endsection
 @section('page-header')
     <!-- breadcrumb -->
@@ -106,9 +117,15 @@
                                     <td>{{ $dnnn->project->pr_number}}</td>
                                     <td>
                                         @if ($dnnn->dn_copy)
-                                            <img src="{{ asset('storage/' . $dnnn->dn_copy) }}" width="100" height="100">
+                                            <a href="{{ asset('storage/' . $dnnn->dn_copy) }}" target="_blank" title="Click to view full image">
+                                                <img src="{{ asset('storage/' . $dnnn->dn_copy) }}"
+                                                     width="50"
+                                                     height="50"
+                                                     class="image-thumbnail"
+                                                     alt="DN Copy Image">
+                                            </a>
                                         @else
-                                            There is no image.
+                                            <span class="text-muted">There is no image.</span>
                                         @endif
                                     </td>
                                     <td>{{ $dnnn->status }}</td>
