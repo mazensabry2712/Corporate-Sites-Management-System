@@ -36,12 +36,12 @@ class CocController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            
+
             'coc_copy' => 'required|mimes:pdf,docx,doc',
             'pr_number'=>"required|exists:projects,id"
         ]);
 
-        if($request->hasFile('coc_copy')){ 
+        if($request->hasFile('coc_copy')){
             $file = $request->file('coc_copy');
             $path = $file->store('uploads',[
                 'disk' => 'public'
@@ -50,7 +50,7 @@ class CocController extends Controller
             $validatedData['coc_copy'] = $path;
         }
         Coc::create($validatedData);
-       
+
         session()->flash('Add', 'Registration successful');
             return redirect('/coc');
 
@@ -71,7 +71,7 @@ class CocController extends Controller
     {
         $projects = Projects::all();
         $coc=Coc::find($id);
-        
+
         return view('dashboard.CoC.edit', compact('coc', 'projects'));
     }
 
@@ -83,12 +83,12 @@ class CocController extends Controller
         $coc=Coc::find($id);
         $path=$coc['coc_copy'];
         $validatedData = $request->validate([
-            
-            'coc_copy' => 'image|mimes:png,jpg,jpeg',
+
+              'coc_copy' => 'required|mimes:pdf,docx,doc',
             'pr_number'=>"required|exists:projects,id"
         ]);
 
-        if($request->hasFile('coc_copy')){ 
+        if($request->hasFile('coc_copy')){
             // if ($coc->coc_copy && Storage::exists($coc->coc_copy)) {
             //     Storage::delete($coc->coc_copy);
             // }
@@ -100,15 +100,15 @@ class CocController extends Controller
             // $path=Storage::putfile("uploads",$request->coc_copy);
             $validatedData['coc_copy'] = $path;
         }
-        
 
-      
+
+
         $coc->update($validatedData);
-   
+
         session()->flash('edit', 'The section has been successfully modified');
             return redirect('/coc');
 
-        
+
     }
 
     /**
@@ -117,10 +117,10 @@ class CocController extends Controller
     public function destroy(Request $request)
     {
         //
-      
+
         $id=$request->id;
         $user=Coc::find($id);
-        Storage::delete($user->coc_copy); 
+        Storage::delete($user->coc_copy);
         $user->delete();
         session()->flash('delete', 'Deleted successfully');
 

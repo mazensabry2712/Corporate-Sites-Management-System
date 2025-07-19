@@ -1,4 +1,3 @@
-
 @extends('layouts.master')
 @section('css')
     <!--- Internal Select2 css-->
@@ -13,7 +12,7 @@
     <link rel="stylesheet" href="{{ URL::asset('assets/plugins/telephoneinput/telephoneinput-rtl.css') }}">
 @endsection
 @section('title')
-    Add Invoice
+    Add Milestone
 @stop
 
 @section('page-header')
@@ -22,14 +21,14 @@
         <div class="my-auto">
             <div class="d-flex">
                 <h4 class="content-title mb-0 my-auto">Add milestone </h4><span class="text-muted mt-1 tx-13 mr-2 mb-0">/
-                milestone</span>
+                    milestone</span>
             </div>
         </div>
     </div>
     <!-- breadcrumb -->
 @endsection
 @section('content')
-@if ($errors->any())
+    @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
                 @foreach ($errors->all() as $error)
@@ -37,15 +36,15 @@
                 @endforeach
             </ul>
         </div>
-    @endif  
+    @endif
 
     <!-- @if (session()->has('Add'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('Add') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ session()->get('Add') }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
     @endif -->
 
     <!-- row -->
@@ -63,13 +62,13 @@
 
                         <div class="row mt-3">
 
-                           
+
                             <div class="col">
                                 <label for="milestone" class="control-label"> milestone </label>
                                 <input type="text" class="form-control" id="risk" name="milestone"
                                     title="   Please enter the milestone  ">
                             </div>
-                          
+
 
 
                             <div class="col">
@@ -79,7 +78,7 @@
                             </div>
 
 
-                          <div class="col">
+                            <div class="col">
                                 <label for="name" class="control-label">PR Number</label>
                                 <select name="pr_number" class="form-control SlectBox" onclick="console.log($(this).val())"
                                     onchange="console.log('change is firing')">
@@ -89,10 +88,10 @@
                                         <option value="{{ $pr_number_id->id }}"> {{ $pr_number_id->pr_number }}</option>
                                     @endforeach
                                 </select>
-                            </div> 
+                            </div>
 
-                      
-                        
+
+
 
                         </div>
 
@@ -107,16 +106,16 @@
 
 
 
-                       
+
                         <div class="row mt-3">
-                        <div class="col">
+                            <div class="col">
                                 <label for="expected_com_date" class="control-label">planned_com </label>
                                 <input type="date" class="form-control" id="expected_com_date" name="planned_com"
                                     title="   Please enter the planned_com ">
                             </div>
-                           
-       
-                           
+
+
+
                             <div class="col">
                                 <label for="expected_com_date" class="control-label">actual_com </label>
                                 <input type="date" class="form-control" id="expected_com_date" name="actual_com"
@@ -136,14 +135,14 @@
                             </div>
 
 
-                       
 
 
-                            
-                           
+
+
+
                         </div>
 
-                       
+
 
 
                         <br>

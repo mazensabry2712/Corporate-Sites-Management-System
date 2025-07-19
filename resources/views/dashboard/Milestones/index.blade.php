@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    AMs
+    Milestones
 @stop
 @section('css')
     <!-- Internal Data table css -->
@@ -80,15 +80,22 @@
     <div class="row row-sm">
         <div class="col-xl-12">
             <div class="card">
-                <!-- <div class="card-header pb-0">
-                    <a class="modal-effect btn btn-outline-primary btn-block" data-effect="effect-scale" data-toggle="modal"
-                        href="{{ route('project.create') }}"> Add AM </a>
-                </div> -->
+
+
+
+                {{-- <div class="card-header pb-0">
+                        <a class="modal-effect btn btn-outline-primary btn-block" data-effect="effect-scale" data-toggle="modal"
+                            href="{{ route('milestones.create') }}"> Add Milestone </a>
+                    </div> --}}
+
+
+
+
+
                 <div class="card-header pb-0">
                     @can('Add')
-
-                    <a class=" btn btn-outline-primary btn-block"
-                        href="{{ route('milestones.create') }}"> Add milestones </a>
+                        <a class=" btn btn-outline-primary btn-block" href="{{ route('milestones.create') }}"> Add milestones
+                        </a>
                     @endcan
                 </div>
                 <div class="card-body">
@@ -121,17 +128,15 @@
                                     <td>{{ $i }}</td>
                                     <td>
                                         @can('Edit')
-                                        <a class=" btn btn-sm btn-info"
-
-                                             href="{{route('milestones.edit',$x->id) }}" title="Upadte"><i
-                                                class="las la-pen"></i></a>
+                                            <a class=" btn btn-sm btn-info" href="{{ route('milestones.edit', $x->id) }}"
+                                                title="Upadte"><i class="las la-pen"></i></a>
                                         @endcan
 
                                         @can('Delete')
-                                        <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
-                                            data-id="{{ $x->id }}" data-name="{{ $x->milestone}}"
-                                            data-toggle="modal" href="#modaldemo9" title="Delete"><i
-                                                class="las la-trash"></i></a>
+                                            <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
+                                                data-id="{{ $x->id }}" data-name="{{ $x->milestone }}"
+                                                data-toggle="modal" href="#modaldemo9" title="Delete"><i
+                                                    class="las la-trash"></i></a>
                                         @endcan
                                     </td>
 

@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ URL::asset('assets/plugins/telephoneinput/telephoneinput-rtl.css') }}">
 @endsection
 @section('title')
-    Add Invoice
+    Add Milestone
 @stop
 
 @section('page-header')
@@ -46,7 +46,7 @@
                 @endforeach
             </ul>
         </div>
-    @endif  
+    @endif
 
     <!-- row -->
     <div class="row">
@@ -63,13 +63,13 @@
 
                         <div class="row mt-3">
 
-                           
+
                             <div class="col">
                                 <label for="milestone" class="control-label"> milestone </label>
                                 <input type="text" class="form-control" id="risk" name="milestone"
                                     title="   Please enter the milestone  " value="{{$milestones->milestone}}">
                             </div>
-                          
+
 
 
                             <div class="col">
@@ -89,10 +89,10 @@
                                         <option value="{{ $pr_number_id->id }}" @selected($milestones->pr_number == $pr_number_id->id)> {{ $pr_number_id->pr_number }}</option>
                                     @endforeach
                                 </select>
-                            </div> 
+                            </div>
 
-                      
-                        
+
+
 
                         </div>
 
@@ -107,16 +107,16 @@
 
 
 
-                       
+
                         <div class="row mt-3">
                         <div class="col">
                                 <label for="expected_com_date" class="control-label">planned_com </label>
                                 <input type="date" class="form-control" id="expected_com_date" name="planned_com"
                                     title="   Please enter the planned_com " value="{{$milestones->planned_com}}">
                             </div>
-                           
-       
-                           
+
+
+
                             <div class="col">
                                 <label for="expected_com_date" class="control-label">actual_com </label>
                                 <input type="date" class="form-control" id="expected_com_date" name="actual_com"
@@ -136,14 +136,14 @@
                             </div>
 
 
-                       
 
 
-                            
-                           
+
+
+
                         </div>
 
-                       
+
 
 
                         <br>
