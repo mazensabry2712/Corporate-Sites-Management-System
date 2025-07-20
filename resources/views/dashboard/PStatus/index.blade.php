@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    AMs
+    project status
 @stop
 @section('css')
     <!-- Internal Data table css -->

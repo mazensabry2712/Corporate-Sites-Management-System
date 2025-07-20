@@ -11,9 +11,8 @@
     <link rel="stylesheet" href="{{ URL::asset('assets/plugins/sumoselect/sumoselect-rtl.css') }}">
     <!--Internal  TelephoneInput css-->
     <link rel="stylesheet" href="{{ URL::asset('assets/plugins/telephoneinput/telephoneinput-rtl.css') }}">
-@endsection
 @section('title')
-    Add Invoice
+    Add Project Status
 @stop
 
 @section('page-header')
@@ -46,7 +45,7 @@
                 @endforeach
             </ul>
         </div>
-    @endif  
+    @endif
 
 
     <!-- row -->
@@ -64,13 +63,13 @@
 
                         <div class="row mt-3">
 
-                           
+
                             <div class="col">
                                 <label for="date_time" class="control-label">  Date time</label>
                                 <input type="date" class="form-control" id="date_time" name="date_time"
                                     title="   Please enter the   " value="{{$pstatus->date_time}}">
                             </div>
-                          
+
 
 
                             <div class="col">
@@ -83,11 +82,11 @@
                                         <option value="{{ $pr_number_id->id }}"@selected($pstatus->pm_name == $pr_number_id->id)> {{ $pr_number_id->name }}</option>
                                     @endforeach
                                 </select>
-                            </div> 
+                            </div>
                         </div>
 
 
-                       
+
                         <div class="row mt-3">
                             <div class="col">
                                 <label for="assigned" class="control-label">status </label>
@@ -95,7 +94,7 @@
                                     title="   Please enter the Status " value="{{$pstatus->status}}">
                             </div>
 
-                           
+
                             <div class="col">
                                 <label for="actual_completion" class="control-label">actual_completion </label>
                                 <input type="number" class="form-control" id="actual_completion" name="actual_completion"
@@ -140,14 +139,14 @@
                                         <option value="{{ $pr_number_id->id }}" @selected($pstatus->pr_number == $pr_number_id->id)> {{ $pr_number_id->pr_number }}</option>
                                     @endforeach
                                 </select>
-                            </div> 
+                            </div>
                         </div>
-                            
-                           
-                      
 
 
-                        <br> 
+
+
+
+                        <br>
 
 
 

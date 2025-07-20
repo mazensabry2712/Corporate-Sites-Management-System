@@ -67,7 +67,10 @@ Route::group(['middleware' => ['auth']], function() {
         //         /*CoC */
                  Route::resource('coc', CocController::class);
         // /*Project POs Form */
-                Route::resource('ppos', PposController::class);
+                // Route::resource('ppos', PposController::class);
+Route::resource('ppos', PposController::class)->except(['show']);
+Route::delete('ppos/destroy', [PposController::class, 'destroy']);
+
         // /*Project Status  */
                 Route::resource('pstatus', PstatusController::class);
         // /*Project Tasks */

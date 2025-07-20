@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ds;
-use App\Models\Pepo;
 use App\Models\Ppos;
 use App\Models\projects;
+use App\Models\Pepo;
+use App\Models\Ds;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class PposController extends Controller
 {
@@ -15,9 +16,7 @@ class PposController extends Controller
      */
     public function index()
     {
-        //
-        
-        $ppos= Ppos::all();
+        $ppos = Ppos::with(['project', 'pepo', 'ds'])->orderBy('created_at', 'desc')->get();
         return view('dashboard.PPOs.index', compact('ppos'));
     }
 
@@ -26,13 +25,11 @@ class PposController extends Controller
      */
     public function create()
     {
-        $projects = Projects::all();
-        
+        $projects = projects::all();
         $pepos = Pepo::all();
+        $dses = Ds::all();
 
-        $ds = ds::all();
-
-        return view('dashboard.PPOs.create',compact('projects', 'pepos', 'ds'));
+        return view('dashboard.PPOs.create', compact('projects', 'pepos', 'dses'));
     }
 
     /**
@@ -40,88 +37,97 @@ class PposController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'pr_number' => 'required|exists:projects,id',
             'category' => 'required|exists:pepos,id',
-            'supplier_name' => 'nullable|exists:ds,id',
-            'po_number' => 'required|string',
-            'value' => 'nullable|numeric',
+            'dsname' => 'required|exists:ds,id',
+            'po_number' => 'required|string|max:255|unique:ppos,po_number',
+            'value' => 'nullable|numeric|min:0',
             'date' => 'nullable|date',
-            'status' => 'nullable|string',
+            'status' => 'required|in:Active,Pending,Completed,Cancelled',
             'updates' => 'nullable|string',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string'
         ]);
 
-        Ppos::create($validated);
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-       
-        session()->flash('Add', 'Registration successful');
-            return redirect('/ppos');
+        try {
+            Ppos::create($request->all());
 
-
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Ppos $ppos)
-    {
-        //
+            return redirect()->route('ppos.index')
+                ->with('Add', 'PPO has been added successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('Error', 'Failed to create PPO: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(Ppos $ppo)
     {
-        //
-        $ppos=Ppos::find($id);
-        $projects = Projects::all();
+        $projects = projects::all();
         $pepos = Pepo::all();
-        $ds = ds::all();
-        
-        return view('dashboard.PPOs.edit',compact('projects', 'pepos', 'ds','ppos'));
-       
-       
+        $dses = Ds::all();
+
+        return view('dashboard.PPOs.edit', compact('ppo', 'projects', 'pepos', 'dses'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Ppos $ppo)
     {
-        //
-        $ppos=Ppos::find($id);
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'pr_number' => 'required|exists:projects,id',
             'category' => 'required|exists:pepos,id',
-            'supplier_name' => 'nullable|exists:ds,id',
-            'po_number' => 'required|string',
-            'value' => 'nullable|numeric',
+            'dsname' => 'required|exists:ds,id',
+            'po_number' => 'required|string|max:255|unique:ppos,po_number,' . $ppo->id,
+            'value' => 'nullable|numeric|min:0',
             'date' => 'nullable|date',
-            'status' => 'nullable|string',
+            'status' => 'required|in:Active,Pending,Completed,Cancelled',
             'updates' => 'nullable|string',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string'
         ]);
 
-        
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        $ppos->update($data);
-        session()->flash('edit', 'The section has been successfully modified');
-        return redirect('/ppos'); // 
+        try {
+            $ppo->update($request->all());
+
+            return redirect()->route('ppos.index')
+                ->with('edit', 'PPO has been updated successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('Error', 'Failed to update PPO: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Ppos $ppos,Request $request)
+    public function destroy(Request $request)
     {
-        //
-        $id=$request->id;
-        Ppos::find($id)->delete();
-        session()->flash('delete', 'Deleted successfully');
-            return redirect('/ppos');
+        try {
+            $ppo = Ppos::findOrFail($request->id);
+            $ppo->delete();
 
+            return redirect()->route('ppos.index')
+                ->with('delete', 'PPO "' . $request->name . '" has been deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('Error', 'Failed to delete PPO: ' . $e->getMessage());
+        }
     }
 }

@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{{ URL::asset('assets/plugins/telephoneinput/telephoneinput-rtl.css') }}">
 @endsection
 @section('title')
-    Add Invoice
+    Add Project Status
 @stop
 
 @section('page-header')
@@ -57,7 +57,7 @@
                     <form id="yourFormId" action="{{ route('pstatus.store') }}" method="POST" enctype="multipart/form-data"
                         autocomplete="off">
                         @csrf
-                       
+
                         {{-- 1 --}}
 
                         <div class="row mt-3">

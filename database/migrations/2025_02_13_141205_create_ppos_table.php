@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pr_number')->references('id')->on('projects')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('category')->references('id')->on('pepos')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('dsname')->references('id')->on('ds')->onDelete('cascade')->onUpdate('cascade');
 
-            $table->foreignId('ds')->nullable()->constrained('ds')->onDelete('set null');
  // من EPO
             $table->string('po_number');
             $table->decimal('value', 10, 2)->nullable();
