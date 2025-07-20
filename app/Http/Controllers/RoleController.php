@@ -55,17 +55,34 @@ return view('roles.create',compact('permission'));
 * @param  \Illuminate\Http\Request  $request
 * @return \Illuminate\Http\Response
 */
+// public function store(Request $request)
+// {
+// $this->validate($request, [
+// 'name' => 'required|unique:roles,name',
+// 'permission' => 'required',
+// ]);
+// $role = Role::create(['name' => $request->input('name')]);
+// $role->syncPermissions($request->input('permission'));
+// return redirect()->route('roles.index')
+// ->with('success','Role created successfully');
+// }
 public function store(Request $request)
 {
-$this->validate($request, [
-'name' => 'required|unique:roles,name',
-'permission' => 'required',
-]);
-$role = Role::create(['name' => $request->input('name')]);
-$role->syncPermissions($request->input('permission'));
-return redirect()->route('roles.index')
-->with('success','Role created successfully');
+    $this->validate($request, [
+        'name' => 'required|unique:roles,name',
+        'permission' => 'required',
+    ]);
+
+    $role = Role::create(['name' => $request->input('name')]);
+
+    $permissionIds = $request->input('permission');
+    $permissionNames = Permission::whereIn('id', $permissionIds)->pluck('name')->toArray();
+    $role->syncPermissions($permissionNames);
+
+    return redirect()->route('roles.index')
+        ->with('success','Role created successfully');
 }
+
 /**
 * Display the specified resource.
 *
@@ -102,19 +119,38 @@ return view('roles.edit',compact('role','permission','rolePermissions'));
 * @param  int  $id
 * @return \Illuminate\Http\Response
 */
+// public function update(Request $request, $id)
+// {
+// $this->validate($request, [
+// 'name' => 'required',
+// 'permission' => 'required',
+// ]);
+// $role = Role::find($id);
+// $role->name = $request->input('name');
+// $role->save();
+// $role->syncPermissions($request->input('permission'));
+// return redirect()->route('roles.index')
+// ->with('success','Role updated successfully');
+// }
 public function update(Request $request, $id)
 {
-$this->validate($request, [
-'name' => 'required',
-'permission' => 'required',
-]);
-$role = Role::find($id);
-$role->name = $request->input('name');
-$role->save();
-$role->syncPermissions($request->input('permission'));
-return redirect()->route('roles.index')
-->with('success','Role updated successfully');
+    $this->validate($request, [
+        'name' => 'required',
+        'permission' => 'required',
+    ]);
+
+    $role = Role::find($id);
+    $role->name = $request->input('name');
+    $role->save();
+
+    $permissionIds = $request->input('permission');
+    $permissionNames = Permission::whereIn('id', $permissionIds)->pluck('name')->toArray();
+    $role->syncPermissions($permissionNames);
+
+    return redirect()->route('roles.index')
+        ->with('success','Role updated successfully');
 }
+
 /**
 * Remove the specified resource from storage.
 *
