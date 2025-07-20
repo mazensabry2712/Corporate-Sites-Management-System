@@ -44,12 +44,12 @@ class PtasksController extends Controller
             'pr_number'=>"required|exists:projects,id"
         ]);
 
-   
+
         Ptasks::create($validatedData);
         session()->flash('Add', 'Registration successful');
            return redirect('/ptasks');
 
-      
+
     }
 
     /**
@@ -67,7 +67,7 @@ class PtasksController extends Controller
     {
         //
         $projects = Projects::all();
-    
+
         $ptasks=Ptasks::find($id);
         return view('dashboard.PTasks.edit', compact('ptasks', 'projects'));
     }

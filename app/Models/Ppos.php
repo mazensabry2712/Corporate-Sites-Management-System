@@ -24,15 +24,15 @@ class Ppos extends Model
         return $this->belongsTo(Projects::class, 'pr_number');
     }
 
-   
+
     public function pepo()
     {
         return $this->belongsTo(Pepo::class, 'category');
     }
 
-    
-    public function supplier()
+
+    public function ds()
     {
-        return $this->belongsTo(Ds::class, 'supplier_name');
+        return $this->belongsTo(Ds::class, 'dsname');
     }
 }

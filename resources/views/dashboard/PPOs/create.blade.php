@@ -1,28 +1,25 @@
-
 @extends('layouts.master')
-@section('css')
-    <!--- Internal Select2 css-->
-    <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    <!---Internal Fileupload css-->
-    <link href="{{ URL::asset('assets/plugins/fileuploads/css/fileupload.css') }}" rel="stylesheet" type="text/css" />
-    <!---Internal Fancy uploader css-->
-    <link href="{{ URL::asset('assets/plugins/fancyuploder/fancy_fileupload.css') }}" rel="stylesheet" />
-    <!--Internal Sumoselect css-->
-    <link rel="stylesheet" href="{{ URL::asset('assets/plugins/sumoselect/sumoselect-rtl.css') }}">
-    <!--Internal  TelephoneInput css-->
-    <link rel="stylesheet" href="{{ URL::asset('assets/plugins/telephoneinput/telephoneinput-rtl.css') }}">
-@endsection
 @section('title')
-    Add Invoice
+    Add PPO
 @stop
-
+@section('css')
+    <!-- Internal Select2 css -->
+    <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+    <link href="{{ URL::asset('assets/plugins/sugarjs/plugin.css') }}" rel="stylesheet">
+    <link href="{{ URL::asset('assets/plugins/jquery-nice-select/css/nice-select.css') }}" rel="stylesheet" />
+@endsection
 @section('page-header')
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="my-auto">
             <div class="d-flex">
-                <h4 class="content-title mb-0 my-auto">Add ppos</h4><span class="text-muted mt-1 tx-13 mr-2 mb-0">/
-                    ppos</span>
+                <h4 class="content-title mb-0 my-auto">General</h4><span class="text-muted mt-1 tx-13 mr-2 mb-0">/
+                    Add PPO</span>
+            </div>
+        </div>
+        <div class="d-flex my-xl-auto right-content">
+            <div class="pr-1 mb-3 mb-xl-0">
+                <a class="btn btn-info btn-sm" href="{{ route('ppos.index') }}"> PPOs List</a>
             </div>
         </div>
     </div>
@@ -30,14 +27,6 @@
 @endsection
 @section('content')
 
-    <!-- @if (session()->has('Add'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('Add') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif -->
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
@@ -46,157 +35,142 @@
                 @endforeach
             </ul>
         </div>
-    @endif  
+    @endif
 
-
-    <!-- row -->
+    <!-- row opened -->
     <div class="row">
-
         <div class="col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <form id="yourFormId" action="{{ route('ppos.store') }}" method="post"
-                        enctype="multipart/form-data" autocomplete="off">
+                    <div class="col-lg-12 margin-tb">
+                        <div class="pull-right">
+                            <a class="btn btn-primary btn-sm" href="{{ route('ppos.index') }}"> Back</a>
+                        </div>
+                    </div><br>
+
+                    <form class="parsley-style-1" id="selectForm2" autocomplete="off" name="selectForm2"
+                        action="{{ route('ppos.store') }}" method="post">
                         {{ csrf_field() }}
-                        {{-- 1 --}}
 
+                        <div class="">
+                            <div class="row mg-b-20">
+                                <div class="parsley-input col-md-6">
+                                    <label> Project Number: <span class="tx-danger">*</span></label>
+                                    <select name="pr_number" id="pr_number" class="form-control select2" required>
+                                        <option value="">Select Project</option>
+                                        @foreach ($projects as $project)
+                                            <option value="{{ $project->id }}"
+                                                {{ old('pr_number') == $project->id ? 'selected' : '' }}>
+                                                {{ $project->pr_number }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-
-                        <div class="row mt-3">
-
-                           
-                            <div class="col">
-                                <label for="po_number" class="control-label"> po_number </label>
-                                <input type="text" class="form-control" id="po_number" name="po_number"
-                                    title="   Please enter the  po_number  ">
+                                <div class="parsley-input col-md-6 mg-t-20 mg-md-t-0">
+                                    <label> Category: <span class="tx-danger">*</span></label>
+                                    <select name="category" id="category" class="form-control select2" required>
+                                        <option value="">Select Category</option>
+                                        @foreach ($pepos as $pepo)
+                                            <option value="{{ $pepo->id }}"
+                                                {{ old('category') == $pepo->id ? 'selected' : '' }}>
+                                                {{ $pepo->category }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
-
-                            <div class="col">
-                                <label for="name" class="control-label">category</label>
-                                <select name="category" class="form-control SlectBox" onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')">
-                                    <!--placeholder-->
-                                    <option value="" selected disabled> category </option>
-                                    @foreach ($pepos as $pr_number_id)
-                                        <option value="{{ $pr_number_id->id }}"> {{ $pr_number_id->category }}</option>
-                                    @endforeach
-                                </select>
-                            </div> 
-
-                
-                          <div class="col">
-                                <label for="name" class="control-label">supplier_name</label>
-                                <select name="supplier_name" class="form-control SlectBox" onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')">
-                                    <!--placeholder-->
-                                    <option value="" selected disabled> PR Number </option>
-                                    @foreach ($ds as $pr_number_id)
-                                        <option value="{{ $pr_number_id->id }}"> {{ $pr_number_id->dsname }}</option>
-                                    @endforeach
-                                </select>
-                            </div> 
-
-                      
-                        
-
-                        </div>
-                         <div class="row mt-3">
-
-                           
-                            <div class="col">
-                                <label for="date" class="control-label">  Date </label>
-                                <input type="date" class="form-control" id="date" name="date"
-                                    title="   Please enter the   ">
-                            </div>
-                          
-
-
-                            <div class="col">
-                                <label for="updates" class="control-label">updates</label>
-                                <input type="text" class="form-control" id="updates" name="updates"
-                                    title="   Please enter the updates  ">
-                            </div>
-
-
-                          <div class="col">
-                                <label for="name" class="control-label">PR Number</label>
-                                <select name="pr_number" class="form-control SlectBox" onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')">
-                                    <!--placeholder-->
-                                    <option value="" selected disabled> PR Number </option>
-                                    @foreach ($projects as $pr_number_id)
-                                        <option value="{{ $pr_number_id->id }}"> {{ $pr_number_id->pr_number }}</option>
-                                    @endforeach
-                                </select>
-                            </div> 
-
-                      
-                        
-
                         </div>
 
+                        <div class="">
+                            <div class="row mg-b-20">
+                                <div class="parsley-input col-md-6">
+                                    <label> Supplier Name: </label>
+                                    <select name="supplier_name" id="supplier_name" class="form-control select2">
+                                        <option value="">Select Supplier</option>
+                                        @foreach ($ds as $supplier)
+                                            <option value="{{ $supplier->id }}"
+                                                {{ old('supplier_name') == $supplier->id ? 'selected' : '' }}>
+                                                {{ $supplier->dsname }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-
-
-
-
-
-
-
-
-
-
-
-                    
-                        <div class="row mt-3">
-                            <div class="col">
-                                <label for="value" class="control-label">value </label>
-                                <input type="number" class="form-control" id="value" name="value"
-                                    title="   Please enter the value ">
+                                <div class="parsley-input col-md-6 mg-t-20 mg-md-t-0">
+                                    <label> PO Number: <span class="tx-danger">*</span></label>
+                                    <input class="form-control form-control-sm mg-b-20"
+                                        data-parsley-class-handler="#lnWrapper" name="po_number" required type="text"
+                                        value="{{ old('po_number') }}">
+                                </div>
                             </div>
-
-                           
-                            <div class="col">
-                                <label for="notes" class="control-label">notes </label>
-                                <input type="text" class="form-control" id="notes" name="notes"
-                                    title="   Please enter the notes ">
-                            </div>
-
-
-
-
-
-
-                            <div class="col">
-                                <label for="status" class="control-label">Status </label>
-                                <input type="text" class="form-control" id="status" name="status"
-                                    title="   Please enter the Status ">
-                            </div>
-
-
-                            
-                           
                         </div>
 
+                        <div class="">
+                            <div class="row mg-b-20">
+                                <div class="parsley-input col-md-6">
+                                    <label> Value: </label>
+                                    <input class="form-control form-control-sm mg-b-20"
+                                        data-parsley-class-handler="#lnWrapper" name="value" type="number" step="0.01"
+                                        value="{{ old('value') }}">
+                                </div>
 
-                        <br>
-
-
-
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary"> Save ppos </button>
+                                <div class="parsley-input col-md-6 mg-t-20 mg-md-t-0">
+                                    <label> Date: </label>
+                                    <input class="form-control form-control-sm mg-b-20"
+                                        data-parsley-class-handler="#lnWrapper" name="date" type="date"
+                                        value="{{ old('date') }}">
+                                </div>
+                            </div>
                         </div>
 
+                        <div class="">
+                            <div class="row mg-b-20">
+                                <div class="parsley-input col-md-12">
+                                    <label> Status: </label>
+                                    <select name="status" id="status" class="form-control">
+                                        <option value="">Select Status</option>
+                                        <option value="Active" {{ old('status') == 'Active' ? 'selected' : '' }}>Active
+                                        </option>
+                                        <option value="Pending" {{ old('status') == 'Pending' ? 'selected' : '' }}>Pending
+                                        </option>
+                                        <option value="Completed" {{ old('status') == 'Completed' ? 'selected' : '' }}>
+                                            Completed</option>
+                                        <option value="Cancelled" {{ old('status') == 'Cancelled' ? 'selected' : '' }}>
+                                            Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="">
+                            <div class="row mg-b-20">
+                                <div class="parsley-input col-md-12">
+                                    <label> Updates: </label>
+                                    <textarea class="form-control form-control-sm mg-b-20" name="updates" rows="3">{{ old('updates') }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="">
+                            <div class="row mg-b-20">
+                                <div class="parsley-input col-md-12">
+                                    <label> Notes: </label>
+                                    <textarea class="form-control form-control-sm mg-b-20" name="notes" rows="3">{{ old('notes') }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-12 col-md-12 text-center">
+                            <button class="btn btn-main-primary pd-x-20" type="submit">Submit</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
-    </div>
-
     <!-- row closed -->
+
     </div>
     <!-- Container closed -->
     </div>
@@ -205,60 +179,12 @@
 @section('js')
     <!-- Internal Select2 js-->
     <script src="{{ URL::asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-    <!--Internal Fileuploads js-->
-    <script src="{{ URL::asset('assets/plugins/fileuploads/js/fileupload.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fileuploads/js/file-upload.js') }}"></script>
-    <!--Internal Fancy uploader js-->
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/jquery.ui.widget.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/jquery.fileupload.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/jquery.iframe-transport.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/jquery.fancy-fileupload.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/fancy-uploader.js') }}"></script>
-    <!--Internal  Form-elements js-->
-    <script src="{{ URL::asset('assets/js/advanced-form-elements.js') }}"></script>
+    <script src="{{ URL::asset('assets/plugins/parsleyjs/parsley.min.js') }}"></script>
+    <!--Internal  Form-validation js -->
+    <script src="{{ URL::asset('assets/js/form-validation.js') }}"></script>
     <script src="{{ URL::asset('assets/js/select2.js') }}"></script>
-    <!--Internal Sumoselect js-->
-    <script src="{{ URL::asset('assets/plugins/sumoselect/jquery.sumoselect.js') }}"></script>
-    <!--Internal  Datepicker js -->
-    <script src="{{ URL::asset('assets/plugins/jquery-ui/ui/widgets/datepicker.js') }}"></script>
-    <!--Internal  jquery.maskedinput js -->
-    <script src="{{ URL::asset('assets/plugins/jquery.maskedinput/jquery.maskedinput.js') }}"></script>
-    <!--Internal  spectrum-colorpicker js -->
-    <script src="{{ URL::asset('assets/plugins/spectrum-colorpicker/spectrum.js') }}"></script>
-    <!-- Internal form-elements js -->
-    <script src="{{ URL::asset('assets/js/form-elements.js') }}"></script>
 
     <script>
-        var date = $('.fc-datepicker').datepicker({
-            dateFormat: 'mm/dd/yy'
-        }).val();
+        $('#selectForm2').parsley();
     </script>
-
-    {{-- ds  --}}
-    <script>
-        $(document).ready(function() {
-            $('select[name="pr_number_id"]').on('change', function() {
-                var SectionId = $(this).val();
-                if (SectionId) {
-                    $.ajax({
-                        url: "{{ URL::to('pr_number_id') }}/" + SectionId,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(data) {
-                            $('select[name="product"]').empty();
-                            $.each(data, function(key, value) {
-                                $('select[name="product"]').append('<option value="' +
-                                    value + '">' + value + '</option>');
-                            });
-                        },
-                    });
-
-                } else {
-                    console.log('AJAX load did not work');
-                }
-            });
-
-        });
-    </script>
-    {{-- /ds  --}}
 @endsection

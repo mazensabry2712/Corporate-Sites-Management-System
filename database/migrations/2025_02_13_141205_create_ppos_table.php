@@ -15,17 +15,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pr_number')->references('id')->on('projects')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('category')->references('id')->on('pepos')->onDelete('cascade')->onUpdate('cascade');
-            
-            $table->foreignId('supplier_name')->nullable()->constrained('ds')->onDelete('set null');
+
+            $table->foreignId('ds')->nullable()->constrained('ds')->onDelete('set null');
  // من EPO
             $table->string('po_number');
-            $table->decimal('value', 10, 2)->nullable();            
+            $table->decimal('value', 10, 2)->nullable();
             $table->date('date')->nullable();
             $table->string('status')->nullable();
             $table->string('updates')->nullable();
             $table->string('notes')->nullable();
             $table->timestamps();
-           
+
         });
     }
 
