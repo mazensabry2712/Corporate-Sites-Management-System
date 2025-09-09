@@ -11,6 +11,100 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
+    <style>
+        /* تحسين شكل عرض vendor AM details */
+        .vendor-am-details {
+            max-width: 300px !important;
+            min-width: 200px;
+            white-space: normal !important;
+        }
+
+        .vendor-am-details .text-wrap {
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+            font-size: 13px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        /* تحسين شكل الجدول */
+        #example1 {
+            width: 100% !important;
+            table-layout: auto;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        /* تحسين العمود */
+        #example1 td.vendor-am-details {
+            padding: 10px 8px;
+            vertical-align: top;
+        }
+
+        /* للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .vendor-am-details {
+                max-width: 250px !important;
+            }
+
+            .vendor-am-details .text-wrap {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+        }
+
+        /* تحسين أزرار التصدير */
+        .export-buttons .btn {
+            transition: all 0.3s ease;
+            margin: 0 1px;
+            border-radius: 4px;
+        }
+
+        .export-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-group .btn {
+            border-radius: 0;
+        }
+
+        .btn-group .btn:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .btn-group .btn:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* إخفاء أزرار DataTables الافتراضية */
+        .dt-buttons {
+            display: none !important;
+        }
+
+        /* للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .card-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .btn-group {
+                margin-bottom: 10px;
+                margin-right: 0 !important;
+            }
+        }
+    </style>
 
 @endsection
 @section('page-header')
@@ -80,14 +174,38 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header pb-0">
-                    @can('Add')
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Vendors Management</h6>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <!-- Export buttons -->
+                                <div class="btn-group export-buttons mr-2" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()" title="Export to Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="exportToCSV()" title="Export to CSV">
+                                        <i class="fas fa-file-csv"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printTable()" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                </div>
 
-
-                    <a class="modal-effect btn btn-outline-primary btn-block" data-effect="effect-scale" data-toggle="modal"
-                        href="#modaldemo8"> Add vendor </a>
-                        @endcan
-
+                                @can('Add')
+                                    <a class="modal-effect btn btn-primary" data-effect="effect-scale" data-toggle="modal"
+                                        href="#modaldemo8">
+                                        <i class="fas fa-plus"></i> Add Vendor
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
                     </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table text-md-nowrap" id="example1">
@@ -110,22 +228,26 @@
                                     <td>{{ $i }}</td>
                                     <td>
                                         @can('Edit')
-                                        <a class="modal-effect btn btn-sm btn-info" data-effect="effect-scale"
-                                            data-id="{{ $vendor->id }}" data-vendors="{{ $vendor->vendors }}"
-                                            data-vendor_am_details="{{ $vendor->vendor_am_details }}" data-toggle="modal"
-                                            href="#exampleModal2" title="Upadte"><i class="las la-pen"></i></a>
+                                            <a class="modal-effect btn btn-sm btn-info" data-effect="effect-scale"
+                                                data-id="{{ $vendor->id }}" data-vendors="{{ $vendor->vendors }}"
+                                                data-vendor_am_details="{{ $vendor->vendor_am_details }}" data-toggle="modal"
+                                                href="#exampleModal2" title="Upadte"><i class="las la-pen"></i></a>
                                         @endcan
 
                                         @can('Delete')
-                                        <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
-                                            data-id="{{ $vendor->id }}" data-vendors="{{ $vendor->vendors }}"
-                                            data-toggle="modal" href="#modaldemo9" title="Delete"><i
-                                                class="las la-trash"></i></a>
+                                            <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
+                                                data-id="{{ $vendor->id }}" data-vendors="{{ $vendor->vendors }}"
+                                                data-toggle="modal" href="#modaldemo9" title="Delete"><i
+                                                    class="las la-trash"></i></a>
                                         @endcan
                                     </td>
 
                                     <td>{{ $vendor->vendors }}</td>
-                                    <td>{{ $vendor->vendor_am_details }}</td>
+                                    <td class="vendor-am-details">
+                                        <div class="text-wrap">
+                                            {{ $vendor->vendor_am_details }}
+                                        </div>
+                                    </td>
 
 
 
@@ -173,9 +295,9 @@
                             <input type="text" class="form-control" id="vendors" name="vendors" required>
                         </div>
                         <div class="form-group">
-                            <label for="vendor_am_details">Vendor Am Details</label>
-                            <input type="text" class="form-control" id="vendor_am_details" name="vendor_am_details"
-                                required>
+                            <label for="vendor_am_details">Vendor AM Details</label>
+                            <textarea class="form-control" id="vendor_am_details" name="vendor_am_details"
+                                rows="4" placeholder="Enter vendor account manager details..." required></textarea>
                         </div>
 
 
@@ -230,8 +352,9 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="vendor_am_details" class="col-form-label">Vendor am details</label>
-                            <input class="form-control" name="vendor_am_details" id="vendor_am_details" type="text">
+                            <label for="vendor_am_details" class="col-form-label">Vendor AM Details</label>
+                            <textarea class="form-control" name="vendor_am_details" id="vendor_am_details"
+                                rows="4" placeholder="Enter vendor account manager details..."></textarea>
                         </div>
 
 
@@ -339,5 +462,67 @@
             modal.find('.modal-body #vendor_am_details').val(vendor_am_details);
 
         })
+    </script>
+
+    <script>
+        // Export functions
+        function exportToPDF() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-pdf').trigger();
+        }
+
+        function exportToExcel() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-excel').trigger();
+        }
+
+        function exportToCSV() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-csv').trigger();
+        }
+
+        function printTable() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-print').trigger();
+        }
+
+        // Enhanced DataTable initialization
+        $(document).ready(function() {
+            if ($.fn.DataTable.isDataTable('#example1')) {
+                $('#example1').DataTable().destroy();
+            }
+
+            $('#example1').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'pdfHtml5',
+                        className: 'buttons-pdf d-none',
+                        title: 'Vendors List'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        className: 'buttons-excel d-none',
+                        title: 'Vendors List'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        className: 'buttons-csv d-none',
+                        title: 'Vendors List'
+                    },
+                    {
+                        extend: 'print',
+                        className: 'buttons-print d-none',
+                        title: 'Vendors List'
+                    }
+                ],
+                responsive: true,
+                language: {
+                    searchPlaceholder: 'Search...',
+                    sSearch: '',
+                    lengthMenu: '_MENU_ items/page',
+                }
+            });
+        });
     </script>
 @endsection

@@ -13,8 +13,8 @@ class VendorsController extends Controller
     public function index()
     {
 
-        
-        $vendors=vendors::all();
+
+        $vendors = vendors::all();
         return view('dashboard.vendors.index', compact('vendors'));
     }
 
@@ -29,30 +29,23 @@ class VendorsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-  
 
-public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'vendors' => 'required|string|max:255', 
-        'vendor_am_details' => 'required|string|max:1000', 
-    ]);
 
-    $exists = vendors::where('vendors', $validatedData['vendors'])->exists();
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'vendors' => 'required|string|max:255',
+            'vendor_am_details' => 'required|string|max:2000',
+        ]);
 
-    if ($exists) {
-        session()->flash('Error', 'The vendor already exists');
-        return redirect('/vendors');
-    } else {
         vendors::create([
             'vendors' => $validatedData['vendors'],
-            'vendor_am_details' => $validatedData['vendor_am_details'], 
+            'vendor_am_details' => $validatedData['vendor_am_details'],
         ]);
+
         session()->flash('Add', 'Vendor registration successful');
         return redirect('/vendors');
     }
-
-}
 
     /**
      * Display the specified resource.
@@ -76,18 +69,17 @@ public function store(Request $request)
 
 
 
-     public function update(Request $request)
-     {
-
-
+    public function update(Request $request)
+    {
         $id = $request->id;
 
-        $this->validate($request, [
-
-            'vendors' => 'required|max:255|unique:vendors,vendors,'.$id,
-            'vendor_am_details' => 'required',
-        ]
-                  );
+        $this->validate(
+            $request,
+            [
+                'vendors' => 'required|max:255',
+                'vendor_am_details' => 'required|max:2000',
+            ]
+        );
 
         $vendors = vendors::find($id);
         $vendors->update([
@@ -96,26 +88,23 @@ public function store(Request $request)
         ]);
 
         session()->flash('success', 'Vendor updated successfully!');
-               return redirect('/vendors');
-         
+        return redirect('/vendors');
     }
-     
+
 
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy( Request $request)
+    public function destroy(Request $request)
     {
-        $id=$request->id;
+        $id = $request->id;
 
         vendors::find($id)->delete();
 
 
 
         session()->flash('delete', 'Vendor deleted successfully!');
-   return redirect('/vendors');
-
-    
+        return redirect('/vendors');
     }
 }

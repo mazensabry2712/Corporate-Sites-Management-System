@@ -120,6 +120,44 @@
             white-space: nowrap;
         }
 
+        /* تحسين شكل عرض Description نفس استايل vendor AM details */
+        .project-description {
+            max-width: 300px !important;
+            min-width: 200px;
+            white-space: normal !important;
+        }
+
+        .project-description .text-wrap {
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+            font-size: 13px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        /* تحسين العمود */
+        #example1 td.project-description {
+            padding: 10px 8px;
+            vertical-align: top;
+        }
+
+        /* للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .project-description {
+                max-width: 250px !important;
+            }
+
+            .project-description .text-wrap {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+        }
+
         #example1 td {
             white-space: nowrap;
             overflow: hidden;
@@ -481,13 +519,15 @@
                                                 N/A
                                             @endif
                                         </td>
-                                        <td>
+                                        <td class="project-description">
                                             @if ($project->description)
-                                                <span title="{{ $project->description }}">
-                                                    {{ Str::limit($project->description, 50) }}
-                                                </span>
+                                                <div class="text-wrap">
+                                                    {{ $project->description }}
+                                                </div>
                                             @else
-                                                N/A
+                                                <div class="text-wrap">
+                                                    N/A
+                                                </div>
                                             @endif
                                         </td>
                                     </tr>

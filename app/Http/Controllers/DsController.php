@@ -31,23 +31,16 @@ class DsController extends Controller
     {
         $validatedData = $request->validate([
             'dsname' => 'required|string|max:255',
-            'ds_contact' => 'nullable|string|max:1000', 
+            'ds_contact' => 'required|string|max:2000',
         ]);
-    
-        $exists = ds::where('dsname', $validatedData['dsname'])->exists();
-    
-        if ($exists) {
-            session()->flash('Error', 'The dsname already exists');
-            return redirect('ds');
-        } else {
-            ds::create([
-                'dsname' => $validatedData['dsname'], 
-                'ds_contact' => $validatedData['ds_contact'],
-            ]);
-    
-            session()->flash('Add', 'dsname registration successful');
-            return redirect('/ds');
-        }
+
+        ds::create([
+            'dsname' => $validatedData['dsname'],
+            'ds_contact' => $validatedData['ds_contact'],
+        ]);
+
+        session()->flash('Add', 'Delivery Specialist registration successful');
+        return redirect('/ds');
     }
 
     /**
@@ -70,32 +63,35 @@ class DsController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request)
-     {
-$id = $request->id;
+    {
+        $id = $request->id;
 
-        $this->validate($request, [
+        $this->validate(
+            $request,
+            [
+                'dsname' => 'required|max:255',
+                'ds_contact' => 'required|max:2000',
+            ]
+        );
 
-            'dsname' => 'required|max:255|unique:ds,dsname,'.$id,
-            'ds_contact' => 'nullable',
-        ]
-                  );
         $ds = ds::find($id);
         $ds->update([
             'dsname' => $request->dsname,
             'ds_contact' => $request->ds_contact,
         ]);
-        session()->flash('edit', 'DS updated successfully!');
-               return redirect('/ds');
+
+        session()->flash('edit', 'Delivery Specialist updated successfully!');
+        return redirect('/ds');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request )
+    public function destroy(Request $request)
     {
-   $id=$request->id;
-   ds::find($id)->delete();
-   session()->flash('delete', 'Deleted successfully');
+        $id = $request->id;
+        ds::find($id)->delete();
+        session()->flash('delete', 'Delivery Specialist deleted successfully');
         return redirect('/ds');
     }
 }

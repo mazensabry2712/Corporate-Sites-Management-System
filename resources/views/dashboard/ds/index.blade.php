@@ -10,6 +10,112 @@ Disti/ Supplier
     <link href="{{ URL::asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+
+    <style>
+        /* تحسين شكل عرض DS details */
+        .ds-details {
+            max-width: 300px !important;
+            min-width: 200px;
+            white-space: normal !important;
+        }
+
+        .ds-details .text-wrap {
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #dc3545;
+            font-size: 13px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        /* تحسين شكل الجدول */
+        #example1 {
+            width: 100% !important;
+            table-layout: auto;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        /* تحسين العمود */
+        #example1 td.ds-details {
+            padding: 10px 8px;
+            vertical-align: top;
+        }
+
+        /* للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .ds-details {
+                max-width: 250px !important;
+            }
+
+            .ds-details .text-wrap {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+        }
+
+        /* تحسين مظهر textarea في الـ modals */
+        .modal-body textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-body textarea:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        /* تحسين أزرار التصدير */
+        .export-buttons .btn {
+            transition: all 0.3s ease;
+            margin: 0 1px;
+            border-radius: 4px;
+        }
+
+        .export-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-group .btn {
+            border-radius: 0;
+        }
+
+        .btn-group .btn:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .btn-group .btn:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* إخفاء أزرار DataTables الافتراضية */
+        .dt-buttons {
+            display: none !important;
+        }
+
+        /* للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .card-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .btn-group {
+                margin-bottom: 10px;
+                margin-right: 0 !important;
+            }
+        }
+    </style>
 @endsection
 @section('page-header')
     <!-- breadcrumb -->
@@ -65,10 +171,37 @@ Disti/ Supplier
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header pb-0">
-                    @can('Add')
-                        <a class="modal-effect btn btn-outline-primary btn-block" data-effect="effect-scale"
-                            data-toggle="modal" href="#modaldemo8"> Add D/S </a>
-                    @endcan
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Delivery Specialists Management</h6>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <!-- Export buttons -->
+                                <div class="btn-group export-buttons mr-2" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()" title="Export to Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="exportToCSV()" title="Export to CSV">
+                                        <i class="fas fa-file-csv"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printTable()" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                </div>
+
+                                @can('Add')
+                                    <a class="modal-effect btn btn-primary" data-effect="effect-scale" data-toggle="modal"
+                                        href="#modaldemo8">
+                                        <i class="fas fa-plus"></i> Add Delivery Specialist
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -103,7 +236,11 @@ Disti/ Supplier
                                         @endcan
                                     </td>
                                     <td>{{ $x->dsname }}</td>
-                                    <td>{{ $x->ds_contact }}</td>
+                                    <td class="ds-details">
+                                        <div class="text-wrap">
+                                            {{ $x->ds_contact }}
+                                        </div>
+                                    </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -130,7 +267,7 @@ Disti/ Supplier
                         </div>
                         <div class="form-group">
                             <label for="ds_contact">D/S Contact Details </label>
-                            <input type="description" class="form-control" id="ds_contact" name="ds_contact" >
+                            <textarea class="form-control" id="ds_contact" name="ds_contact" rows="4" placeholder="Enter delivery specialist contact details..."></textarea>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-outline-primary">Add</button>
@@ -175,7 +312,7 @@ Disti/ Supplier
                         </div>
                         <div class="form-group">
                             <label for="ds_contact" class="col-form-label">D/S Contact Details</label>
-                            <input class="form-control" name="ds_contact" id="ds_contact" type="text">
+                            <textarea class="form-control" name="ds_contact" id="ds_contact" rows="4" placeholder="Enter delivery specialist contact details..."></textarea>
                         </div>
 
 
@@ -276,5 +413,67 @@ Disti/ Supplier
             modal.find('.modal-body #ds_contact').val(ds_contact);
 
         })
+    </script>
+
+    <script>
+        // Export functions
+        function exportToPDF() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-pdf').trigger();
+        }
+
+        function exportToExcel() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-excel').trigger();
+        }
+
+        function exportToCSV() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-csv').trigger();
+        }
+
+        function printTable() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-print').trigger();
+        }
+
+        // Enhanced DataTable initialization
+        $(document).ready(function() {
+            if ($.fn.DataTable.isDataTable('#example1')) {
+                $('#example1').DataTable().destroy();
+            }
+
+            $('#example1').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'pdfHtml5',
+                        className: 'buttons-pdf d-none',
+                        title: 'Delivery Specialists List'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        className: 'buttons-excel d-none',
+                        title: 'Delivery Specialists List'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        className: 'buttons-csv d-none',
+                        title: 'Delivery Specialists List'
+                    },
+                    {
+                        extend: 'print',
+                        className: 'buttons-print d-none',
+                        title: 'Delivery Specialists List'
+                    }
+                ],
+                responsive: true,
+                language: {
+                    searchPlaceholder: 'Search...',
+                    sSearch: '',
+                    lengthMenu: '_MENU_ items/page',
+                }
+            });
+        });
     </script>
 @endsection
