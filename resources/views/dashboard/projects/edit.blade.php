@@ -5,6 +5,39 @@
     <!-- Internal DatePicker css -->
     <link href="{{ URL::asset('assets/plugins/jquery-ui/ui/1.12.1/themes/base/jquery-ui.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/amazeui-datetimepicker/css/amazeui.datetimepicker.css') }}" rel="stylesheet">
+
+    <style>
+        .text-info {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .form-text {
+            font-size: 0.8rem;
+        }
+
+        .select2-container .select2-selection--multiple {
+            min-height: 38px;
+            border: 1px solid #ced4da;
+        }
+
+        .select2-container .select2-selection--multiple .select2-selection__choice {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+            padding: 2px 8px;
+            margin: 2px;
+        }
+
+        .select2-container .select2-selection--multiple .select2-selection__choice__remove {
+            color: white;
+            margin-right: 5px;
+        }
+
+        .select2-container .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #dc3545;
+        }
+    </style>
 @endsection
 
 @section('page-header')
@@ -95,20 +128,23 @@
                                 </div>
                             </div>
 
-                            <!-- Vendor -->
+                            <!-- Vendors (Multiple Selection) -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="vendors_id">Vendor</label>
-                                    <select class="form-control select2 @error('vendors_id') is-invalid @enderror"
-                                            id="vendors_id" name="vendors_id">
-                                        <option value="">Select Vendor</option>
+                                    <label for="vendors">Vendors <span class="text-info">*Multiple Selection</span></label>
+                                    <select class="form-control select2-multiple @error('vendors') is-invalid @enderror"
+                                            id="vendors" name="vendors[]" multiple>
                                         @foreach($vendors as $vendor)
                                             <option value="{{ $vendor->id }}"
-                                                {{ old('vendors_id', $project->vendors_id) == $vendor->id ? 'selected' : '' }}>
+                                                {{ (collect(old('vendors', $project->vendors->pluck('id')->toArray()))->contains($vendor->id)) ? 'selected' : '' }}>
                                                 {{ $vendor->vendors }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="form-text text-muted">Select one or more vendors. First selected will be primary.</small>
+                                    @error('vendors')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                     @error('vendors_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -117,40 +153,46 @@
                         </div>
 
                         <div class="row">
-                            <!-- DS -->
+                            <!-- Delivery Specialists (Multiple Selection) -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="ds_id">DS</label>
-                                    <select class="form-control select2 @error('ds_id') is-invalid @enderror"
-                                            id="ds_id" name="ds_id">
-                                        <option value="">Select DS</option>
+                                    <label for="delivery_specialists">Delivery Specialists <span class="text-info">*Multiple Selection</span></label>
+                                    <select class="form-control select2-multiple @error('delivery_specialists') is-invalid @enderror"
+                                            id="delivery_specialists" name="delivery_specialists[]" multiple>
                                         @foreach($ds as $dsItem)
                                             <option value="{{ $dsItem->id }}"
-                                                {{ old('ds_id', $project->ds_id) == $dsItem->id ? 'selected' : '' }}>
+                                                {{ (collect(old('delivery_specialists', $project->deliverySpecialists->pluck('id')->toArray()))->contains($dsItem->id)) ? 'selected' : '' }}>
                                                 {{ $dsItem->dsname }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="form-text text-muted">Select one or more DS. First selected will be lead.</small>
+                                    @error('delivery_specialists')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                     @error('ds_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
 
-                            <!-- Customer -->
+                            <!-- Customers (Multiple Selection) -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="cust_id">Customer</label>
-                                    <select class="form-control select2 @error('cust_id') is-invalid @enderror"
-                                            id="cust_id" name="cust_id">
-                                        <option value="">Select Customer</option>
+                                    <label for="customers">Customers <span class="text-info">*Multiple Selection</span></label>
+                                    <select class="form-control select2-multiple @error('customers') is-invalid @enderror"
+                                            id="customers" name="customers[]" multiple>
                                         @foreach($custs as $cust)
                                             <option value="{{ $cust->id }}"
-                                                {{ old('cust_id', $project->cust_id) == $cust->id ? 'selected' : '' }}>
+                                                {{ (collect(old('customers', $project->customers->pluck('id')->toArray()))->contains($cust->id)) ? 'selected' : '' }}>
                                                 {{ $cust->name }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="form-text text-muted">Select one or more customers. First selected will be primary.</small>
+                                    @error('customers')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                     @error('cust_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -289,7 +331,7 @@
                                     @if($project->po_attachment)
                                         <div class="mb-2">
                                             <small class="text-muted">Current file:
-                                                <a href="{{ asset('storage/' . $project->po_attachment) }}" target="_blank">
+                                                <a href="{{ asset($project->po_attachment) }}" target="_blank">
                                                     {{ basename($project->po_attachment) }}
                                                 </a>
                                             </small>
@@ -311,7 +353,7 @@
                                     @if($project->epo_attachment)
                                         <div class="mb-2">
                                             <small class="text-muted">Current file:
-                                                <a href="{{ asset('storage/' . $project->epo_attachment) }}" target="_blank">
+                                                <a href="{{ asset($project->epo_attachment) }}" target="_blank">
                                                     {{ basename($project->epo_attachment) }}
                                                 </a>
                                             </small>
@@ -341,6 +383,11 @@
                             </div>
                         </div>
 
+                        <!-- Hidden fields for backward compatibility -->
+                        <input type="hidden" id="vendors_id" name="vendors_id" value="{{ old('vendors_id', $project->vendors_id) }}">
+                        <input type="hidden" id="ds_id" name="ds_id" value="{{ old('ds_id', $project->ds_id) }}">
+                        <input type="hidden" id="cust_id" name="cust_id" value="{{ old('cust_id', $project->cust_id) }}">
+
                         <!-- Submit Buttons -->
                         <div class="form-group mt-4">
                             <button type="submit" class="btn btn-primary">
@@ -363,11 +410,53 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize Select2
+            // Initialize Select2 for single selection
             $('.select2').select2({
                 placeholder: "Select an option",
                 allowClear: true
             });
+
+            // Initialize Select2 for multiple selection
+            $('.select2-multiple').select2({
+                placeholder: "Select multiple options",
+                allowClear: true,
+                closeOnSelect: false
+            });
+
+            // Auto-update hidden fields when multiple selections change
+            $('#vendors').on('change', function() {
+                var selected = $(this).val();
+                if (selected && selected.length > 0) {
+                    $('#vendors_id').val(selected[0]); // First selected becomes primary
+                } else {
+                    $('#vendors_id').val('');
+                }
+            });
+
+            $('#delivery_specialists').on('change', function() {
+                var selected = $(this).val();
+                if (selected && selected.length > 0) {
+                    $('#ds_id').val(selected[0]); // First selected becomes lead
+                } else {
+                    $('#ds_id').val('');
+                }
+            });
+
+            $('#customers').on('change', function() {
+                var selected = $(this).val();
+                if (selected && selected.length > 0) {
+                    $('#cust_id').val(selected[0]); // First selected becomes primary
+                } else {
+                    $('#cust_id').val('');
+                }
+            });
+
+            // Initialize hidden fields with current selections on page load
+            setTimeout(function() {
+                $('#vendors').trigger('change');
+                $('#delivery_specialists').trigger('change');
+                $('#customers').trigger('change');
+            }, 100);
 
             // Calculate deadline based on PO date and duration
             $('#customer_po_date, #customer_po_duration').on('change', function() {

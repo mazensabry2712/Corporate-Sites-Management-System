@@ -13,10 +13,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // شغّل السيّدَر الخاص بإنشاء صلاحيات النظام أولًا
         $this->call(PermissionTableSeeder::class);
 
-        // ثم إنشاء المستخدم الإداري وتعيين الصلاحيات
         $this->call(CreateAdminUserSeeder::class);
     }
 }

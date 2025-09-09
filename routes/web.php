@@ -99,5 +99,17 @@ Auth::routes();
 
 require __DIR__ . '/auth.php';
 
+// Route لعرض الصور من مجلد storge
+Route::get('storge/{path}', function ($path) {
+    $filePath = base_path('storge/' . $path);
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+
+    $mimeType = mime_content_type($filePath);
+    return response()->file($filePath, [
+        'Content-Type' => $mimeType,
+    ]);
+})->where('path', '.*');
 
 Route::get('/{page}',[AdminController::class,'index']);

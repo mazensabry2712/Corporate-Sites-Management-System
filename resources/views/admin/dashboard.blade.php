@@ -4,6 +4,42 @@
     <link href="{{ URL::asset('assets/plugins/owl-carousel/owl.carousel.css') }}" rel="stylesheet" />
     <!-- Maps css -->
     <link href="{{ URL::asset('assets/plugins/jqvmap/jqvmap.min.css') }}" rel="stylesheet">
+
+    <style>
+        .sales-card {
+            border-radius: 15px !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        }
+
+        .sales-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+
+        .stats-icon {
+            font-size: 2.5rem;
+            opacity: 0.3;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .stats-number {
+            font-size: 2rem !important;
+            font-weight: 700 !important;
+        }
+
+        .stats-label {
+            font-size: 0.9rem !important;
+            font-weight: 500 !important;
+        }
+    </style>
 @endsection
 @section('page-header')
     <!-- breadcrumb -->
@@ -38,98 +74,80 @@
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-primary-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Users</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $userCount }}</h4>
-                                {{-- {{ dd($projectcount)}} --}}
-                                <p class="mb-0 tx-12 text-white op-7">All Users</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-users text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">👥 Users</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $userCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Total System Users</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-up text-white"></i> --}}
-                                {{-- <span class="text-white op-7"> +427</span> --}}
-                            </span>
                         </div>
                     </div>
-
                 </div>
-                <span id="compositeline" class="pt-1">5,9,5,6,4,12,18,14,10,15,12,5,8,5,12,5,12,10,16,12</span>
             </div>
         </div>
 
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-danger-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Projects Details</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $projectcount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Projects</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-project-diagram text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">📊 Projects Details</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $projectcount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Active Projects</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-down text-white"></i>
-											<span class="text-white op-7"> -23.09%</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                <span id="compositeline2" class="pt-1">3,2,4,6,12,14,8,7,14,16,12,7,8,4,3,2,2,5,6,7</span>
             </div>
         </div>
 
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-success-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Customers</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $custCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Customers</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-handshake text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">🤝 Customers</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $custCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Total Customers</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-up text-white"></i>
-											<span class="text-white op-7"> 52.09%</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                <span id="compositeline3" class="pt-1">5,10,5,20,22,12,15,18,20,15,8,12,22,5,10,12,22,15,16,10</span>
             </div>
         </div>
 
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-warning-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Pm</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $pmCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Pms</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-user-tie text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">💼 Project Managers</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $pmCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Active PMs</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-down text-white"></i>
-											<span class="text-white op-7"> -152.3</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                <span id="compositeline4" class="pt-1">5,9,5,6,4,12,18,14,10,15,12,5,8,5,12,5,12,10,16,12</span>
             </div>
         </div>
 
@@ -140,98 +158,80 @@
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-primary-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Am</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $amCount }}</h4>
-                                {{-- {{ dd($projectcount)}} --}}
-                                <p class="mb-0 tx-12 text-white op-7">All Ams</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-user-cog text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">⚙️ Account Managers</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $amCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Active AMs</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-up text-white"></i> --}}
-                                {{-- <span class="text-white op-7"> +427</span> --}}
-                            </span>
                         </div>
                     </div>
-
                 </div>
-                {{-- <span id="compositeline5" class="pt-1">5,9,5,6,4,12,18,14,10,15,12,5,8,5,12,5,12,10,16,12</span> --}}
             </div>
         </div>
 
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-danger-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Vendors</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $VendorsCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Vendors</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-truck text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">🚛 Vendors</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $VendorsCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Total Vendors</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-down text-white"></i>
-											<span class="text-white op-7"> -23.09%</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                {{-- <span id="compositeline2" class="pt-1">3,2,4,6,12,14,8,7,14,16,12,7,8,4,3,2,2,5,6,7</span> --}}
             </div>
         </div>
 
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-success-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Disti/Supplier</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $dsCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Distis/Suppliers</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-shipping-fast text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">📦 Distributors/Suppliers</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $dsCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Total Partners</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-up text-white"></i>
-											<span class="text-white op-7"> 52.09%</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                <span id="compositeline3" class="pt-1"> </span>
             </div>
         </div>
 
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-warning-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Invoices</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $invoiceCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Invoices</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-receipt text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">🧾 Invoices</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $invoiceCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Total Invoices</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-down text-white"></i>
-											<span class="text-white op-7"> -152.3</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                {{-- <span id="compositeline4" class="pt-1">5,9,5,6,4,12,18,14,10,15,12,5,8,5,12,5,12,10,16,12</span> --}}
             </div>
         </div>
 
@@ -242,7 +242,7 @@
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-primary-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
+                <div class="pl-3 pt-3 pr-3 pb-2">
                     <div class="">
                         <h6 class="mb-3 tx-12 text-white">Dn</h6>
                     </div>
@@ -268,68 +268,56 @@
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-danger-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Coc</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $cocCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Cocs</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-certificate text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">📜 Certificates</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $cocCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Total COCs</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-down text-white"></i>
-											<span class="text-white op-7"> -23.09%</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                {{-- <span id="compositeline2" class="pt-1">3,2,4,6,12,14,8,7,14,16,12,7,8,4,3,2,2,5,6,7</span> --}}
             </div>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-success-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Projects POs</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $posCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All POs</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-file-contract text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">📋 Project POs</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $posCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Active POs</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-up text-white"></i>
-											<span class="text-white op-7"> 52.09%</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                <span id="compositeline3" class="pt-1"> </span>
             </div>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-warning-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Status</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $statusCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Status</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-tasks text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">📊 Status Updates</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $statusCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Total Status</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-down text-white"></i>
-											<span class="text-white op-7"> -152.3</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                {{-- <span id="compositeline4" class="pt-1">5,9,5,6,4,12,18,14,10,15,12,5,8,5,12,5,12,10,16,12</span> --}}
             </div>
         </div>
     </div>
@@ -338,93 +326,78 @@
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-primary-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Tasks</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $tasksCount }}</h4>
-                                {{-- {{ dd($projectcount)}} --}}
-                                <p class="mb-0 tx-12 text-white op-7">All Tasks</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-clipboard-list text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">✅ Tasks</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $tasksCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Active Tasks</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-up text-white"></i> --}}
-                                {{-- <span class="text-white op-7"> +427</span> --}}
-                            </span>
                         </div>
                     </div>
-
                 </div>
-                {{-- <span id="compositeline5" class="pt-1">5,9,5,6,4,12,18,14,10,15,12,5,8,5,12,5,12,10,16,12</span> --}}
             </div>
         </div>
 
 
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-danger-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Epo</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $epoCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Epo</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-file-signature text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">📝 EPO Orders</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $epoCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Total EPOs</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-down text-white"></i>
-											<span class="text-white op-7"> -23.09%</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                {{-- <span id="compositeline2" class="pt-1">3,2,4,6,12,14,8,7,14,16,12,7,8,4,3,2,2,5,6,7</span> --}}
             </div>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-success-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Risks</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $reskCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Risks</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-exclamation-triangle text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">⚠️ Risks</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $reskCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Identified Risks</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-up text-white"></i>
-											<span class="text-white op-7"> 52.09%</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
-                <span id="compositeline3" class="pt-1"> </span>
             </div>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
             <div class="card overflow-hidden sales-card bg-warning-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2 pt-0">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Milestones</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $milestonesCount }}</h4>
-                                <p class="mb-0 tx-12 text-white op-7">All Milestones</p>
+                <div class="pl-3 pt-3 pr-3 pb-2">
+                    <i class="fas fa-flag-checkered text-white stats-icon"></i>
+                    <div class="card-content">
+                        <h6 class="mb-3 tx-12 text-white stats-label">🏁 Milestones</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $milestonesCount }}</h4>
+                                    <p class="mb-0 tx-12 text-white op-7">Achieved Goals</p>
+                                </div>
                             </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-down text-white"></i>
-											<span class="text-white op-7"> -152.3</span> --}}
-                            </span>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
                 {{-- <span id="compositeline4" class="pt-1">5,9,5,6,4,12,18,14,10,15,12,5,8,5,12,5,12,10,16,12</span> --}}
             </div>
         </div>

@@ -38,25 +38,29 @@ class CustController extends Controller
             'customercontactposition' => 'nullable|string|max:255'??null,
             'email' => 'nullable|email|max:255'??null,
             'phone' => 'nullable|string|max:15'??null,
+        ], [
+            'name.required' => 'Customer name is required',
+            'email.email' => 'Please enter a valid email address',
+            'logo.mimes' => 'Logo must be an image file (jpeg, jpg, png, gif, webp)',
+            'logo.max' => 'Logo file size cannot exceed 2MB',
         ]);
-
-         $b_exists = Cust::where('name', $validatedData['name'])->exists();
 
         $data = $request->except(['logo']);
 
       if($request->file('logo')){
         $file = $request->file('logo');
-            $path = $file->store('uploads',[
-                'disk' => 'public'
-            ]);
-            $data['logo'] = $path;
+        $fileName = time() . '_' . $file->getClientOriginalName();
+
+        // حفظ في مجلد storge الأصلي
+        $destinationPath = base_path('storge');
+        $file->move($destinationPath, $fileName);
+
+        // نسخ إلى مجلد public للعرض
+        $publicPath = public_path('storge');
+        copy(base_path('storge/' . $fileName), $publicPath . '/' . $fileName);
+
+        $data['logo'] = 'storge/' . $fileName;
         }
-
-
-if ($b_exists) {
-    session()->flash('Error', 'The name already exists');
-    return redirect('/customer');
-}
 
 // إذا كانت البيانات سليمة، يتم حفظها
 Cust::create($data);
@@ -73,64 +77,75 @@ return redirect('/customer'); //حسب الحاجة
     /**
      * Display the specified resource.
      */
-    public function show(Cust $cust)
+    public function show(Cust $customer)
     {
-        //
+        // Get customer order/position number
+        $customers = Cust::orderBy('id')->get();
+        $loop_index = $customers->search(function($item) use ($customer) {
+            return $item->id === $customer->id;
+        }) + 1;
+
+        return view('dashboard.customer.show', compact('customer', 'loop_index'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(Cust $customer)
     {
-        try{
-            $cust = Cust::findOrFail($id);
-        }catch(Exception $e){
-            return redirect('/customer')->with('error', 'Record not found!');
-        }
-
-
-
-       return view('dashboard.customer.edit',compact('cust'));
+        return view('dashboard.customer.edit', compact('customer'));
     }
 
     /**
      * Update the specified resource in storage.
      */
 
-     public function update(Request $request, $id)
+     public function update(Request $request, Cust $customer)
      {
-         $cust = Cust::findOrFail($id);
          $validated = $request->validate([
-                     'name' => 'required|string|max:255'.$cust->id,
+            'name' => 'required|string|max:255',
             'abb' => 'nullable|string|max:255',
             'tybe' => 'nullable|in:GOV,PRIVATE',
-             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'customercontactname' => 'nullable|string|max:255',
             'customercontactposition' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:15',
+         ], [
+            'name.required' => 'Customer name is required',
+            'email.email' => 'Please enter a valid email address',
+            'logo.image' => 'Logo must be an image file',
+            'logo.mimes' => 'Logo must be an image file (jpeg, jpg, png, gif, webp)',
+            'logo.max' => 'Logo file size cannot exceed 2MB',
          ]);
 
-         $data = $validated;
-
-
-         $cust = Cust::find($id);
-
-            $old_logo = $cust->logo;
+         $old_logo = $customer->logo;
          $data = $request->except(['logo']);
 
-
          if($request->file('logo')){
-             $file = $request->file('logo');
-             $path = $file->store('uploads',[
-                 'disk' => 'public'
-             ]);
+             // حذف الصورة القديمة إذا كانت موجودة من كلا المكانين
+             if($old_logo && file_exists(base_path($old_logo))) {
+                 unlink(base_path($old_logo));
+             }
+             if($old_logo && file_exists(public_path($old_logo))) {
+                 unlink(public_path($old_logo));
+             }
 
-             $data['logo'] = $path;
+             $file = $request->file('logo');
+             $fileName = time() . '_' . $file->getClientOriginalName();
+
+             // حفظ في مجلد storge الأصلي
+             $destinationPath = base_path('storge');
+             $file->move($destinationPath, $fileName);
+
+             // نسخ إلى مجلد public للعرض
+             $publicPath = public_path('storge');
+             copy(base_path('storge/' . $fileName), $publicPath . '/' . $fileName);
+
+             $data['logo'] = 'storge/' . $fileName;
          }
 
-         $cust->update($data);
+         $customer->update($data);
          session()->flash('Add', 'Registration successful.');
          return redirect('/customer');
      }
@@ -199,11 +214,20 @@ return redirect('/customer'); //حسب الحاجة
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy(Cust $customer)
     {
-        $id=$request->id;
-        Cust::find($id)->delete();
+        // حذف الصورة إذا كانت موجودة من كلا المكانين
+        if($customer->logo) {
+            if(file_exists(base_path($customer->logo))) {
+                unlink(base_path($customer->logo));
+            }
+            if(file_exists(public_path($customer->logo))) {
+                unlink(public_path($customer->logo));
+            }
+        }
+
+        $customer->delete();
         session()->flash('delete', 'Deleted successfully');
-             return redirect('/customer');
+        return redirect('/customer');
     }
 }

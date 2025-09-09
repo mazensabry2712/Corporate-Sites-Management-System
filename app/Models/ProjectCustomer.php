@@ -5,13 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ds extends Model
+class ProjectCustomer extends Model
 {
     use HasFactory;
-
-    protected $table = 'ds';
-
-    protected $fillable = [
-       'dsname', 'ds_contact'
-    ];
 }

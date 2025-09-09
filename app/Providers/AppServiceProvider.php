@@ -20,12 +20,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-//   
+        // Helper function لعرض الصور من مجلد storge
+        if (!function_exists('storge_asset')) {
+            function storge_asset($path) {
+                return url('storge/' . ltrim($path, '/'));
+            }
+        }
     }
 
 
 
-    
+
 
 
 }

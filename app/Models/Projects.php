@@ -48,5 +48,42 @@ class projects extends Model
 
     }
 
+    // Many-to-many relationships for multiple assignments
+    public function customers()
+    {
+        return $this->belongsToMany(Cust::class, 'project_customers', 'project_id', 'customer_id')
+                    ->withPivot('is_primary', 'role', 'notes')
+                    ->withTimestamps();
+    }
+
+    public function vendors()
+    {
+        return $this->belongsToMany(vendors::class, 'project_vendors', 'project_id', 'vendor_id')
+                    ->withPivot('is_primary', 'service_type', 'contract_value', 'start_date', 'end_date', 'notes')
+                    ->withTimestamps();
+    }
+
+    public function deliverySpecialists()
+    {
+        return $this->belongsToMany(Ds::class, 'project_delivery_specialists', 'project_id', 'ds_id')
+                    ->withPivot('is_lead', 'responsibility', 'allocation_percentage', 'assigned_date', 'notes')
+                    ->withTimestamps();
+    }
+
+    // Helper methods to get primary/lead relationships
+    public function primaryCustomer()
+    {
+        return $this->customers()->wherePivot('is_primary', true)->first();
+    }
+
+    public function primaryVendor()
+    {
+        return $this->vendors()->wherePivot('is_primary', true)->first();
+    }
+
+    public function leadDeliverySpecialist()
+    {
+        return $this->deliverySpecialists()->wherePivot('is_lead', true)->first();
+    }
 
 }
