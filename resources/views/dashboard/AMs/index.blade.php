@@ -11,6 +11,98 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
+    <style>
+        /* تحسين أزرار التصدير */
+        .export-buttons .btn {
+            transition: all 0.3s ease;
+            margin: 0 1px;
+            border-radius: 4px;
+        }
+
+        .export-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-group .btn {
+            border-radius: 0;
+        }
+
+        .btn-group .btn:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .btn-group .btn:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* إخفاء أزرار DataTables الافتراضية */
+        .dt-buttons {
+            display: none !important;
+        }
+
+        /* تحسين شكل الـ Alerts */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            position: relative;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+            color: white;
+        }
+
+        .alert .close {
+            color: white;
+            opacity: 0.8;
+            font-size: 20px;
+        }
+
+        .alert .close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .card-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .btn-group {
+                margin-bottom: 10px;
+                margin-right: 0 !important;
+            }
+        }
+
+        /* تأكيد عدم الاختفاء السريع */
+        .alert.fade.show {
+            opacity: 1 !important;
+        }
+    </style>
 
 @endsection
 @section('page-header')
@@ -30,47 +122,66 @@
 @endsection
 @section('content')
 
-    {{-- @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif --}}
-
     @if (session()->has('Add'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('Add') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+        <div class="alert alert-success alert-dismissible fade show"
+            role="alert" style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-plus mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Added!</strong>
+                    <div>{{ session()->get('Add') }}</div>
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
             </button>
         </div>
     @endif
+
     @if (session()->has('Error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('Error') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+        <div class="alert alert-danger alert-dismissible fade show"
+            role="alert" style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Error!</strong>
+                    <div>{{ session()->get('Error') }}</div>
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
             </button>
         </div>
     @endif
 
     @if (session()->has('delete'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('delete') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+        <div class="alert alert-danger alert-dismissible fade show"
+            role="alert" style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-trash mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Deleted!</strong>
+                    <div>{{ session()->get('delete') }}</div>
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
             </button>
         </div>
     @endif
 
     @if (session()->has('edit'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('edit') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+        <div class="alert alert-success alert-dismissible fade show"
+            role="alert" style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-edit mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Updated!</strong>
+                    <div>{{ session()->get('edit') }}</div>
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
             </button>
         </div>
     @endif
@@ -80,62 +191,77 @@
     <div class="row row-sm">
         <div class="col-xl-12">
             <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Account Managers Management</h6>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <!-- Export buttons -->
+                                <div class="btn-group export-buttons mr-2" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()" title="Export to Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="exportToCSV()" title="Export to CSV">
+                                        <i class="fas fa-file-csv"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printTable()" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                </div>
 
-
-                <div class="card-header pb-0"> @can('Add')
-                        <a class="modal-effect btn btn-outline-primary btn-block" data-effect="effect-scale" data-toggle="modal"
-                            href="#modaldemo8"> Add AM </a>
-                    @endcan
+                                @can('Add')
+                                    <a class="btn btn-primary" data-effect="effect-scale" data-toggle="modal"
+                                        href="#modaldemo8">
+                                        <i class="fas fa-plus"></i> Add Account Manager
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table text-md-nowrap" id="example1">
                             <thead>
-
                                 <tr>
                                     <th>#</th>
-                                    <th>AM Operations </th>
-                                    <th>AM Name </th>
-                                    <th>AM Email </th>
+                                    <th>Operations</th>
+                                    <th>AM Name</th>
+                                    <th>AM Email</th>
                                     <th>AM Phone</th>
-
                                 </tr>
-
-
-
-
                             </thead>
-
                             <tbody>
                                 <?php $i = 0; ?>
                                 @foreach ($aams as $x)
                                     <?php $i++; ?>
+                                    <tr>
+                                        <td>{{ $i }}</td>
+                                        <td>
+                                            @can('Edit')
+                                                <a class="modal-effect btn btn-sm btn-info" data-effect="effect-scale"
+                                                    data-id="{{ $x->id }}" data-name="{{ $x->name }}"
+                                                    data-email="{{ $x->email }}" data-phone="{{ $x->phone }}"
+                                                    data-toggle="modal" href="#exampleModal2" title="Update"><i
+                                                        class="las la-pen"></i></a>
+                                            @endcan
 
-                                    <td>{{ $i }}</td>
-                                    <td>
-                                        @can('Edit')
-                                            <a class="modal-effect btn btn-sm btn-info" data-effect="effect-scale"
-                                                data-id="{{ $x->id }}" data-name="{{ $x->name }}"
-                                                data-email="{{ $x->email }}" data-phone="{{ $x->phone }}"
-                                                data-toggle="modal" href="#exampleModal2" title="Upadte"><i
-                                                    class="las la-pen"></i></a>
-                                        @endcan
-
-                                        @can('Delete')
-                                            <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
-                                                data-id="{{ $x->id }}" data-name="{{ $x->name }}"
-                                                data-toggle="modal" href="#modaldemo9" title="Delete"><i
-                                                    class="las la-trash"></i></a>
-                                        @endcan
-                                    </td>
-
-                                    <td>{{ $x->name }}</td>
-                                    <td>{{ $x->email }}</td>
-                                    <td>{{ $x->phone }}</td>
-
-
-
+                                            @can('Delete')
+                                                <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
+                                                    data-id="{{ $x->id }}" data-name="{{ $x->name }}"
+                                                    data-toggle="modal" href="#modaldemo9" title="Delete"><i
+                                                        class="las la-trash"></i></a>
+                                            @endcan
+                                        </td>
+                                        <td>{{ $x->name }}</td>
+                                        <td>{{ $x->email }}</td>
+                                        <td>{{ $x->phone }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -334,5 +460,35 @@
             modal.find('.modal-body #email').val(email);
             modal.find('.modal-body #phone').val(phone);
         })
+    </script>
+
+    <!-- Export Functions -->
+    <script>
+        // Export to PDF
+        function exportToPDF() {
+            $('#example1').DataTable().button('.buttons-pdf').trigger();
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            $('#example1').DataTable().button('.buttons-excel').trigger();
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            $('#example1').DataTable().button('.buttons-csv').trigger();
+        }
+
+        // Print Table
+        function printTable() {
+            $('#example1').DataTable().button('.buttons-print').trigger();
+        }
+
+        // Auto-hide alerts after 5 seconds
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
     </script>
 @endsection

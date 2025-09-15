@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Dn extends Model
 {
     use HasFactory;
-    protected $guarded = [];
+
+    protected $table = 'dns';
+
 
     protected $fillable = [
         'dn_number',
@@ -17,8 +19,8 @@ class Dn extends Model
         'status',
     ];
 
-public function project()
-{
-    return $this->belongsTo(projects::class, 'pr_number');
-}
+    public function project()
+    {
+        return $this->belongsTo(projects::class, 'pr_number');
+    }
 }

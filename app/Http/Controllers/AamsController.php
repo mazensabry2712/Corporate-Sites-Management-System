@@ -12,8 +12,8 @@ class AamsController extends Controller
      */
     public function index()
     {
-        $aams=aams::all();
-        return view('dashboard.AMs.index',compact('aams'));
+        $aams = aams::all();
+        return view('dashboard.AMs.index', compact('aams'));
     }
 
     /**
@@ -35,10 +35,10 @@ class AamsController extends Controller
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:15',
         ]);
-    
+
         // التحقق إذا كان الاسم موجودًا مسبقًا
         $b_exists = aams::where('name', $validatedData['name'])->exists();
-    
+
         if ($b_exists) {
             session()->flash('Error', 'The name already exists');
             return redirect('/am');
@@ -49,7 +49,7 @@ class AamsController extends Controller
                 'email' => $validatedData['email'],
                 'phone' => $validatedData['phone'],
             ]);
-    
+
             session()->flash('Add', 'Registration successful');
             return redirect('/am');
         }
@@ -77,14 +77,14 @@ class AamsController extends Controller
     public function update(Request $request)
     {
         $id = $request->id;
-    
+
         // التحقق من صحة البيانات
         $this->validate($request, [
             'name' => 'required|max:255|unique:aams,name,' . $id, // التحقق من اسم القسم بناءً على الحقل "name"
             'email' => 'required|email|unique:aams,email,' . $id, // التحقق من البريد الإلكتروني
             'phone' => 'required|unique:aams,phone,' . $id, // التحقق من رقم الهاتف
         ]);
-    
+
         // العثور على العنصر وتحديث
         $aams = aams::findOrFail($id); // نستخدم findOrFail للتأكد من وجود العنصر
         $aams->update([
@@ -92,25 +92,24 @@ class AamsController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
         ]);
-    
+
         // رسالة تأكيد وإعادة توجيه
         session()->flash('edit', 'The section has been successfully modified');
         return redirect('/am'); // إعادة التوجيه إلى صفحة الأقسام
     }
-    
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request )
+    public function destroy(Request $request)
     {
-$id=$request->id;
+        $id = $request->id;
 
-   aams::find($id)->delete();
+        aams::find($id)->delete();
 
-   session()->flash('delete', 'Deleted successfully');
+        session()->flash('delete', 'Deleted successfully');
 
         return redirect('/am');
     }
-
 }

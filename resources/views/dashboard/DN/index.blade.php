@@ -11,16 +11,214 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
+    <!-- Lightbox CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+
     <style>
+        .img-thumbnail {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            transition: 0.3s;
+        }
+        .img-thumbnail:hover {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        }
+        .no-file {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            width: 50px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+
+        /* تحسين شكل عرض DN details */
+        .dn-details {
+            max-width: 300px !important;
+            min-width: 200px;
+            white-space: normal !important;
+        }
+
+        .dn-details .text-wrap {
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+            font-size: 13px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        /* تحسين شكل عرض اسم المشروع */
+        .project-name {
+            max-width: 200px !important;
+            min-width: 150px;
+            white-space: normal !important;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .project-name .badge {
+            display: inline-block;
+            max-width: 100%;
+            word-wrap: break-word;
+            white-space: normal;
+            line-height: 1.4;
+        }
+
+        /* تحسين شكل الجدول */
+        #example1 {
+            width: 100% !important;
+            table-layout: auto;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        /* تحسين العمود */
+        #example1 td.dn-details {
+            padding: 10px 8px;
+            vertical-align: top;
+        }
+
+        /* تحسين أزرار التصدير */
+        .export-buttons .btn {
+            transition: all 0.3s ease;
+            margin: 0 1px;
+            border-radius: 4px;
+        }
+
+        .export-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-group .btn {
+            border-radius: 0;
+        }
+
+        .btn-group .btn:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .btn-group .btn:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* إخفاء أزرار DataTables الافتراضية */
+        .dt-buttons {
+            display: none !important;
+        }
+
         .image-thumbnail {
             cursor: pointer;
             border: 2px solid #ddd;
-            border-radius: 4px;
+            border-radius: 8px;
             transition: all 0.3s ease;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+
         .image-thumbnail:hover {
             border-color: #007bff;
             transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+
+        /* للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .dn-details {
+                max-width: 250px !important;
+            }
+
+            .dn-details .text-wrap {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+
+            .card-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .btn-group {
+                margin-bottom: 10px;
+                margin-right: 0 !important;
+            }
+        }
+
+        /* تحسين شكل الـ Alerts */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            position: relative;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+            color: white;
+        }
+
+        .alert .close {
+            color: white;
+            opacity: 0.8;
+            font-size: 20px;
+        }
+
+        .alert .close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* تأكيد عدم الاختفاء السريع */
+        .alert.fade.show {
+            opacity: 1 !important;
+        }
+    </style>
+
+            .dn-details .text-wrap {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+
+            .card-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .btn-group {
+                margin-bottom: 10px;
+                margin-right: 0 !important;
+            }
         }
     </style>
 @endsection
@@ -51,17 +249,21 @@
         </div>
     @endif --}}
 
-    @foreach (['Error', 'Add', 'delete', 'edit'] as $msg)
-        @if (session()->has($msg))
-            <div class="alert alert-{{ $msg == 'Error' || $msg == 'delete' ? 'danger' : 'success' }} alert-dismissible fade show"
-                role="alert">
-                <strong>{{ session()->get($msg) }}</strong>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+    @if (session()->has('delete'))
+        <div class="alert alert-danger alert-dismissible fade show"
+            role="alert" style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-trash mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Deleted!</strong>
+                    <div>{{ session()->get('delete') }}</div>
+                </div>
             </div>
-        @endif
-    @endforeach
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
+            </button>
+        </div>
+    @endif
 
 
     <!-- row opened -->
@@ -69,30 +271,52 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header pb-0">
-                    @can('Add')
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Delivery Notes Management</h6>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <!-- Export buttons -->
+                                <div class="btn-group export-buttons mr-2" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()" title="Export to Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="exportToCSV()" title="Export to CSV">
+                                        <i class="fas fa-file-csv"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printTable()" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                </div>
 
-                    <a class=" btn btn-outline-primary btn-block" data-effect="effect-scale"
-                        href="{{ route('dn.create') }}"> Add DN </a>
-                    @endcan
+                                @can('Add')
+                                    <a class="btn btn-primary" data-effect="effect-scale" href="{{ route('dn.create') }}">
+                                        <i class="fas fa-plus"></i> Add Delivery Note
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table text-md-nowrap" id="example1">
                             <thead>
-
                                 <tr>
                                     <th>#</th>
-                                    <th>Operations </th>
+                                    <th> Operations </th>
                                     <th>DN number  </th>
                                     <th>PR number</th>
+                                    <th>Project Name</th>
                                     <th>DN Copy</th>
                                     <th>Status</th>
-
                                 </tr>
-
                             </thead>
-
                             <tbody>
                                 <?php $i = 0; ?>
                                 @foreach ($dn as $dnnn)
@@ -100,6 +324,11 @@
 
                                     <td>{{ $i }}</td>
                                     <td>
+                                        {{-- @can('Show') --}}
+                                        <a class="btn btn-sm btn-primary"
+                                            href="{{route('dn.show',$dnnn->id)}}" title="View"><i class="las la-eye"></i></a>
+                                        {{-- @endcan --}}
+
                                          @can('Edit')
                                         <a class=" btn btn-sm btn-info"
                                             href="{{route('dn.edit',$dnnn->id)}}" title="Upadte"><i class="las la-pen"></i></a>
@@ -112,26 +341,51 @@
                                                 class="las la-trash"></i></a>
                                         @endcan
                                     </td>
-
                                     <td>{{ $dnnn->dn_number }}</td>
                                     <td>{{ $dnnn->project->pr_number}}</td>
-                                    <td>
-                                        @if ($dnnn->dn_copy)
-                                            <a href="{{ asset('storage/' . $dnnn->dn_copy) }}" target="_blank" title="Click to view full image">
-                                                <img src="{{ asset('storage/' . $dnnn->dn_copy) }}"
-                                                     width="50"
-                                                     height="50"
-                                                     class="image-thumbnail"
-                                                     alt="DN Copy Image">
-                                            </a>
+                                    <td class="project-name">
+                                        @if($dnnn->project && $dnnn->project->name)
+                                            <span class="badge badge-info" style="font-size: 12px; padding: 6px 10px;">
+                                                {{ $dnnn->project->name }}
+                                            </span>
                                         @else
-                                            <span class="text-muted">There is no image.</span>
+                                            <span class="badge badge-secondary" style="font-size: 11px; padding: 5px 8px;">
+                                                No name available
+                                            </span>
                                         @endif
                                     </td>
-                                    <td>{{ $dnnn->status }}</td>
+                                    <td>
+                                        @if ($dnnn->dn_copy && file_exists(public_path($dnnn->dn_copy)))
+                                            @php
+                                                $fileExtension = pathinfo($dnnn->dn_copy, PATHINFO_EXTENSION);
+                                                $isImage = in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                            @endphp
 
-
-
+                                            @if($isImage)
+                                                <a href="{{ asset($dnnn->dn_copy) }}" data-lightbox="gallery-{{$dnnn->id}}"
+                                                    data-title="DN Copy - {{$dnnn->dn_number}}" title="Click to view full size">
+                                                    <img src="{{ asset($dnnn->dn_copy) }}" alt="DN Copy"
+                                                         height="50" width="50" class="img-thumbnail"
+                                                         title="DN Copy - Click to enlarge">
+                                                </a>
+                                            @else
+                                                <a href="{{ asset($dnnn->dn_copy) }}" target="_blank"
+                                                   title="Click to view/download file" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-file-pdf"></i> View File
+                                                </a>
+                                            @endif
+                                        @else
+                                            <div class="no-file" title="No file uploaded">
+                                                <i class="fas fa-file text-muted" style="font-size: 20px;"></i>
+                                                <small class="text-muted" style="font-size: 10px;">No File</small>
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="dn-details">
+                                        <div class="text-wrap">
+                                            {{ $dnnn->status }}
+                                        </div>
+                                    </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -217,4 +471,118 @@
 
         })
     </script>
+
+    <script>
+        // Export functions
+        function exportToPDF() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-pdf').trigger();
+        }
+
+        function exportToExcel() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-excel').trigger();
+        }
+
+        function exportToCSV() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-csv').trigger();
+        }
+
+        function printTable() {
+            const table = $('#example1').DataTable();
+            table.button('.buttons-print').trigger();
+        }
+
+        // Enhanced DataTable initialization
+        $(document).ready(function() {
+            // تحسين الـ Alerts
+            $('.alert').each(function() {
+                var $alert = $(this);
+
+                // منع الاختفاء التلقائي
+                $alert.on('close.bs.alert', function(e) {
+                    e.preventDefault();
+                    $alert.fadeOut(500, function() {
+                        $alert.remove();
+                    });
+                });
+
+                // إضافة تأثير hover
+                $alert.hover(
+                    function() {
+                        $(this).css('transform', 'translateY(-2px)');
+                    },
+                    function() {
+                        $(this).css('transform', 'translateY(0)');
+                    }
+                );
+
+                // اختفاء تلقائي بعد 8 ثواني (بدلاً من السريع)
+                setTimeout(function() {
+                    if ($alert.is(':visible')) {
+                        $alert.fadeOut(1000, function() {
+                            $alert.remove();
+                        });
+                    }
+                }, 8000);
+            });
+
+            if ($.fn.DataTable.isDataTable('#example1')) {
+                $('#example1').DataTable().destroy();
+            }
+
+            $('#example1').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'pdfHtml5',
+                        className: 'buttons-pdf d-none',
+                        title: 'Delivery Notes List'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        className: 'buttons-excel d-none',
+                        title: 'Delivery Notes List'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        className: 'buttons-csv d-none',
+                        title: 'Delivery Notes List'
+                    },
+                    {
+                        extend: 'print',
+                        className: 'buttons-print d-none',
+                        title: 'Delivery Notes List'
+                    }
+                ],
+                responsive: true,
+                columnDefs: [
+                    { width: "5%", targets: 0 },    // # column
+                    { width: "15%", targets: 1 },   // Operations column
+                    { width: "15%", targets: 2 },   // DN number column
+                    { width: "15%", targets: 3 },   // PR number column
+                    { width: "20%", targets: 4 },   // Project Name column
+                    { width: "10%", targets: 5 },   // DN Copy column
+                    { width: "20%", targets: 6 }    // Status column
+                ],
+                language: {
+                    searchPlaceholder: 'Search...',
+                    sSearch: '',
+                    lengthMenu: '_MENU_ items/page',
+                }
+            });
+        });
+
+        // Initialize Lightbox
+        lightbox.option({
+            'resizeDuration': 200,
+            'wrapAround': true,
+            'fadeDuration': 300,
+            'imageFadeDuration': 300
+        });
+    </script>
+
+    <!-- Lightbox JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 @endsection

@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('dns', function (Blueprint $table) {
             $table->id();
-            $table->text('dn_number')->nullable(); // حقل نصي
+            $table->string('dn_number')->unique(); // تغيير من text إلى string مع unique constraint
             $table->foreignId('pr_number')->nullable()->constrained('projects');
             $table->string('dn_copy')->nullable(); // ملف PDF أو صورة
             $table->text('status')->nullable(); // حقل نصي
             $table->timestamps();
-
         });
     }
 
