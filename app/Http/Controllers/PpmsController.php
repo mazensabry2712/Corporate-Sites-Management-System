@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ppms;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PpmsController extends Controller
 {
@@ -12,8 +13,11 @@ class PpmsController extends Controller
      */
     public function index()
     {
-        $ppms=ppms::all();
-        return view('dashboard.PMs.index',compact('ppms'));
+        $ppms = Cache::remember('ppms_list', 3600, function () {
+            return ppms::select('id', 'name', 'email', 'phone')->get();
+        });
+
+        return view('dashboard.PMs.index', compact('ppms'));
     }
 
     /**
@@ -29,25 +33,18 @@ class PpmsController extends Controller
      */
     public function store(Request $request)
     {
-     // التحقق من صحة البيانات الواردة في الطلب
-$validatedData = $request->validate([
-    'name' => 'required|string|max:255',
-    'email' => 'required|email|max:255',
-    'phone' => 'required|string|max:15',
-]);
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:ppms,name',
+            'email' => 'required|email|max:255|unique:ppms,email',
+            'phone' => 'required|string|max:15',
+        ]);
 
-// التحقق من وجود سجل بالاسم المطلوب مسبقًا
-if (ppms::where('name', $validatedData['name'])->exists()) {
-    session()->flash('Error', 'The name already exists');
-    return redirect('/pm');  // إعادة التوجيه إلى الصفحة المناسبة مع رسالة خطأ
-}
+        ppms::create($validatedData);
 
-// إنشاء السجل الجديد في قاعدة البيانات
-ppms::create($validatedData);
+        Cache::forget('ppms_list');
 
-// إعداد رسالة النجاح وإعادة التوجيه
-session()->flash('Add', 'Registration successful');
-return redirect('/pm'); // إعادة التوجيه إلى صفحة السجلات
+        return redirect()->route('pm.index')
+            ->with('Add', 'PM added successfully');
     }
 
     /**
@@ -70,40 +67,37 @@ return redirect('/pm'); // إعادة التوجيه إلى صفحة السجل�
      * Update the specified resource in storage.
      */
     public function update(Request $request)
-     {
-
-
+    {
         $id = $request->id;
 
-        $this->validate($request, [
-
-            'name' => 'required|max:255|unique:ppms,name,'.$id,
-            'email' => 'required',
-            'phone' => 'required',
-        ]
-                  );
-
-        $ppms = ppms::find($id);
-        $ppms->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:ppms,name,' . $id,
+            'email' => 'required|email|max:255|unique:ppms,email,' . $id,
+            'phone' => 'required|string|max:15',
         ]);
 
-        session()->flash('success', 'Pm updated successfully!');
-               return redirect('/pm');
-         
+        $ppms = ppms::findOrFail($id);
+        $ppms->update($validatedData);
+
+        Cache::forget('ppms_list');
+
+        return redirect()->route('pm.index')
+            ->with('edit', 'PM updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request )
+    public function destroy(Request $request)
     {
-    $id=$request->id;
-    ppms::find($id)->delete();
-    session()->flash('delete', 'Deleted successfully');
-        return redirect('/pm');
-    }
+        $id = $request->id;
 
+        $ppms = ppms::findOrFail($id);
+        $ppms->delete();
+
+        Cache::forget('ppms_list');
+
+        return redirect()->route('pm.index')
+            ->with('delete', 'PM deleted successfully');
+    }
 }
