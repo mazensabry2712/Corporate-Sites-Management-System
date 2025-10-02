@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\aams;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AamsController extends Controller
 {
@@ -12,7 +13,10 @@ class AamsController extends Controller
      */
     public function index()
     {
-        $aams = aams::all();
+        $aams = Cache::remember('aams_list', 3600, function () {
+            return aams::select('id', 'name', 'email', 'phone')->get();
+        });
+
         return view('dashboard.AMs.index', compact('aams'));
     }
 
@@ -29,30 +33,18 @@ class AamsController extends Controller
      */
     public function store(Request $request)
     {
-        // التحقق من وجود الحقول المطلوبة في الطلب
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'name' => 'required|string|max:255|unique:aams,name',
+            'email' => 'required|email|max:255|unique:aams,email',
             'phone' => 'required|string|max:15',
         ]);
 
-        // التحقق إذا كان الاسم موجودًا مسبقًا
-        $b_exists = aams::where('name', $validatedData['name'])->exists();
+        aams::create($validatedData);
 
-        if ($b_exists) {
-            session()->flash('Error', 'The name already exists');
-            return redirect('/am');
-        } else {
-            // إنشاء السجل الجديد
-            aams::create([
-                'name' => $validatedData['name'],
-                'email' => $validatedData['email'],
-                'phone' => $validatedData['phone'],
-            ]);
+        Cache::forget('aams_list');
 
-            session()->flash('Add', 'Registration successful');
-            return redirect('/am');
-        }
+        return redirect()->route('am.index')
+            ->with('Add', 'AM added successfully');
     }
 
     /**
@@ -78,24 +70,19 @@ class AamsController extends Controller
     {
         $id = $request->id;
 
-        // التحقق من صحة البيانات
-        $this->validate($request, [
-            'name' => 'required|max:255|unique:aams,name,' . $id, // التحقق من اسم القسم بناءً على الحقل "name"
-            'email' => 'required|email|unique:aams,email,' . $id, // التحقق من البريد الإلكتروني
-            'phone' => 'required|unique:aams,phone,' . $id, // التحقق من رقم الهاتف
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:aams,name,' . $id,
+            'email' => 'required|email|max:255|unique:aams,email,' . $id,
+            'phone' => 'required|string|max:15',
         ]);
 
-        // العثور على العنصر وتحديث
-        $aams = aams::findOrFail($id); // نستخدم findOrFail للتأكد من وجود العنصر
-        $aams->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-        ]);
+        $aams = aams::findOrFail($id);
+        $aams->update($validatedData);
 
-        // رسالة تأكيد وإعادة توجيه
-        session()->flash('edit', 'The section has been successfully modified');
-        return redirect('/am'); // إعادة التوجيه إلى صفحة الأقسام
+        Cache::forget('aams_list');
+
+        return redirect()->route('am.index')
+            ->with('edit', 'AM updated successfully');
     }
 
 
@@ -106,10 +93,12 @@ class AamsController extends Controller
     {
         $id = $request->id;
 
-        aams::find($id)->delete();
+        $aams = aams::findOrFail($id);
+        $aams->delete();
 
-        session()->flash('delete', 'Deleted successfully');
+        Cache::forget('aams_list');
 
-        return redirect('/am');
+        return redirect()->route('am.index')
+            ->with('delete', 'AM deleted successfully');
     }
 }

@@ -107,51 +107,51 @@
         .bg-primary-gradient {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
+
         .modal-lg {
             max-width: 800px;
         }
-        
+
         #viewModal .card {
             border-radius: 10px;
         }
-        
+
         #viewModal .form-control[readonly] {
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
             cursor: default;
         }
-        
+
         #viewModal label {
             color: #495057;
             margin-bottom: 0.5rem;
         }
-        
+
         /* Export buttons animation */
         .btn-group .btn {
             transition: all 0.3s ease;
         }
-        
+
         .btn-group .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-        
+
         /* Loading animation */
         .btn-loading {
             pointer-events: none;
             opacity: 0.6;
         }
-        
+
         .btn-loading .fas {
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         /* Print styles */
         @media print {
             body * { visibility: hidden; }
@@ -739,7 +739,7 @@
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
-                
+
                 link.setAttribute('href', url);
                 link.setAttribute('download', `AM_${amName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`);
                 link.style.visibility = 'hidden';
@@ -783,7 +783,7 @@
                 <p class="mb-0">${message}</p>
             `;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.animation = 'slideOut 0.3s ease-in';
                 setTimeout(() => toast.remove(), 300);

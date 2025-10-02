@@ -78,68 +78,6 @@
             #pm-details-content { position: absolute; left: 0; top: 0; width: 100%; }
             .btn-group { display: none !important; }
         }
-        
-        /* Card Header Styles */
-        .card-header {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-bottom: 2px solid #667eea;
-        }
-        
-        .card-title {
-            color: #495057;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        
-        /* Responsive design for export buttons */
-        @media (max-width: 768px) {
-            .card-header .d-flex {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-            
-            .btn-group {
-                margin-bottom: 10px;
-                margin-right: 0 !important;
-            }
-            
-            .btn-group .btn {
-                font-size: 0.8rem;
-                padding: 0.375rem 0.5rem;
-            }
-        }
-        
-        /* Table improvements */
-        #example1 thead th {
-            background-color: #667eea;
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-        
-        #example1 tbody tr {
-            transition: all 0.3s ease;
-        }
-        
-        #example1 tbody tr:hover {
-            background-color: rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        /* Button action improvements */
-        .btn-sm {
-            font-size: 0.875rem;
-            padding: 0.25rem 0.5rem;
-        }
-        
-        /* Toast animation */
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
     </style>
 @endsection
 @section('page-header')
@@ -715,118 +653,11 @@
                 <p class="mb-0">${message}</p>
             `;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.animation = 'slideOut 0.3s ease-in';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
-        }
-
-        // Table Export Functions
-        function exportTableToPDF() {
-            const button = event.target.closest('button');
-            showLoadingButton(button);
-            
-            try {
-                $('#example1').DataTable().button('.buttons-pdf').trigger();
-                showSuccessToast('PDF file is being generated!');
-            } catch (error) {
-                console.error('PDF export error:', error);
-                showSuccessToast('PDF export not available. Try Excel instead.');
-            }
-            
-            setTimeout(() => hideLoadingButton(button), 2000);
-        }
-
-        function exportTableToExcel() {
-            const button = event.target.closest('button');
-            showLoadingButton(button);
-            
-            try {
-                $('#example1').DataTable().button('.buttons-excel').trigger();
-                showSuccessToast('Excel file is being generated!');
-            } catch (error) {
-                console.error('Excel export error:', error);
-                showSuccessToast('Excel export not available.');
-            }
-            
-            setTimeout(() => hideLoadingButton(button), 2000);
-        }
-
-        function exportTableToCSV() {
-            const button = event.target.closest('button');
-            showLoadingButton(button);
-            
-            try {
-                $('#example1').DataTable().button('.buttons-csv').trigger();
-                showSuccessToast('CSV file is being generated!');
-            } catch (error) {
-                console.error('CSV export error:', error);
-                showSuccessToast('CSV export not available.');
-            }
-            
-            setTimeout(() => hideLoadingButton(button), 2000);
-        }
-
-        function printTableData() {
-            const button = event.target.closest('button');
-            showLoadingButton(button);
-            
-            try {
-                const printWindow = window.open('', '_blank');
-                const tableContent = document.getElementById('example1').outerHTML;
-                
-                const printContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>PMs Report</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 20px; }
-                            .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 15px; }
-                            .header h1 { color: #667eea; margin: 0; }
-                            .header p { color: #666; margin: 10px 0 0 0; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-                            th { background-color: #667eea; color: white; font-weight: bold; }
-                            tr:nth-child(even) { background-color: #f8f9fa; }
-                            tr:hover { background-color: #e9ecef; }
-                            .footer { margin-top: 30px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 15px; }
-                            @media print {
-                                body { margin: 10px; }
-                                .no-print { display: none; }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <h1>Project Managers Report</h1>
-                            <p>Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                        </div>
-                        ${tableContent}
-                        <div class="footer">
-                            <p>Corporate Sites Management System - PMs Report</p>
-                            <p>This is an automatically generated document</p>
-                        </div>
-                    </body>
-                    </html>
-                `;
-                
-                printWindow.document.write(printContent);
-                printWindow.document.close();
-                
-                setTimeout(() => {
-                    printWindow.print();
-                    hideLoadingButton(button);
-                }, 500);
-                
-                showSuccessToast('Print dialog opened!');
-            } catch (error) {
-                console.error('Print error:', error);
-                window.print();
-                hideLoadingButton(button);
-                showSuccessToast('Browser print opened as alternative!');
-            }
         }
     </script>
 @endsection
