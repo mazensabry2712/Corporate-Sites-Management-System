@@ -104,6 +104,82 @@
                 margin-right: 0 !important;
             }
         }
+
+        /* View Modal Styles */
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        #viewModal .modal-lg {
+            max-width: 900px;
+        }
+
+        #viewModal .form-control[readonly] {
+            background-color: #f8f9fa;
+            cursor: default;
+            border: 1px solid #e0e0e0;
+        }
+
+        #viewModal .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        #viewModal .form-group label {
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        #viewModal .btn {
+            transition: all 0.3s ease;
+        }
+
+        #viewModal .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-content, .print-content * {
+                visibility: visible;
+            }
+            .print-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
     </style>
 
 @endsection
@@ -221,38 +297,47 @@
                             </thead>
 
                             <tbody>
-                                <?php $i = 0; ?>
-                                @foreach ($vendors as $vendor)
-                                    <?php $i++; ?>
+                                @forelse ($vendors as $index => $vendor)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>
+                                            <a class="modal-effect btn btn-sm btn-primary" data-effect="effect-scale"
+                                                data-vendors="{{ $vendor->vendors }}"
+                                                data-vendor_am_details="{{ $vendor->vendor_am_details }}"
+                                                data-toggle="modal" href="#viewModal" title="View">
+                                                <i class="las la-eye"></i>
+                                            </a>
 
-                                    <td>{{ $i }}</td>
-                                    <td>
-                                        @can('Edit')
-                                            <a class="modal-effect btn btn-sm btn-info" data-effect="effect-scale"
-                                                data-id="{{ $vendor->id }}" data-vendors="{{ $vendor->vendors }}"
-                                                data-vendor_am_details="{{ $vendor->vendor_am_details }}" data-toggle="modal"
-                                                href="#exampleModal2" title="Upadte"><i class="las la-pen"></i></a>
-                                        @endcan
+                                            @can('Edit')
+                                                <a class="modal-effect btn btn-sm btn-info" data-effect="effect-scale"
+                                                    data-id="{{ $vendor->id }}" data-vendors="{{ $vendor->vendors }}"
+                                                    data-vendor_am_details="{{ $vendor->vendor_am_details }}" data-toggle="modal"
+                                                    href="#exampleModal2" title="Update"><i class="las la-pen"></i></a>
+                                            @endcan
 
-                                        @can('Delete')
-                                            <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
-                                                data-id="{{ $vendor->id }}" data-vendors="{{ $vendor->vendors }}"
-                                                data-toggle="modal" href="#modaldemo9" title="Delete"><i
-                                                    class="las la-trash"></i></a>
-                                        @endcan
-                                    </td>
+                                            @can('Delete')
+                                                <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
+                                                    data-id="{{ $vendor->id }}" data-vendors="{{ $vendor->vendors }}"
+                                                    data-toggle="modal" href="#modaldemo9" title="Delete"><i
+                                                        class="las la-trash"></i></a>
+                                            @endcan
+                                        </td>
 
-                                    <td>{{ $vendor->vendors }}</td>
-                                    <td class="vendor-am-details">
-                                        <div class="text-wrap">
-                                            {{ $vendor->vendor_am_details }}
-                                        </div>
-                                    </td>
-
-
-
+                                        <td>{{ $vendor->vendors }}</td>
+                                        <td class="vendor-am-details">
+                                            <div class="text-wrap">
+                                                {{ $vendor->vendor_am_details }}
+                                            </div>
+                                        </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center">
+                                            <i class="las la-inbox" style="font-size: 48px; color: #ccc;"></i>
+                                            <p class="text-muted">No vendors found</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -325,6 +410,61 @@
         <!-- /row -->
     </div>
 
+    <!-- View Modal -->
+    <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary-gradient">
+                    <h5 class="modal-title text-white" id="viewModalLabel">
+                        <i class="fas fa-eye"></i> View Vendor Details
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-right mb-3">
+                        <button type="button" class="btn btn-sm btn-info" onclick="printVendor()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" onclick="exportVendorToExcel()">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="exportVendorToCSV()">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <i class="fas fa-building text-primary"></i> Vendor Name
+                                        </label>
+                                        <input type="text" class="form-control" id="view-vendors" readonly>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <i class="fas fa-info-circle text-info"></i> Vendor AM Details
+                                        </label>
+                                        <textarea class="form-control" id="view-vendor_am_details" rows="6" readonly></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- edit -->
     <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -436,6 +576,16 @@
 
 
     <script>
+        // View Modal
+        $('#viewModal').on('show.bs.modal', function(event) {
+            const button = $(event.relatedTarget);
+            const modal = $(this);
+
+            modal.find('#view-vendors').val(button.data('vendors'));
+            modal.find('#view-vendor_am_details').val(button.data('vendor_am_details'));
+        });
+
+        // Edit Modal
         $('#exampleModal2').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget)
             var id = button.data('id')
@@ -451,6 +601,7 @@
     </script>
 
     <script>
+        // Delete Modal
         $('#modaldemo9').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget)
             var id = button.data('id')
@@ -462,10 +613,15 @@
             modal.find('.modal-body #vendor_am_details').val(vendor_am_details);
 
         })
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
     </script>
 
     <script>
-        // Export functions
+        // Export functions for table
         function exportToPDF() {
             const table = $('#example1').DataTable();
             table.button('.buttons-pdf').trigger();
@@ -484,6 +640,149 @@
         function printTable() {
             const table = $('#example1').DataTable();
             table.button('.buttons-print').trigger();
+        }
+
+        // Print Vendor Function
+        function printVendor() {
+            const button = event.target.closest('button');
+            showLoadingButton(button);
+
+            try {
+                const vendorName = document.getElementById('view-vendors').value;
+                const vendorDetails = document.getElementById('view-vendor_am_details').value;
+
+                const printWindow = window.open('', '_blank');
+                const printContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Vendor Details - ${vendorName}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                            .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #667eea; padding-bottom: 20px; }
+                            .header h1 { color: #667eea; margin: 0; font-size: 28px; }
+                            .header p { color: #666; margin: 10px 0 0 0; }
+                            .vendor-details { margin: 30px 0; background: #f8f9fa; padding: 30px; border-radius: 10px; }
+                            .detail-row { display: flex; margin: 20px 0; padding: 15px; background: white; border-radius: 5px; border-left: 4px solid #667eea; }
+                            .detail-label { font-weight: bold; width: 200px; color: #495057; }
+                            .detail-value { flex: 1; color: #212529; white-space: pre-wrap; }
+                            .footer { margin-top: 50px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px; }
+                            @media print {
+                                body { margin: 20px; }
+                                .no-print { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>Vendor Details</h1>
+                            <p>Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                        <div class="vendor-details">
+                            <div class="detail-row">
+                                <div class="detail-label">🏢 Vendor Name:</div>
+                                <div class="detail-value">${vendorName}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">📋 Vendor AM Details:</div>
+                                <div class="detail-value">${vendorDetails}</div>
+                            </div>
+                        </div>
+                        <div class="footer">
+                            <p>Corporate Sites Management System - Vendor Report</p>
+                            <p>This is an automatically generated document</p>
+                        </div>
+                    </body>
+                    </html>
+                `;
+
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+
+                setTimeout(() => {
+                    printWindow.print();
+                    hideLoadingButton(button);
+                }, 500);
+
+                showSuccessToast('Print dialog opened!');
+            } catch (error) {
+                console.error('Print error:', error);
+                window.print();
+                hideLoadingButton(button);
+                showSuccessToast('Browser print opened as alternative!');
+            }
+        }
+
+        // Export Vendor to Excel Function
+        function exportVendorToExcel() {
+            const button = event.target.closest('button');
+            showLoadingButton(button);
+
+            try {
+                const vendorName = document.getElementById('view-vendors').value;
+                const vendorDetails = document.getElementById('view-vendor_am_details').value;
+
+                const data = [
+                    ['Field', 'Value'],
+                    ['Vendor Name', vendorName],
+                    ['Vendor AM Details', vendorDetails],
+                    ['', ''],
+                    ['Generated On', new Date().toLocaleString()]
+                ];
+
+                const csv = data.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+
+                link.setAttribute('href', url);
+                link.setAttribute('download', `Vendor_${vendorName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                hideLoadingButton(button);
+                showSuccessToast('Excel file exported successfully!');
+            } catch (error) {
+                console.error('Excel export error:', error);
+                hideLoadingButton(button);
+                showSuccessToast('Export failed. Please try again.');
+            }
+        }
+
+        // Export Vendor to CSV Function
+        function exportVendorToCSV() {
+            exportVendorToExcel(); // Same functionality
+        }
+
+        // Helper Functions
+        function showLoadingButton(button) {
+            button.classList.add('btn-loading');
+            const icon = button.querySelector('i');
+            if (icon) icon.classList.add('fa-spin');
+        }
+
+        function hideLoadingButton(button) {
+            button.classList.remove('btn-loading');
+            const icon = button.querySelector('i');
+            if (icon) icon.classList.remove('fa-spin');
+        }
+
+        function showSuccessToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success position-fixed';
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 250px; animation: slideIn 0.3s ease-out;';
+            toast.innerHTML = `
+                <strong><i class="fas fa-check-circle"></i> Success!</strong>
+                <p class="mb-0">${message}</p>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         // Enhanced DataTable initialization

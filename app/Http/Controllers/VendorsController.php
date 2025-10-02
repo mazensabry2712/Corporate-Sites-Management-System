@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\vendors;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class VendorsController extends Controller
 {
@@ -12,9 +13,10 @@ class VendorsController extends Controller
      */
     public function index()
     {
+        $vendors = Cache::remember('vendors_list', 3600, function () {
+            return vendors::select('id', 'vendors', 'vendor_am_details', 'created_at', 'updated_at')->get();
+        });
 
-
-        $vendors = vendors::all();
         return view('dashboard.vendors.index', compact('vendors'));
     }
 
@@ -43,6 +45,7 @@ class VendorsController extends Controller
             'vendor_am_details' => $validatedData['vendor_am_details'],
         ]);
 
+        Cache::forget('vendors_list');
         session()->flash('Add', 'Vendor registration successful');
         return redirect('/vendors');
     }
@@ -81,12 +84,13 @@ class VendorsController extends Controller
             ]
         );
 
-        $vendors = vendors::find($id);
-        $vendors->update([
+        $vendor = vendors::findOrFail($id);
+        $vendor->update([
             'vendors' => $request->vendors,
             'vendor_am_details' => $request->vendor_am_details,
         ]);
 
+        Cache::forget('vendors_list');
         session()->flash('success', 'Vendor updated successfully!');
         return redirect('/vendors');
     }
@@ -99,11 +103,10 @@ class VendorsController extends Controller
     public function destroy(Request $request)
     {
         $id = $request->id;
+        $vendor = vendors::findOrFail($id);
+        $vendor->delete();
 
-        vendors::find($id)->delete();
-
-
-
+        Cache::forget('vendors_list');
         session()->flash('delete', 'Vendor deleted successfully!');
         return redirect('/vendors');
     }

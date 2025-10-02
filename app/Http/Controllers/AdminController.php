@@ -49,10 +49,10 @@ class AdminController extends Controller
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:15',
         ]);
-    
+
         // التحقق إذا كان الاسم موجودًا مسبقًا
         $b_exists = aams::where('name', $validatedData['name'])->exists();
-    
+
         if ($b_exists) {
             session()->flash('Error', 'The name already exists');
             return redirect()->route('amindex');
@@ -63,7 +63,7 @@ class AdminController extends Controller
                 'email' => $validatedData['email'],
                 'phone' => $validatedData['phone'],
             ]);
-    
+
             session()->flash('Add', 'Registration successful');
             return redirect()->route('amindex');
         }
@@ -111,8 +111,8 @@ class AdminController extends Controller
      */
     public function destroy($id)
     {
-        //
-       
+        
+
         session()->flash('delete', 'Deleted successfully');
 
         return redirect('/risks');

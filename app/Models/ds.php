@@ -12,6 +12,12 @@ class Ds extends Model
     protected $table = 'ds';
 
     protected $fillable = [
-       'dsname', 'ds_contact'
+        'dsname',
+        'ds_contact'
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 }

@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('vendors', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('vendors');
-            $table->string('vendor_am_details');
+            $table->string('vendor_am_details', 2000);
             $table->timestamps();
+
+            // Add index for better performance
+            $table->index('vendors');
         });
     }
 

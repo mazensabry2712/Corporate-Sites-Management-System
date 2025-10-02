@@ -18,11 +18,11 @@
         }
 
         .stats-icon {
-            font-size: 2.5rem;
-            opacity: 0.3;
+            font-size: 1.8rem;
+            opacity: 0.25;
             position: absolute;
-            right: 20px;
-            top: 20px;
+            right: 15px;
+            top: 15px;
         }
 
         .card-content {
@@ -31,13 +31,16 @@
         }
 
         .stats-number {
-            font-size: 2rem !important;
+            font-size: 1.5rem !important;
             font-weight: 700 !important;
         }
 
         .stats-label {
-            font-size: 0.9rem !important;
+            font-size: 0.75rem !important;
             font-weight: 500 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 @endsection
@@ -72,17 +75,17 @@
     <!-- row -->
     <div class="row row-sm">
 
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <div class="card overflow-hidden sales-card bg-primary-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-users text-white stats-icon"></i>
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-users text-white stats-icon" style="font-size: 1.8rem;"></i>
                     <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">👥 Users</h6>
+                        <h6 class="mb-2 tx-11 text-white stats-label">👥 Users</h6>
                         <div class="pb-0 mt-0">
                             <div class="d-flex">
                                 <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $userCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Total System Users</p>
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $userCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Total System Users</p>
                                 </div>
                             </div>
                         </div>
@@ -92,17 +95,17 @@
         </div>
 
 
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <div class="card overflow-hidden sales-card bg-danger-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-project-diagram text-white stats-icon"></i>
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-project-diagram text-white stats-icon" style="font-size: 1.8rem;"></i>
                     <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">📊 Projects Details</h6>
+                        <h6 class="mb-2 tx-11 text-white stats-label">📊 Projects</h6>
                         <div class="pb-0 mt-0">
                             <div class="d-flex">
                                 <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $projectcount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Active Projects</p>
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $projectcount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Active Projects</p>
                                 </div>
                             </div>
                         </div>
@@ -112,17 +115,17 @@
         </div>
 
 
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <div class="card overflow-hidden sales-card bg-success-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-handshake text-white stats-icon"></i>
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-handshake text-white stats-icon" style="font-size: 1.8rem;"></i>
                     <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">🤝 Customers</h6>
+                        <h6 class="mb-2 tx-11 text-white stats-label">🤝 Customers</h6>
                         <div class="pb-0 mt-0">
                             <div class="d-flex">
                                 <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $custCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Total Customers</p>
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $custCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Total Customers</p>
                                 </div>
                             </div>
                         </div>
@@ -132,17 +135,171 @@
         </div>
 
 
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <div class="card overflow-hidden sales-card bg-warning-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-user-tie text-white stats-icon"></i>
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-user-tie text-white stats-icon" style="font-size: 1.8rem;"></i>
                     <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">💼 Project Managers</h6>
+                        <h6 class="mb-2 tx-11 text-white stats-label">💼 PMs</h6>
                         <div class="pb-0 mt-0">
                             <div class="d-flex">
                                 <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $pmCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Active PMs</p>
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $pmCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Active PMs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card overflow-hidden sales-card bg-primary-gradient">
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-user-cog text-white stats-icon" style="font-size: 1.8rem;"></i>
+                    <div class="card-content">
+                        <h6 class="mb-2 tx-11 text-white stats-label">⚙️ AMs</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $amCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Active AMs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card overflow-hidden sales-card bg-danger-gradient">
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-truck text-white stats-icon" style="font-size: 1.8rem;"></i>
+                    <div class="card-content">
+                        <h6 class="mb-2 tx-11 text-white stats-label">🚛 Vendors</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $VendorsCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Total Vendors</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card overflow-hidden sales-card bg-success-gradient">
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-shipping-fast text-white stats-icon" style="font-size: 1.8rem;"></i>
+                    <div class="card-content">
+                        <h6 class="mb-2 tx-11 text-white stats-label">📦 D/S</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $dsCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Total Partners</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card overflow-hidden sales-card bg-warning-gradient">
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-receipt text-white stats-icon" style="font-size: 1.8rem;"></i>
+                    <div class="card-content">
+                        <h6 class="mb-2 tx-11 text-white stats-label">🧾 Invoices</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $invoiceCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Total Invoices</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card overflow-hidden sales-card bg-info-gradient">
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-file-alt text-white stats-icon" style="font-size: 1.8rem;"></i>
+                    <div class="card-content">
+                        <h6 class="mb-2 tx-11 text-white stats-label">📄 DNs</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $dnCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">All DNs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card overflow-hidden sales-card bg-danger-gradient">
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-certificate text-white stats-icon" style="font-size: 1.8rem;"></i>
+                    <div class="card-content">
+                        <h6 class="mb-2 tx-11 text-white stats-label">📜 COCs</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $cocCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Total COCs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card overflow-hidden sales-card bg-success-gradient">
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-file-contract text-white stats-icon" style="font-size: 1.8rem;"></i>
+                    <div class="card-content">
+                        <h6 class="mb-2 tx-11 text-white stats-label">📋 POs</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $posCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Active POs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card overflow-hidden sales-card bg-warning-gradient">
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-tasks text-white stats-icon" style="font-size: 1.8rem;"></i>
+                    <div class="card-content">
+                        <h6 class="mb-2 tx-11 text-white stats-label">📊 Status</h6>
+                        <div class="pb-0 mt-0">
+                            <div class="d-flex">
+                                <div class="">
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $statusCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Total Status</p>
                                 </div>
                             </div>
                         </div>
@@ -152,21 +309,20 @@
         </div>
 
     </div>
-    {{--  --}}
-
+    <!-- row 2 -->
     <div class="row row-sm">
 
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <div class="card overflow-hidden sales-card bg-primary-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-user-cog text-white stats-icon"></i>
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-clipboard-list text-white stats-icon" style="font-size: 1.8rem;"></i>
                     <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">⚙️ Account Managers</h6>
+                        <h6 class="mb-2 tx-11 text-white stats-label">✅ Tasks</h6>
                         <div class="pb-0 mt-0">
                             <div class="d-flex">
                                 <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $amCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Active AMs</p>
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $tasksCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Active Tasks</p>
                                 </div>
                             </div>
                         </div>
@@ -176,17 +332,17 @@
         </div>
 
 
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <div class="card overflow-hidden sales-card bg-danger-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-truck text-white stats-icon"></i>
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-file-signature text-white stats-icon" style="font-size: 1.8rem;"></i>
                     <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">🚛 Vendors</h6>
+                        <h6 class="mb-2 tx-11 text-white stats-label">📝 EPOs</h6>
                         <div class="pb-0 mt-0">
                             <div class="d-flex">
                                 <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $VendorsCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Total Vendors</p>
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $epoCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Total EPOs</p>
                                 </div>
                             </div>
                         </div>
@@ -194,19 +350,17 @@
                 </div>
             </div>
         </div>
-
-
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <div class="card overflow-hidden sales-card bg-success-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-shipping-fast text-white stats-icon"></i>
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-exclamation-triangle text-white stats-icon" style="font-size: 1.8rem;"></i>
                     <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">📦 Distributors/Suppliers</h6>
+                        <h6 class="mb-2 tx-11 text-white stats-label">⚠️ Risks</h6>
                         <div class="pb-0 mt-0">
                             <div class="d-flex">
                                 <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $dsCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Total Partners</p>
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $reskCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Identified Risks</p>
                                 </div>
                             </div>
                         </div>
@@ -214,183 +368,17 @@
                 </div>
             </div>
         </div>
-
-
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <div class="card overflow-hidden sales-card bg-warning-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-receipt text-white stats-icon"></i>
+                <div class="pl-3 pt-2 pr-3 pb-2">
+                    <i class="fas fa-flag-checkered text-white stats-icon" style="font-size: 1.8rem;"></i>
                     <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">🧾 Invoices</h6>
+                        <h6 class="mb-2 tx-11 text-white stats-label">🏁 Milestones</h6>
                         <div class="pb-0 mt-0">
                             <div class="d-flex">
                                 <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $invoiceCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Total Invoices</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    {{--  --}}
-    <div class="row row-sm">
-
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
-            <div class="card overflow-hidden sales-card bg-primary-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <div class="">
-                        <h6 class="mb-3 tx-12 text-white">Dn</h6>
-                    </div>
-                    <div class="pb-0 mt-0">
-                        <div class="d-flex">
-                            <div class="">
-                                <h4 class="tx-20 font-weight-bold mb-1 text-white">{{ $dnCount }}</h4>
-                                {{-- {{ dd($projectcount)}} --}}
-                                <p class="mb-0 tx-12 text-white op-7">All Dns</p>
-                            </div>
-                            <span class="float-right my-auto mr-auto">
-                                {{-- <i class="fas fa-arrow-circle-up text-white"></i> --}}
-                                {{-- <span class="text-white op-7"> +427</span> --}}
-                            </span>
-                        </div>
-                    </div>
-
-                </div>
-                {{-- <span id="compositeline5" class="pt-1">5,9,5,6,4,12,18,14,10,15,12,5,8,5,12,5,12,10,16,12</span> --}}
-            </div>
-        </div>
-
-
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
-            <div class="card overflow-hidden sales-card bg-danger-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-certificate text-white stats-icon"></i>
-                    <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">📜 Certificates</h6>
-                        <div class="pb-0 mt-0">
-                            <div class="d-flex">
-                                <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $cocCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Total COCs</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
-            <div class="card overflow-hidden sales-card bg-success-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-file-contract text-white stats-icon"></i>
-                    <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">📋 Project POs</h6>
-                        <div class="pb-0 mt-0">
-                            <div class="d-flex">
-                                <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $posCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Active POs</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
-            <div class="card overflow-hidden sales-card bg-warning-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-tasks text-white stats-icon"></i>
-                    <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">📊 Status Updates</h6>
-                        <div class="pb-0 mt-0">
-                            <div class="d-flex">
-                                <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $statusCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Total Status</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {{--  --}}
-    <div class="row row-sm">
-
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
-            <div class="card overflow-hidden sales-card bg-primary-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-clipboard-list text-white stats-icon"></i>
-                    <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">✅ Tasks</h6>
-                        <div class="pb-0 mt-0">
-                            <div class="d-flex">
-                                <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $tasksCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Active Tasks</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
-            <div class="card overflow-hidden sales-card bg-danger-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-file-signature text-white stats-icon"></i>
-                    <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">📝 EPO Orders</h6>
-                        <div class="pb-0 mt-0">
-                            <div class="d-flex">
-                                <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $epoCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Total EPOs</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
-            <div class="card overflow-hidden sales-card bg-success-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-exclamation-triangle text-white stats-icon"></i>
-                    <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">⚠️ Risks</h6>
-                        <div class="pb-0 mt-0">
-                            <div class="d-flex">
-                                <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $reskCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Identified Risks</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 col-xm-12">
-            <div class="card overflow-hidden sales-card bg-warning-gradient">
-                <div class="pl-3 pt-3 pr-3 pb-2">
-                    <i class="fas fa-flag-checkered text-white stats-icon"></i>
-                    <div class="card-content">
-                        <h6 class="mb-3 tx-12 text-white stats-label">🏁 Milestones</h6>
-                        <div class="pb-0 mt-0">
-                            <div class="d-flex">
-                                <div class="">
-                                    <h4 class="tx-20 font-weight-bold mb-1 text-white stats-number">{{ $milestonesCount }}</h4>
-                                    <p class="mb-0 tx-12 text-white op-7">Achieved Goals</p>
+                                    <h4 class="tx-18 font-weight-bold mb-0 text-white stats-number">{{ $milestonesCount }}</h4>
+                                    <p class="mb-0 tx-10 text-white op-7">Achieved Goals</p>
                                 </div>
                             </div>
                         </div>

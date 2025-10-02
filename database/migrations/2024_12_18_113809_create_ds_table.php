@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('ds', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('dsname');
-            $table->string('ds_contact');
+            $table->string('dsname')->unique();
+            $table->string('ds_contact', 2000);
             $table->timestamps();
+
+            // Add index for better performance
+            $table->index('dsname');
         });
     }
     /**
