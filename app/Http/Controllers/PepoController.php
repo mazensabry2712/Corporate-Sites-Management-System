@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pepo;
 use App\Models\Ppos;
-use App\Models\projects;
+use App\Models\Project;
 use Illuminate\Http\Request;
 
 class PepoController extends Controller
@@ -25,7 +25,7 @@ class PepoController extends Controller
     public function create()
     {
         //
-        $projects=projects::all();
+    $projects=Project::all();
         return view('dashboard.PEPO.create',compact('projects'));
     }
 
@@ -63,7 +63,7 @@ class PepoController extends Controller
     {
         //
         $Pepo=Pepo::find($id);
-        $projects=projects::all();
+    $projects=Project::all();
         return view('dashboard.PEPO.edit',compact('projects','Pepo'));
     }
 
@@ -82,7 +82,7 @@ class PepoController extends Controller
 
         $pepo->update($data);
         session()->flash('edit', 'The section has been successfully modified');
-        return redirect('/epo'); // 
+        return redirect('/epo'); //
     }
 
     /**

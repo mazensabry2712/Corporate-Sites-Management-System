@@ -13,12 +13,12 @@ class Pepo extends Model
         'category',
         'planned_cost',
         'selling_price',
-      
+
     ];
 
     public function project()
     {
-        return $this->belongsTo(projects::class, 'pr_number', 'id');
+    return $this->belongsTo(Project::class, 'pr_number', 'id');
     }
 
 }

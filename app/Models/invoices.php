@@ -38,6 +38,6 @@ class invoices extends Model
     // Define the relationship with the Project model
     public function project()
     {
-        return $this->belongsTo(projects::class, 'pr_number', 'id');
+    return $this->belongsTo(Project::class, 'pr_number', 'id');
     }
 }

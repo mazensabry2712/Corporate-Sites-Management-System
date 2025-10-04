@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ppms;
-use App\Models\projects;
+use App\Models\Project;
 use App\Models\Pstatus;
 use Illuminate\Http\Request;
 
@@ -25,7 +25,7 @@ class PstatusController extends Controller
     public function create()
     {
         //
-        $projects=projects::all();
+    $projects=Project::all();
         $ppms=ppms::all();
         return view('dashboard.PStatus.create',compact('projects','ppms'));
 
@@ -68,7 +68,7 @@ class PstatusController extends Controller
     public function edit($id)
     {
         //
-        $projects=projects::all();
+    $projects=Project::all();
         $pstatus=Pstatus::find($id);
         $ppms=ppms::all();
         return view('dashboard.PStatus.edit',compact('projects','pstatus','ppms'));

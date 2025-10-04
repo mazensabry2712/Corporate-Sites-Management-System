@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\invoices;
-use App\Models\projects;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,7 +24,7 @@ class InvoicesController extends Controller
     public function create()
     {
         // $invoices = invoices::all();
-        $pr_number_idd = projects::all();
+    $pr_number_idd = Project::all();
         return view('dashboard.invoice.create', compact('pr_number_idd'));
     }
 
@@ -71,7 +71,7 @@ class InvoicesController extends Controller
     {
         //
         $invoices = invoices::find($id);
-        $pr_number_idd = projects::all();
+    $pr_number_idd = Project::all();
         return view('dashboard.invoice.edit', compact('invoices', 'pr_number_idd'));
     }
 
@@ -107,7 +107,7 @@ class InvoicesController extends Controller
         }
 
         session()->flash('edit', 'The section has been successfully modified');
-        
+
         return redirect('/invoices'); // إعادة التوجيه إل
     }
 

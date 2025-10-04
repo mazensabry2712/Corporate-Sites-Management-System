@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Coc;
-use App\Models\projects;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,7 +26,7 @@ class CocController extends Controller
     public function create()
     {
         //
-        $projects=projects::all();
+    $projects=Project::all();
         return view('dashboard.CoC.create', compact('projects'));
     }
 
@@ -69,7 +69,7 @@ class CocController extends Controller
      */
     public function edit($id)
     {
-        $projects = Projects::all();
+    $projects = Project::all();
         $coc=Coc::find($id);
 
         return view('dashboard.CoC.edit', compact('coc', 'projects'));

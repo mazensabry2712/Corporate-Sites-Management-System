@@ -17,12 +17,12 @@ class Pstatus extends Model
         'expected_completion',
         'date_pending_cost_orders',
         'notes',
-        
+
     ];
 
     public function project()
     {
-        return $this->belongsTo(projects::class);
+    return $this->belongsTo(Project::class);
     }
 
     public function ppm()

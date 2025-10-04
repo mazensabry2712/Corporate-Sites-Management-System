@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\projects;
+use App\Models\Project;
 use App\Models\Ptasks;
 use Illuminate\Http\Request;
 
@@ -23,7 +23,7 @@ class PtasksController extends Controller
     public function create()
     {
         //
-        $projects=projects::all();
+    $projects=Project::all();
        // print_r($projects);
         return view('dashboard.PTasks.create',compact('projects'));
     }
@@ -66,7 +66,7 @@ class PtasksController extends Controller
     public function edit($id)
     {
         //
-        $projects = Projects::all();
+    $projects = Project::all();
 
         $ptasks=Ptasks::find($id);
         return view('dashboard.PTasks.edit', compact('ptasks', 'projects'));

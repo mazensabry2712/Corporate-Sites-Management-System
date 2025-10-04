@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dn;
-use App\Models\projects;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,7 +23,7 @@ class DnController extends Controller
      */
     public function create()
     {
-        $projects = projects::orderBy('pr_number')->get();
+    $projects = Project::orderBy('pr_number')->get();
         return view('dashboard.DN.create', compact('projects'));
     }
 
@@ -87,7 +87,7 @@ class DnController extends Controller
     public function edit($id)
     {
         $dn = Dn::findOrFail($id);
-        $projects = projects::orderBy('pr_number')->get();
+    $projects = Project::orderBy('pr_number')->get();
         return view('dashboard.DN.edit', compact('projects', 'dn'));
     }
 

@@ -12,7 +12,7 @@ use App\Models\Milestones;
 use App\Models\Pepo;
 use App\Models\ppms;
 use App\Models\Ppos;
-use App\Models\projects;
+use App\Models\Project;
 use App\Models\Pstatus;
 use App\Models\Ptasks;
 use App\Models\Risks;
@@ -32,7 +32,7 @@ class DashboardController extends Controller
     public function index()
     {
         $userCount = User::count();
-         $projectcount = projects::count();
+         $projectcount = Project::count();
          $custCount = Cust::count();
          $pmCount = ppms::count();
          $amCount = aams::count();

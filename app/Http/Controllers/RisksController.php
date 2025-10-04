@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\projects;
+use App\Models\Project;
 use App\Models\Risks;
 use Illuminate\Http\Request;
 
@@ -25,7 +25,7 @@ class RisksController extends Controller
     public function create()
     {
         //
-        $projects=projects::all();
+    $projects=Project::all();
         return view('dashboard.Risks.create',compact('projects'));
     }
 
@@ -65,12 +65,12 @@ class RisksController extends Controller
     public function edit($id)
     {
         // جلب جميع المشاريع من قاعدة البيانات
-        $projects = Projects::all();
-    
+    $projects = Project::all();
+
         $risks=Risks::find($id);
         return view('dashboard.Risks.edit', compact('risks', 'projects'));
     }
-    
+
 
     /**
      * Update the specified resource in storage.

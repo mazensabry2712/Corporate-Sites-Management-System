@@ -8,7 +8,7 @@ use App\Models\aams;
 use App\Models\Cust;
 use App\Models\ppms;
 use App\Models\vendors;
-use App\Models\projects;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -20,7 +20,7 @@ class ProjectsController extends Controller
     public function index()
     {
         try {
-            $projects = projects::with([
+            $projects = Project::with([
                 'vendor', 'cust', 'ds', 'aams', 'ppms',
                 'customers', 'vendors', 'deliverySpecialists'
             ])->get();
@@ -66,7 +66,7 @@ class ProjectsController extends Controller
             // $data['Created_by'] = auth()->id();
 
             // Create the project
-            $project = projects::create($data);
+            $project = Project::create($data);
 
             // Handle multiple relationships
             $this->handleMultipleRelationships($project, $request);
@@ -85,7 +85,7 @@ class ProjectsController extends Controller
     public function show($id)
     {
         try {
-            $project = projects::with([
+            $project = Project::with([
                 'vendor', 'cust', 'ds', 'aams', 'ppms',
                 'customers', 'vendors', 'deliverySpecialists'
             ])->findOrFail($id);
@@ -102,7 +102,7 @@ class ProjectsController extends Controller
     public function edit($id)
     {
         try {
-            $project = projects::with(['customers', 'vendors', 'deliverySpecialists'])->findOrFail($id);
+            $project = Project::with(['customers', 'vendors', 'deliverySpecialists'])->findOrFail($id);
             $ds = Ds::all();
             $custs = Cust::all();
             $aams = aams::all();
@@ -122,7 +122,7 @@ class ProjectsController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $project = projects::findOrFail($id);
+            $project = Project::findOrFail($id);
 
             $validated = $this->validateProjectData($request, $project->id);
             $data = $validated;
@@ -154,7 +154,7 @@ class ProjectsController extends Controller
     public function destroy($id)
     {
         try {
-            $project = projects::findOrFail($id);
+            $project = Project::findOrFail($id);
 
             // Delete associated files
             $this->deleteProjectFiles($project);

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ppos;
-use App\Models\projects;
+use App\Models\Project;
 use App\Models\Pepo;
 use App\Models\Ds;
 use Illuminate\Http\Request;
@@ -25,7 +25,7 @@ class PposController extends Controller
      */
     public function create()
     {
-        $projects = projects::all();
+    $projects = Project::all();
         $pepos = Pepo::all();
         $dses = Ds::all();
 
@@ -72,7 +72,7 @@ class PposController extends Controller
      */
     public function edit(Ppos $ppo)
     {
-        $projects = projects::all();
+    $projects = Project::all();
         $pepos = Pepo::all();
         $dses = Ds::all();
 

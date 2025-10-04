@@ -20,12 +20,12 @@ class Milestones extends Model
 
     public function risks ()
     {
-        return $this->belongsTo(projects::class);
+    return $this->belongsTo(Project::class);
     }
 
     public function project()
     {
-        return $this->belongsTo(projects::class, 'pr_number', 'id');
+    return $this->belongsTo(Project::class, 'pr_number', 'id');
     }
 
 }

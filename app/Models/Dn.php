@@ -21,6 +21,6 @@ class Dn extends Model
 
     public function project()
     {
-        return $this->belongsTo(projects::class, 'pr_number');
+    return $this->belongsTo(Project::class, 'pr_number');
     }
 }

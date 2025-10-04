@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Milestones;
-use App\Models\projects;
+use App\Models\Project;
 use Illuminate\Http\Request;
 
 class MilestonesController extends Controller
@@ -16,7 +16,7 @@ class MilestonesController extends Controller
         //
         $Milestones = Milestones::all();
         return view('dashboard.Milestones.index', compact('Milestones'));
-        
+
     }
 
     /**
@@ -25,9 +25,9 @@ class MilestonesController extends Controller
     public function create()
     {
         //
-        $projects = projects::all();
-    
-        
+    $projects = Project::all();
+
+
         return view('dashboard.Milestones.create', compact( 'projects'));
     }
 
@@ -68,9 +68,9 @@ class MilestonesController extends Controller
     {
         //
 
-        $projects = Projects::all();
+    $projects = Project::all();
         $milestones=Milestones::find($id);
-        
+
         return view('dashboard.Milestones.edit', compact('milestones', 'projects'));
     }
 
@@ -89,8 +89,8 @@ class MilestonesController extends Controller
                 'comments' => 'nullable|string',
                 'pr_number'=>"required|exists:projects,id"
             ]);
-    
-       
+
+
 
     $milestones->update([
          'pr_number'=>$request->pr_number,
@@ -109,12 +109,12 @@ class MilestonesController extends Controller
      */
     public function destroy(Request $request)
     {
-        
-        
+
+
              $id=$request->id;
-            
+
             Milestones::find($id)->delete();
-     
+
         session()->flash('delete', 'Deleted successfully');
 
         return redirect('/milestones');

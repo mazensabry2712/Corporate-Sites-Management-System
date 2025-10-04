@@ -14,6 +14,6 @@ class Ptasks extends Model
 
     public function ptasks ()
     {
-        return $this->belongsTo(projects::class);
+    return $this->belongsTo(Project::class);
     }
 }

@@ -16,12 +16,12 @@ class Coc extends Model
 
     public function coc()
     {
-        return $this->belongsTo(projects::class);
+    return $this->belongsTo(Project::class);
     }
 
     public function project()
     {
-        return $this->belongsTo(projects::class, 'pr_number');
+    return $this->belongsTo(Project::class, 'pr_number');
     }
 
 }

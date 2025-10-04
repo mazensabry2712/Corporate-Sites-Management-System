@@ -4,25 +4,26 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DnController;
 use App\Http\Controllers\DsController;
+use App\Http\Controllers\CocController;
 use App\Http\Controllers\AamsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustController;
+use App\Http\Controllers\PepoController;
 use App\Http\Controllers\PpmsController;
+use App\Http\Controllers\PposController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\CocController;
+use App\Http\Controllers\RisksController;
+use App\Http\Controllers\PtasksController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\PstatusController;
 use App\Http\Controllers\VendorsController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MilestonesController;
-use App\Http\Controllers\PepoController;
-use App\Http\Controllers\PposController;
-use App\Http\Controllers\PstatusController;
-use App\Http\Controllers\PtasksController;
-use App\Http\Controllers\RisksController;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController;
 
 
 
@@ -88,13 +89,14 @@ Route::delete('ppos/destroy', [PposController::class, 'destroy']);
 
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
+    Route::resource('reports', ReportController::class);
 
 
     }
 
 );
 
-Auth::routes();
+// Auth::routes();
 // Auth::routes(['register'=>false]);
 
 require __DIR__ . '/auth.php';
