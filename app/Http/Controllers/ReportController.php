@@ -11,6 +11,7 @@ use App\Models\ds;
 use App\Models\Cust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 
@@ -147,6 +148,35 @@ class ReportController extends Controller
             ->defaultSort('-created_at')
             ->get();
 
+        // Get all other tables data
+        $allVendors = vendors::orderBy('created_at', 'desc')->get();
+        $allCustomers = Cust::orderBy('created_at', 'desc')->get();
+        $allProjectManagers = ppms::orderBy('created_at', 'desc')->get();
+        $allAccountManagers = aams::orderBy('created_at', 'desc')->get();
+        $allDeliverySpecialists = ds::orderBy('created_at', 'desc')->get();
+
+        // Get related data tables
+        $projectCustomers = DB::table('project_customers')
+            ->join('projects', 'project_customers.project_id', '=', 'projects.id')
+            ->join('custs', 'project_customers.customer_id', '=', 'custs.id')
+            ->select('project_customers.*', 'projects.pr_number', 'projects.name as project_name', 'custs.name as customer_name')
+            ->orderBy('project_customers.created_at', 'desc')
+            ->get();
+
+        $projectVendors = DB::table('project_vendors')
+            ->join('projects', 'project_vendors.project_id', '=', 'projects.id')
+            ->join('vendors', 'project_vendors.vendor_id', '=', 'vendors.id')
+            ->select('project_vendors.*', 'projects.pr_number', 'projects.name as project_name', 'vendors.vendors as vendor_name')
+            ->orderBy('project_vendors.created_at', 'desc')
+            ->get();
+
+        $projectDS = DB::table('project_delivery_specialists')
+            ->join('projects', 'project_delivery_specialists.project_id', '=', 'projects.id')
+            ->join('ds', 'project_delivery_specialists.ds_id', '=', 'ds.id')
+            ->select('project_delivery_specialists.*', 'projects.pr_number', 'projects.name as project_name', 'ds.dsname')
+            ->orderBy('project_delivery_specialists.created_at', 'desc')
+            ->get();
+
         return view('dashboard.reports.index', compact(
             'reports',
             'prNumbers',
@@ -157,7 +187,15 @@ class ReportController extends Controller
             'customerPos',
             'vendorsList',
             'suppliers',
-            'ams'
+            'ams',
+            'allVendors',
+            'allCustomers',
+            'allProjectManagers',
+            'allAccountManagers',
+            'allDeliverySpecialists',
+            'projectCustomers',
+            'projectVendors',
+            'projectDS'
         ));
     }
 

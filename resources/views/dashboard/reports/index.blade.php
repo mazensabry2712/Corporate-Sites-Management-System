@@ -83,6 +83,25 @@
         50% { opacity: 0.7; }
     }
 
+    .active-filters-summary {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        border-left: 3px solid #667eea;
+    }
+
+    .active-filters-summary .badge {
+        font-size: 10px;
+        padding: 5px 10px;
+        font-weight: 500;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    .active-filters-summary .badge strong {
+        font-weight: 700;
+    }
+
     .reports-content {
         flex: 1;
         min-width: 0;
@@ -405,6 +424,20 @@
                         <span class="active-filters-badge">{{ count(array_filter(request('filter', []))) }} Active</span>
                     @endif
                 </h5>
+
+                {{-- Display Active Filters --}}
+                @if(request()->has('filter') && count(array_filter(request('filter', []))) > 0)
+                    <div class="active-filters-summary mt-2">
+                        <small class="text-muted d-block mb-1"><i class="fas fa-info-circle"></i> Active Filters:</small>
+                        @foreach(request('filter', []) as $filterKey => $filterValue)
+                            @if(!empty($filterValue))
+                                <span class="badge badge-primary mr-1 mb-1">
+                                    {{ ucfirst(str_replace('_', ' ', $filterKey)) }}: <strong>{{ is_array($filterValue) ? implode(', ', $filterValue) : $filterValue }}</strong>
+                                </span>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
             <form action="{{ route('reports.index') }}" method="GET" id="filterForm">
@@ -420,8 +453,8 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label><i class="fas fa-hashtag"></i> PR Number</label>
-                                <select name="filter[pr_number]" class="form-control select2">
-                                    <option value="">-- Select PR Number --</option>
+                                <select name="filter[pr_number]" class="form-control select2" data-placeholder="-- Select PR Number --">
+                                    <option></option>
                                     @foreach($prNumbers as $prNumber)
                                         <option value="{{ $prNumber }}" {{ request('filter.pr_number') == $prNumber ? 'selected' : '' }}>
                                             {{ $prNumber }}
@@ -602,85 +635,164 @@
 
         {{-- Results Content --}}
         <div class="reports-content">
-                    {{-- Results Card --}}
-            <div class="card">
-                <div class="card-header pb-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title mb-1">Reports Data</h6>
-                            <p class="text-muted tx-12 mb-0">Total Results: <strong>{{ $reports->count() }}</strong></p>
-                        </div>
-                        <div class="btn-group export-buttons" role="group">
-                            <button type="button" class="btn btn-sm btn-danger" onclick="exportToPDF()">
-                                <i class="fas fa-file-pdf"></i> PDF
-                            </button>
-                            <button type="button" class="btn btn-sm btn-success" onclick="exportToExcel()">
-                                <i class="fas fa-file-excel"></i> Excel
-                            </button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="exportToCSV()">
-                                <i class="fas fa-file-csv"></i> CSV
-                            </button>
-                            <button type="button" class="btn btn-sm btn-info" onclick="printTable()">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped text-nowrap" id="example1">
-                            <thead>
-                                <tr class="bg-primary text-white">
-                                    <th style="width: 50px;">#</th>
-                                    <th>PR Number</th>
-                                    <th>Project Name</th>
-                                    <th>Project Manager</th>
-                                    <th>Technologies</th>
-                                    <th>Customer Name</th>
-                                    <th>Customer PO</th>
-                                    <th>Value ($)</th>
-                                    <th>Invoice Total</th>
-                                    <th>Deadline</th>
-                                    <th>Completion %</th>
-                                    <th>Vendors</th>
-                                    <th>Suppliers</th>
-                                    <th>AM</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($reports as $index => $report)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td><span class="badge badge-info">{{ $report->pr_number ?? 'N/A' }}</span></td>
-                                        <td><strong>{{ $report->name ?? 'N/A' }}</strong></td>
-                                        <td>{{ $report->ppms->name ?? 'N/A' }}</td>
-                                        <td><span class="badge badge-secondary">{{ $report->technologies ?? 'N/A' }}</span></td>
-                                        <td>{{ $report->cust->name ?? 'N/A' }}</td>
-                                        <td>{{ $report->customer_po ?? 'N/A' }}</td>
-                                        <td class="text-right"><strong>${{ number_format($report->value ?? 0, 2) }}</strong></td>
-                                        <td class="text-right">N/A</td>
-                                        <td>{{ $report->customer_po_deadline ? \Carbon\Carbon::parse($report->customer_po_deadline)->format('d M Y') : 'N/A' }}</td>
-                                        <td>
-                                            <span class="badge badge-secondary badge-completion">N/A</span>
-                                        </td>
-                                        <td>{{ $report->vendor->vendors ?? 'N/A' }}</td>
-                                        <td>{{ $report->ds->dsname ?? 'N/A' }}</td>
-                                        <td>{{ $report->aams->name ?? 'N/A' }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="14" class="text-center text-muted py-5">
-                                            <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
-                                            <h5>No Projects Found</h5>
-                                            <p>Try adjusting your filters or reset to see all projects.</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            {{-- Projects --}}
+            <h5>Projects ({{ $reports->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($reports as $i => $r)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $r->pr_number }}</td>
+                        <td>{{ $r->name }}</td>
+                        <td>{{ $r->ppms->name ?? '' }}</td>
+                        <td>{{ $r->technologies }}</td>
+                        <td>{{ $r->cust->name ?? '' }}</td>
+                        <td>{{ $r->customer_po }}</td>
+                        <td>${{ $r->value }}</td>
+                        <td>{{ $r->customer_po_deadline }}</td>
+                        <td>{{ $r->vendor->vendors ?? '' }}</td>
+                        <td>{{ $r->ds->dsname ?? '' }}</td>
+                        <td>{{ $r->aams->name ?? '' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Vendors --}}
+            <h5>Vendors ({{ $allVendors->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($allVendors as $i => $v)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $v->vendors }}</td>
+                        <td>{{ $v->vendor_am_details }}</td>
+                        <td>{{ $v->created_at }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Customers --}}
+            <h5>Customers ({{ $allCustomers->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($allCustomers as $i => $c)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $c->name }}</td>
+                        <td>{{ $c->abb }}</td>
+                        <td>{{ $c->tybe }}</td>
+                        <td>{{ $c->phone }}</td>
+                        <td>{{ $c->email }}</td>
+                        <td>{{ $c->created_at }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Project Managers --}}
+            <h5>Project Managers ({{ $allProjectManagers->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($allProjectManagers as $i => $pm)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $pm->name }}</td>
+                        <td>{{ $pm->email }}</td>
+                        <td>{{ $pm->phone }}</td>
+                        <td>{{ $pm->created_at }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Account Managers --}}
+            <h5>Account Managers ({{ $allAccountManagers->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($allAccountManagers as $i => $am)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $am->name }}</td>
+                        <td>{{ $am->email }}</td>
+                        <td>{{ $am->phone }}</td>
+                        <td>{{ $am->created_at }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Delivery Specialists --}}
+            <h5>Delivery Specialists ({{ $allDeliverySpecialists->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($allDeliverySpecialists as $i => $ds)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $ds->dsname }}</td>
+                        <td>{{ $ds->ds_contact }}</td>
+                        <td>{{ $ds->created_at }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Project-Customer Relations --}}
+            <h5>Project-Customer Relations ({{ $projectCustomers->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($projectCustomers as $i => $pc)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $pc->pr_number }}</td>
+                        <td>{{ $pc->project_name }}</td>
+                        <td>{{ $pc->customer_name }}</td>
+                        <td>{{ $pc->is_primary }}</td>
+                        <td>{{ $pc->role }}</td>
+                        <td>{{ $pc->notes }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Project-Vendor Relations --}}
+            <h5>Project-Vendor Relations ({{ $projectVendors->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($projectVendors as $i => $pv)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $pv->pr_number }}</td>
+                        <td>{{ $pv->project_name }}</td>
+                        <td>{{ $pv->vendor_name }}</td>
+                        <td>{{ $pv->is_primary }}</td>
+                        <td>{{ $pv->service_type }}</td>
+                        <td>${{ $pv->contract_value }}</td>
+                        <td>{{ $pv->notes }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Project-DS Relations --}}
+            <h5>Project-DS Relations ({{ $projectDS->count() }})</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach($projectDS as $i => $pds)
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $pds->pr_number }}</td>
+                        <td>{{ $pds->project_name }}</td>
+                        <td>{{ $pds->dsname }}</td>
+                        <td>{{ $pds->is_lead }}</td>
+                        <td>{{ $pds->responsibility }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+
         </div>
     </div>
 @endsection
