@@ -9,194 +9,157 @@ use App\Models\aams;
 use App\Models\vendors;
 use App\Models\ds;
 use App\Models\Cust;
+use App\Http\Requests\ReportFilterRequest;
+use App\Services\ReportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 
 class ReportController extends Controller
 {
     /**
+     * Report Service Instance
+     */
+    protected $reportService;
+
+    /**
+     * Constructor - Inject ReportService
+     */
+    public function __construct(ReportService $reportService)
+    {
+        $this->reportService = $reportService;
+    }
+
+    /**
      * Display a listing of the resource with filters.
      */
-    public function index(Request $request)
+    public function index(ReportFilterRequest $request)
     {
-        // Get data from actual database tables
-    $prNumbers = Project::distinct()
-            ->whereNotNull('pr_number')
-            ->pluck('pr_number')
-            ->filter()
-            ->sort()
-            ->values();
+        try {
+            // Get filter options (cached) - always needed for dropdowns
+            $filterOptions = $this->reportService->getFilterOptions();
 
-    $projectNames = Project::distinct()
-            ->whereNotNull('name')
-            ->pluck('name')
-            ->filter()
-            ->sort()
-            ->values();
+            // Check if filters are applied
+            $hasFilters = $request->hasActiveFilters();
 
-        $projectManagers = ppms::distinct()
-            ->whereNotNull('name')
-            ->pluck('name')
-            ->filter()
-            ->sort()
-            ->values();
+            // Initialize empty collections
+            $reports = collect();
+            $tablesData = [
+                'allVendors' => collect(),
+                'allCustomers' => collect(),
+                'allProjectManagers' => collect(),
+                'allAccountManagers' => collect(),
+                'allDeliverySpecialists' => collect(),
+                'projectCustomers' => collect(),
+                'projectVendors' => collect(),
+                'projectDS' => collect(),
+            ];
+            $statistics = null;
 
-    $technologies = Project::distinct()
-            ->whereNotNull('technologies')
-            ->pluck('technologies')
-            ->filter()
-            ->sort()
-            ->values();
+            // Only load data if filters are applied (Performance optimization)
+            if ($hasFilters) {
+                $filters = $request->input('filter', []);
+                $reports = $this->reportService->getFilteredReports($filters);
 
-        $customerNames = Cust::distinct()
-            ->whereNotNull('name')
-            ->pluck('name')
-            ->filter()
-            ->sort()
-            ->values();
+                // Get all additional tables data (cached)
+                $tablesData = $this->reportService->getAllTablesData();
 
-    $customerPos = Project::distinct()
-            ->whereNotNull('customer_po')
-            ->pluck('customer_po')
-            ->filter()
-            ->sort()
-            ->values();
+                // Get statistics
+                $statistics = $this->reportService->getReportsStatistics();
 
-        $vendorsList = vendors::distinct()
-            ->whereNotNull('vendors')
-            ->pluck('vendors')
-            ->filter()
-            ->sort()
-            ->values();
+                // Log filter usage for analytics
+                Log::info('Reports filtered', [
+                    'filters_count' => $request->getActiveFiltersCount(),
+                    'active_filters' => array_keys($request->getActiveFilters()),
+                    'results_count' => $reports->count()
+                ]);
+            }
 
-        $suppliers = ds::distinct()
-            ->whereNotNull('dsname')
-            ->pluck('dsname')
-            ->filter()
-            ->sort()
-            ->values();
+            return view('dashboard.reports.index', array_merge(
+                [
+                    'reports' => $reports,
+                    'prNumbers' => $filterOptions['prNumbers'],
+                    'projectNames' => $filterOptions['projectNames'],
+                    'projectManagers' => $filterOptions['projectManagers'],
+                    'technologies' => $filterOptions['technologies'],
+                    'customerNames' => $filterOptions['customerNames'],
+                    'customerPos' => $filterOptions['customerPos'],
+                    'vendorsList' => $filterOptions['vendorsList'],
+                    'suppliers' => $filterOptions['suppliers'],
+                    'ams' => $filterOptions['ams'],
+                    'statistics' => $statistics,
+                ],
+                $tablesData
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error in ReportController@index: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
-        $ams = aams::distinct()
-            ->whereNotNull('name')
-            ->pluck('name')
-            ->filter()
-            ->sort()
-            ->values();
+            return back()
+                ->with('error', 'An error occurred while loading reports. Please try again.')
+                ->withInput();
+        }
+    }
 
-        // Build query on projects table with relationships
-    $reports = QueryBuilder::for(Project::class)
-            ->with(['vendor', 'cust', 'ds', 'aams', 'ppms'])
-            ->allowedFilters([
-                AllowedFilter::callback('pr_number', function ($query, $value) {
-                    $query->where('pr_number', '=', $value);
-                }),
-                AllowedFilter::callback('name', function ($query, $value) {
-                    $query->where('name', '=', $value);
-                }),
-                AllowedFilter::partial('technologies'),
-                AllowedFilter::callback('customer_po', function ($query, $value) {
-                    $query->where('customer_po', '=', $value);
-                }),
-                AllowedFilter::callback('project_manager', function ($query, $value) {
-                    $query->whereHas('ppms', function ($q) use ($value) {
-                        $q->where('name', $value);
-                    });
-                }),
-                AllowedFilter::callback('customer_name', function ($query, $value) {
-                    $query->whereHas('cust', function ($q) use ($value) {
-                        $q->where('name', $value);
-                    });
-                }),
-                AllowedFilter::callback('vendors', function ($query, $value) {
-                    $query->whereHas('vendor', function ($q) use ($value) {
-                        $q->where('vendors', $value);
-                    });
-                }),
-                AllowedFilter::callback('suppliers', function ($query, $value) {
-                    $query->whereHas('ds', function ($q) use ($value) {
-                        $q->where('dsname', $value);
-                    });
-                }),
-                AllowedFilter::callback('am', function ($query, $value) {
-                    $query->whereHas('aams', function ($q) use ($value) {
-                        $q->where('name', $value);
-                    });
-                }),
-                AllowedFilter::callback('value_min', function ($query, $value) {
-                    $query->where('value', '>=', $value);
-                }),
-                AllowedFilter::callback('value_max', function ($query, $value) {
-                    $query->where('value', '<=', $value);
-                }),
-                AllowedFilter::callback('deadline_from', function ($query, $value) {
-                    $query->where('customer_po_deadline', '>=', $value);
-                }),
-                AllowedFilter::callback('deadline_to', function ($query, $value) {
-                    $query->where('customer_po_deadline', '<=', $value);
-                }),
-                // TODO: Add completion_min and completion_max filters after adding completion_percentage column to projects table
-                // AllowedFilter::callback('completion_min', function ($query, $value) {
-                //     $query->where('completion_percentage', '>=', $value);
-                // }),
-                // AllowedFilter::callback('completion_max', function ($query, $value) {
-                //     $query->where('completion_percentage', '<=', $value);
-                // }),
-            ])
-            ->defaultSort('-created_at')
-            ->get();
+    /**
+     * Clear reports cache
+     */
+    public function clearCache()
+    {
+        try {
+            $this->reportService->clearCache();
 
-        // Get all other tables data
-        $allVendors = vendors::orderBy('created_at', 'desc')->get();
-        $allCustomers = Cust::orderBy('created_at', 'desc')->get();
-        $allProjectManagers = ppms::orderBy('created_at', 'desc')->get();
-        $allAccountManagers = aams::orderBy('created_at', 'desc')->get();
-        $allDeliverySpecialists = ds::orderBy('created_at', 'desc')->get();
+            return back()->with('success', 'Reports cache cleared successfully');
+        } catch (\Exception $e) {
+            Log::error('Error clearing cache: ' . $e->getMessage());
+            return back()->with('error', 'Failed to clear cache');
+        }
+    }
 
-        // Get related data tables
-        $projectCustomers = DB::table('project_customers')
-            ->join('projects', 'project_customers.project_id', '=', 'projects.id')
-            ->join('custs', 'project_customers.customer_id', '=', 'custs.id')
-            ->select('project_customers.*', 'projects.pr_number', 'projects.name as project_name', 'custs.name as customer_name')
-            ->orderBy('project_customers.created_at', 'desc')
-            ->get();
+    /**
+     * Export filtered reports to CSV
+     */
+    public function export(ReportFilterRequest $request)
+    {
+        try {
+            $filters = $request->input('filter', []);
+            $data = $this->reportService->exportFilteredData($filters);
 
-        $projectVendors = DB::table('project_vendors')
-            ->join('projects', 'project_vendors.project_id', '=', 'projects.id')
-            ->join('vendors', 'project_vendors.vendor_id', '=', 'vendors.id')
-            ->select('project_vendors.*', 'projects.pr_number', 'projects.name as project_name', 'vendors.vendors as vendor_name')
-            ->orderBy('project_vendors.created_at', 'desc')
-            ->get();
+            $filename = 'reports_export_' . date('Y-m-d_His') . '.csv';
 
-        $projectDS = DB::table('project_delivery_specialists')
-            ->join('projects', 'project_delivery_specialists.project_id', '=', 'projects.id')
-            ->join('ds', 'project_delivery_specialists.ds_id', '=', 'ds.id')
-            ->select('project_delivery_specialists.*', 'projects.pr_number', 'projects.name as project_name', 'ds.dsname')
-            ->orderBy('project_delivery_specialists.created_at', 'desc')
-            ->get();
+            $headers = [
+                'Content-Type' => 'text/csv; charset=utf-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
 
-        return view('dashboard.reports.index', compact(
-            'reports',
-            'prNumbers',
-            'projectNames',
-            'projectManagers',
-            'technologies',
-            'customerNames',
-            'customerPos',
-            'vendorsList',
-            'suppliers',
-            'ams',
-            'allVendors',
-            'allCustomers',
-            'allProjectManagers',
-            'allAccountManagers',
-            'allDeliverySpecialists',
-            'projectCustomers',
-            'projectVendors',
-            'projectDS'
-        ));
+            $callback = function() use ($data) {
+                $file = fopen('php://output', 'w');
+
+                // Add BOM for UTF-8
+                fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                // Add headers
+                if (!empty($data)) {
+                    fputcsv($file, array_keys($data[0]));
+                }
+
+                // Add data
+                foreach ($data as $row) {
+                    fputcsv($file, $row);
+                }
+
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        } catch (\Exception $e) {
+            Log::error('Error exporting reports: ' . $e->getMessage());
+            return back()->with('error', 'Failed to export reports');
+        }
     }
 
     /**

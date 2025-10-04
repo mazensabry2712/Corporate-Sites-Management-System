@@ -90,6 +90,8 @@ Route::delete('ppos/destroy', [PposController::class, 'destroy']);
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
     Route::resource('reports', ReportController::class);
+    Route::get('reports/export/csv', [ReportController::class, 'export'])->name('reports.export');
+    Route::post('reports/cache/clear', [ReportController::class, 'clearCache'])->name('reports.cache.clear');
 
 
     }
