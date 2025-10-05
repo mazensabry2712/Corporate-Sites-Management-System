@@ -16,7 +16,7 @@ class InvoicesController extends Controller
     {
         // Cache for 1 hour (3600 seconds) for ultra-fast performance
         $invoices = Cache::remember('invoices_list', 3600, function () {
-            return invoices::with('project:id,pr_number,name')->get();
+            return invoices::with('project:id,pr_number,name,value')->get();
         });
 
         return view('dashboard.invoice.index', compact('invoices'));
@@ -46,8 +46,7 @@ class InvoicesController extends Controller
             'value' => 'required|numeric|min:0',
             'pr_number' => 'required|exists:projects,id',
             'invoice_copy_path' => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif|max:10240', // 10MB max
-            'status' => 'required|in:paid,pending,overdue,cancelled',
-            'pr_invoices_total_value' => 'nullable|numeric|min:0'
+            'status' => 'required|string|max:255',
         ]);
 
         // Handle file upload to external 'storge' folder
@@ -75,9 +74,10 @@ class InvoicesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(invoices $invoices)
+    public function show($id)
     {
-        //
+        $invoice = invoices::with('project:id,pr_number,name,value')->findOrFail($id);
+        return view('dashboard.invoice.show', compact('invoice'));
     }
 
     /**
@@ -107,8 +107,7 @@ class InvoicesController extends Controller
             'invoice_number' => 'required|unique:invoices,invoice_number,' . $id,
             'value' => 'required|numeric|min:0',
             'invoice_copy_path' => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif|max:10240', // 10MB
-            'status' => 'required|in:paid,pending,overdue,cancelled',
-            'pr_invoices_total_value' => 'nullable|numeric|min:0',
+            'status' => 'required|string|max:255',
             'pr_number' => 'required|exists:projects,id'
         ]);
 
@@ -152,6 +151,7 @@ class InvoicesController extends Controller
     {
         $id = $request->id;
         $invoice = invoices::findOrFail($id);
+        $projectId = $invoice->pr_number;
 
         // Delete file from external 'storge' folder if exists
         if ($invoice->invoice_copy_path) {

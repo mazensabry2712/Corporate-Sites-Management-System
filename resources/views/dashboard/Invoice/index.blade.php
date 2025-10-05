@@ -310,9 +310,9 @@
                                     <th>PR Number</th>
                                     <th>Project Name</th>
                                     <th>Invoice Number</th>
-
                                     <th>Invoice Copy</th>
                                     <th>Value</th>
+                                    <th>PR Invoices Total Value</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -323,6 +323,13 @@
                                     <tr>
                                         <td>{{ $i }}</td>
                                         <td>
+                                            {{-- @can('Show') --}}
+                                                <a class="btn btn-sm btn-primary"
+                                                    href="{{ route('invoices.show', $invoice->id) }}" title="View">
+                                                    <i class="las la-eye"></i>
+                                                </a>
+                                            {{-- @endcan --}}
+
                                             @can('Edit')
                                                 <a class="btn btn-sm btn-info"
                                                     href="{{ route('invoices.edit', $invoice->id) }}" title="Update">
@@ -388,23 +395,39 @@
                                             </span>
                                         </td>
                                         <td>
-                                            @if ($invoice->status == 'paid')
-                                                <span class="badge badge-success">
-                                                    <i class="fas fa-check-circle"></i> Paid
-                                                </span>
-                                            @elseif($invoice->status == 'pending')
-                                                <span class="badge badge-warning">
-                                                    <i class="fas fa-clock"></i> Pending
-                                                </span>
-                                            @elseif($invoice->status == 'overdue')
-                                                <span class="badge badge-danger">
-                                                    <i class="fas fa-exclamation-triangle"></i> Overdue
+                                            @if($invoice->project && $invoice->project->value)
+                                                <span class="badge badge-info" style="font-size: 13px; padding: 8px 12px;">
+                                                    <i class="fas fa-file-invoice"></i> {{ number_format($invoice->value, 2) }}
+                                                    <strong>of</strong>
+                                                    <i class="fas fa-project-diagram"></i> {{ number_format($invoice->project->value, 2) }} EGP
                                                 </span>
                                             @else
-                                                <span class="badge badge-secondary">
-                                                    <i class="fas fa-ban"></i> Cancelled
-                                                </span>
+                                                <span class="text-muted">N/A</span>
                                             @endif
+                                        </td>
+                                        <td>
+                                            @php
+                                                $statusLower = strtolower($invoice->status);
+                                                $badgeClass = 'badge-primary';
+                                                $icon = 'fas fa-info-circle';
+
+                                                if (str_contains($statusLower, 'paid') || str_contains($statusLower, 'complete')) {
+                                                    $badgeClass = 'badge-success';
+                                                    $icon = 'fas fa-check-circle';
+                                                } elseif (str_contains($statusLower, 'pending') || str_contains($statusLower, 'waiting') || str_contains($statusLower, 'processing')) {
+                                                    $badgeClass = 'badge-warning';
+                                                    $icon = 'fas fa-clock';
+                                                } elseif (str_contains($statusLower, 'overdue') || str_contains($statusLower, 'late')) {
+                                                    $badgeClass = 'badge-danger';
+                                                    $icon = 'fas fa-exclamation-triangle';
+                                                } elseif (str_contains($statusLower, 'cancel') || str_contains($statusLower, 'reject')) {
+                                                    $badgeClass = 'badge-secondary';
+                                                    $icon = 'fas fa-ban';
+                                                }
+                                            @endphp
+                                            <span class="badge {{ $badgeClass }}">
+                                                <i class="{{ $icon }}"></i> {{ $invoice->status }}
+                                            </span>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -483,7 +506,7 @@
                     className: 'btn btn-danger btn-sm',
                     title: 'Invoices List',
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 6, 7]
+                        columns: [0, 2, 3, 4, 6, 7, 8]
                     }
                 },
                 {
@@ -492,7 +515,7 @@
                     className: 'btn btn-success btn-sm',
                     title: 'Invoices List',
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 6, 7]
+                        columns: [0, 2, 3, 4, 6, 7, 8]
                     }
                 },
                 {
@@ -501,7 +524,7 @@
                     className: 'btn btn-info btn-sm',
                     title: 'Invoices List',
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 6, 7]
+                        columns: [0, 2, 3, 4, 6, 7, 8]
                     }
                 },
                 {
@@ -510,7 +533,7 @@
                     className: 'btn btn-secondary btn-sm',
                     title: 'Invoices List',
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 6, 7]
+                        columns: [0, 2, 3, 4, 6, 7, 8]
                     }
                 }
             ],

@@ -6,6 +6,7 @@ use App\Models\Coc;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class CocController extends Controller
 {
@@ -14,10 +15,12 @@ class CocController extends Controller
      */
     public function index()
     {
-        //
-        $coc = Coc::all();
-        return view('dashboard.CoC.index', compact('coc'));
+        // استخدام Cache + Eager Loading للسرعة الفائقة
+        $coc = Cache::remember('coc_list', 3600, function () {
+            return Coc::with('project:id,name,pr_number')->latest()->get();
+        });
 
+        return view('dashboard.CoC.index', compact('coc'));
     }
 
     /**
@@ -36,32 +39,34 @@ class CocController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-
-            'coc_copy' => 'required|mimes:pdf,docx,doc',
-            'pr_number'=>"required|exists:projects,id"
+            'coc_copy' => 'required|mimes:pdf,docx,doc,jpg,jpeg,png,gif|max:10240',
+            'pr_number' => "required|exists:projects,id"
         ]);
 
         if($request->hasFile('coc_copy')){
             $file = $request->file('coc_copy');
-            $path = $file->store('uploads',[
-                'disk' => 'public'
-            ]);
-            // $path=Storage::putfile("uploads",$request->coc_copy);
-            $validatedData['coc_copy'] = $path;
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('../storge'), $filename);
+            $validatedData['coc_copy'] = $filename;
         }
+
         Coc::create($validatedData);
 
-        session()->flash('Add', 'Registration successful');
-            return redirect('/coc');
+        // مسح الـ Cache بعد الإضافة
+        Cache::forget('coc_list');
+
+        session()->flash('Add', 'Certificate of Compliance added successfully');
+        return redirect('/coc');
 
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Coc $coc)
+    public function show($id)
     {
-        //
+        $coc = Coc::with('project:id,pr_number,name')->findOrFail($id);
+        return view('dashboard.CoC.show', compact('coc'));
     }
 
     /**
@@ -80,33 +85,34 @@ class CocController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $coc=Coc::find($id);
-        $path=$coc['coc_copy'];
-        $validatedData = $request->validate([
+        $coc = Coc::findOrFail($id);
 
-              'coc_copy' => 'required|mimes:pdf,docx,doc',
-            'pr_number'=>"required|exists:projects,id"
+        $validatedData = $request->validate([
+            'coc_copy' => 'nullable|mimes:pdf,docx,doc,jpg,jpeg,png,gif|max:10240',
+            'pr_number' => "required|exists:projects,id"
         ]);
 
         if($request->hasFile('coc_copy')){
-            // if ($coc->coc_copy && Storage::exists($coc->coc_copy)) {
-            //     Storage::delete($coc->coc_copy);
-            // }
-            Storage::delete($path);
+            // حذف الملف القديم
+            $oldFile = public_path('../storge/' . $coc->coc_copy);
+            if(file_exists($oldFile)){
+                unlink($oldFile);
+            }
+
+            // رفع الملف الجديد
             $file = $request->file('coc_copy');
-            $path = $file->store('uploads',[
-                'disk' => 'public'
-            ]);
-            // $path=Storage::putfile("uploads",$request->coc_copy);
-            $validatedData['coc_copy'] = $path;
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('../storge'), $filename);
+            $validatedData['coc_copy'] = $filename;
         }
-
-
 
         $coc->update($validatedData);
 
-        session()->flash('edit', 'The section has been successfully modified');
-            return redirect('/coc');
+        // مسح الـ Cache بعد التعديل
+        Cache::forget('coc_list');
+
+        session()->flash('edit', 'Certificate of Compliance updated successfully');
+        return redirect('/coc');
 
 
     }
@@ -116,12 +122,20 @@ class CocController extends Controller
      */
     public function destroy(Request $request)
     {
-        //
-
         $id=$request->id;
-        $user=Coc::find($id);
-        Storage::delete($user->coc_copy);
-        $user->delete();
+        $coc=Coc::find($id);
+
+        // حذف الملف من مجلد storge
+        $filePath = public_path('../storge/' . $coc->coc_copy);
+        if(file_exists($filePath)){
+            unlink($filePath);
+        }
+
+        $coc->delete();
+
+        // مسح الـ Cache بعد الحذف
+        Cache::forget('coc_list');
+
         session()->flash('delete', 'Deleted successfully');
 
         return redirect('/coc');
