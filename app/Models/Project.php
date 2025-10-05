@@ -11,12 +11,9 @@ class Project extends Model
 
     protected $fillable = [
         'pr_number', 'name', 'technologies', 'vendors_id', 'ds_id', 'aams_id', 'ppms_id',
-        'value', 'customer_name', 'customer_po', 'ac_manager', 'project_manager',
-        'customer_contact_details', 'po_attachment', 'epo_attachment',
+        'value', 'customer_po', 'customer_contact_details', 'po_attachment', 'epo_attachment',
         'customer_po_date', 'customer_po_duration', 'customer_po_deadline',
-        'description', 'Created_by' ,'vendors_id',
-        'cust_id',
-
+        'description', 'Created_by', 'cust_id',
     ];
 
     public function vendor()
@@ -48,6 +45,36 @@ class Project extends Model
         return $this->belongsTo(ppms::class, 'ppms_id')
         ->withDefault(['name' => 'nothing']);
 
+    }
+
+    public function statuses()
+    {
+        return $this->hasMany(Pstatus::class, 'pr_number', 'id');
+    }
+
+    public function latestStatus()
+    {
+        return $this->hasOne(Pstatus::class, 'pr_number', 'id')->latestOfMany();
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Ptasks::class, 'pr_number', 'id');
+    }
+
+    public function milestones()
+    {
+        return $this->hasMany(Milestones::class, 'pr_number', 'id');
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(invoices::class, 'pr_number', 'id');
+    }
+
+    public function risks()
+    {
+        return $this->hasMany(Risks::class, 'pr_number', 'id');
     }
 
     // Many-to-many relationships for multiple assignments

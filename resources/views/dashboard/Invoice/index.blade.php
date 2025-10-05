@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    Invoices
+    Invoices | mdsjedpr
 @stop
 @section('css')
     <!-- Internal Data table css -->
@@ -80,13 +80,12 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Operations</th>
+                                    <th>Project Number</th>
                                     <th>Invoice Number</th>
                                     <th>Value</th>
                                     <th>Status</th>
                                     <th>Total Invoices Value</th>
-                                    <th>Project Number</th>
                                     <th>Invoice Copy</th>
-                                    <th>Created At</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -97,23 +96,26 @@
                                         <td>{{ $i }}</td>
                                         <td>
                                             @can('Edit')
-                                                <a class="btn btn-sm btn-info" href="{{ route('invoices.edit', $invoice->id) }}" title="Update">
+                                                <a class="btn btn-sm btn-info"
+                                                    href="{{ route('invoices.edit', $invoice->id) }}" title="Update">
                                                     <i class="las la-pen"></i>
                                                 </a>
                                             @endcan
 
                                             @can('Delete')
                                                 <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
-                                                    data-id="{{ $invoice->id }}" data-invoice_number="{{ $invoice->invoice_number }}"
-                                                    data-toggle="modal" href="#modaldemo9" title="Delete">
+                                                    data-id="{{ $invoice->id }}"
+                                                    data-invoice_number="{{ $invoice->invoice_number }}" data-toggle="modal"
+                                                    href="#modaldemo9" title="Delete">
                                                     <i class="las la-trash"></i>
                                                 </a>
                                             @endcan
                                         </td>
-                                        <td>{{ $invoice->invoice_number }}</td>
+                                        <td>{{ $invoice->project->pr_number ?? 'N/A' }}</td>
+                                        <td>{{ $invoice->invoice_number ?? 'N/A' }}</td>
                                         <td>{{ number_format($invoice->value, 2) ?? 'N/A' }}</td>
                                         <td>
-                                            @if($invoice->status == 'paid')
+                                            @if ($invoice->status == 'paid')
                                                 <span class="badge badge-success">{{ $invoice->status }}</span>
                                             @elseif($invoice->status == 'pending')
                                                 <span class="badge badge-warning">{{ $invoice->status }}</span>
@@ -122,17 +124,17 @@
                                             @endif
                                         </td>
                                         <td>{{ number_format($invoice->pr_invoices_total_value, 2) ?? 'N/A' }}</td>
-                                        <td>{{ $invoice->project->pr_number ?? 'N/A' }}</td>
                                         <td>
-                                            @if($invoice->invoice_copy_path)
-                                                <a href="{{ asset('storage/' . $invoice->invoice_copy_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                            @if ($invoice->invoice_copy_path)
+                                                <a href="{{ asset('storage/' . $invoice->invoice_copy_path) }}"
+                                                    target="_blank" class="btn btn-sm btn-outline-info">
                                                     <i class="las la-file-pdf"></i> View PDF
                                                 </a>
                                             @else
                                                 <span class="text-muted">No file</span>
                                             @endif
                                         </td>
-                                        <td>{{ $invoice->created_at->format('Y-m-d') }}</td>
+
                                     </tr>
                                 @endforeach
                             </tbody>
