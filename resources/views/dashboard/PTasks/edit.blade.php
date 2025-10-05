@@ -3,14 +3,17 @@
     Edit Task
 @stop
 @section('css')
-    <!-- Internal Nice-select css  -->
-    <link href="{{ URL::asset('assets/plugins/jquery-nice-select/css/nice-select.css') }}" rel="stylesheet" />
-    <!-- Internal select2 css -->
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    <!--Internal  Font Awesome -->
-    <link href="{{ URL::asset('assets/plugins/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
-    <!--Internal  treeview -->
-    <link href="{{ URL::asset('assets/plugins/treeview/treeview-rtl.css') }}" rel="stylesheet" type="text/css" />
+    <style>
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+    </style>
 @endsection
 
 @section('page-header')
@@ -55,13 +58,13 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="pr_number">Project <span class="text-danger">*</span></label>
-                                    <select name="pr_number" class="form-control select2" required>
+                                    <label for="pr_number">PR#: <span class="text-danger">*</span></label>
+                                    <select name="pr_number" id="pr_number" class="form-control select2" required>
                                         <option value="">Choose Project</option>
                                         @foreach ($projects as $project)
-                                            <option value="{{ $project->id }}"
+                                            <option value="{{ $project->id }}" data-project-name="{{ $project->name }}"
                                                 {{ (old('pr_number', $ptasks->pr_number) == $project->id) ? 'selected' : '' }}>
-                                                {{ $project->pr_number }} - {{ $project->pr_name }}
+                                                {{ $project->pr_number }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -70,9 +73,9 @@
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="task_date">Task Date <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="task_date" name="task_date"
-                                           value="{{ old('task_date', $ptasks->task_date ? \Carbon\Carbon::parse($ptasks->task_date)->format('Y-m-d') : '') }}" required>
+                                    <label>Project Name:</label>
+                                    <input type="text" id="project_name_display" class="form-control" readonly
+                                           style="background-color: #f8f9fa; cursor: not-allowed;">
                                 </div>
                             </div>
                         </div>
@@ -80,33 +83,42 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="expected_com_date">Expected Completion Date</label>
+                                    <label for="task_date">Task Date: <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="task_date" name="task_date"
+                                           value="{{ old('task_date', $ptasks->task_date ? \Carbon\Carbon::parse($ptasks->task_date)->format('Y-m-d') : '') }}" required>
+                                    <small class="text-muted">Auto filled with current date</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="expected_com_date">Expected Completion Date:</label>
                                     <input type="date" class="form-control" id="expected_com_date" name="expected_com_date"
                                            value="{{ old('expected_com_date', $ptasks->expected_com_date ? \Carbon\Carbon::parse($ptasks->expected_com_date)->format('Y-m-d') : '') }}">
                                 </div>
                             </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="assigned">Assigned To</label>
-                                    <input type="text" class="form-control" id="assigned" name="assigned"
-                                           value="{{ old('assigned', $ptasks->assigned) }}" placeholder="Enter person name">
-                                </div>
-                            </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="status">Status <span class="text-danger">*</span></label>
+                                    <label for="assigned">Assigned To:</label>
+                                    <input type="text" class="form-control" id="assigned" name="assigned"
+                                           value="{{ old('assigned', $ptasks->assigned) }}" placeholder="Enter person name">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="status">Status: <span class="text-danger">*</span></label>
                                     <select name="status" class="form-control" required>
                                         <option value="">Choose Status</option>
-                                        <option value="pending" {{ old('status', $ptasks->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="in_progress" {{ old('status', $ptasks->status) == 'in_progress' ? 'selected' : '' }}>In Progress</option>
                                         <option value="completed" {{ old('status', $ptasks->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                                        <option value="on_hold" {{ old('status', $ptasks->status) == 'on_hold' ? 'selected' : '' }}>On Hold</option>
-                                        <option value="cancelled" {{ old('status', $ptasks->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                        <option value="pending" {{ old('status', $ptasks->status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="progress" {{ old('status', $ptasks->status) == 'progress' ? 'selected' : '' }}>Under Progress</option>
+                                        <option value="hold" {{ old('status', $ptasks->status) == 'hold' ? 'selected' : '' }}>On Hold</option>
                                     </select>
+                                    <small class="text-muted">Selection: completed, pending, under progress, or on hold</small>
                                 </div>
                             </div>
                         </div>
@@ -114,16 +126,16 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="details">Task Details</label>
+                                    <label for="details">Task Details:</label>
                                     <textarea class="form-control" id="details" name="details" rows="4"
-                                              placeholder="Enter task details">{{ old('details', $ptasks->details) }}</textarea>
+                                              placeholder="Enter task details...">{{ old('details', $ptasks->details) }}</textarea>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary">Update Task</button>
-                            <button type="button" class="btn btn-secondary mx-2" onclick="window.history.back();">Cancel</button>
+                        <div class="mg-t-30">
+                            <button class="btn btn-outline-primary pd-x-20" type="submit">Update Task</button>
+                            <a href="{{ route('ptasks.index') }}" class="btn btn-outline-secondary pd-x-20">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -134,22 +146,7 @@
 @endsection
 
 @section('js')
-    <!--Internal  jquery.maskedinput js -->
-    <script src="{{ URL::asset('assets/plugins/jquery.maskedinput/jquery.maskedinput.js') }}"></script>
-    <!--Internal  spectrum-colorpicker js -->
-    <script src="{{ URL::asset('assets/plugins/spectrum-colorpicker/spectrum.js') }}"></script>
-    <!-- Internal Select2.min js -->
     <script src="{{ URL::asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-    <!--Internal Ion.rangeSlider.min js -->
-    <script src="{{ URL::asset('assets/plugins/ion-rangeslider/js/ion.rangeSlider.min.js') }}"></script>
-    <!--Internal  jquery-simple-datetimepicker js -->
-    <script src="{{ URL::asset('assets/plugins/amazeui-datetimepicker/js/amazeui.datetimepicker.min.js') }}"></script>
-    <!-- Ionicons js -->
-    <script src="{{ URL::asset('assets/plugins/jquery-simple-datetimepicker/jquery.simple-dtpicker.js') }}"></script>
-    <!--Internal  pickerjs js -->
-    <script src="{{ URL::asset('assets/plugins/pickerjs/picker.min.js') }}"></script>
-    <!-- Internal form-elements js -->
-    <script src="{{ URL::asset('assets/js/form-elements.js') }}"></script>
 
     <script>
         $(document).ready(function() {
@@ -157,6 +154,23 @@
                 placeholder: "Choose Project",
                 allowClear: true
             });
+
+            // Auto-fill project name when PR Number changes
+            $('#pr_number').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const projectName = selectedOption.data('project-name');
+
+                if (projectName) {
+                    $('#project_name_display').val(projectName).css('color', '#495057');
+                } else {
+                    $('#project_name_display').val('No project name available').css('color', '#6c757d');
+                }
+            });
+
+            // Initialize on page load with current value
+            if ($('#pr_number').val()) {
+                $('#pr_number').trigger('change');
+            }
         });
     </script>
 @endsection

@@ -22,11 +22,11 @@ class Pstatus extends Model
 
     public function project()
     {
-    return $this->belongsTo(Project::class);
+        return $this->belongsTo(Project::class, 'pr_number');
     }
 
     public function ppm()
     {
-        return $this->belongsTo(ppms::class);
+        return $this->belongsTo(ppms::class, 'pm_name');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Ptasks;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PtasksController extends Controller
 {
@@ -13,7 +14,12 @@ class PtasksController extends Controller
      */
     public function index()
     {
-        $ptasks = Ptasks::all();
+        $ptasks = Cache::remember('ptasks_list', 3600, function () {
+            return Ptasks::with(['project:id,pr_number,name'])
+                ->latest()
+                ->get();
+        });
+
         return view('dashboard.PTasks.index', compact('ptasks'));
     }
 
@@ -46,8 +52,10 @@ class PtasksController extends Controller
 
 
         Ptasks::create($validatedData);
-        session()->flash('Add', 'Registration successful');
-           return redirect('/ptasks');
+        Cache::forget('ptasks_list');
+
+        session()->flash('Add', 'Task added successfully');
+        return redirect()->route('ptasks.index');
 
 
     }
@@ -55,9 +63,10 @@ class PtasksController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Ptasks $ptasks)
+    public function show($id)
     {
-        //
+        $ptask = Ptasks::with(['project'])->findOrFail($id);
+        return view('dashboard.PTasks.show', compact('ptask'));
     }
 
     /**
@@ -88,16 +97,11 @@ class PtasksController extends Controller
             'pr_number'=>"required|exists:projects,id"
         ]);
 
-        $ptasks->update([
-         'pr_number'=>$request->pr_number,
-        'expected_com_date'=>$request->expected_com_date,
-        'task_date'=>$request->task_date,
-        'details'=>$request->details,
-        'assigned'=>$request->assigned,
-        'status'=>$request->status,
-        ]);
-        session()->flash('edit', 'The section has been successfully modified');
-        return redirect('/ptasks'); // إعادة التوجيه إلى صفحة الأقسام
+        $ptasks->update($validatedData);
+        Cache::forget('ptasks_list');
+
+        session()->flash('edit', 'Task updated successfully');
+        return redirect()->route('ptasks.index');
     }
 
     /**
@@ -105,12 +109,11 @@ class PtasksController extends Controller
      */
     public function destroy(Request $request)
     {
-        //
-       $id=$request->id;
-       Ptasks::find($id)->delete();
-        session()->flash('delete', 'Deleted successfully');
+        $id = $request->id;
+        Ptasks::findOrFail($id)->delete();
+        Cache::forget('ptasks_list');
 
-        return redirect('/ptasks');
-
+        session()->flash('delete', 'Task deleted successfully');
+        return redirect()->route('ptasks.index');
     }
 }

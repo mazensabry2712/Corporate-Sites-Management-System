@@ -94,7 +94,8 @@
 
                 <div class="card-header pb-0">
                     @can('Add')
-                        <a class=" btn btn-outline-primary btn-block" href="{{ route('milestones.create') }}"> Add milestones
+                        <a class="btn btn-primary" href="{{ route('milestones.create') }}">
+                            <i class="fas fa-plus"></i> Add New Milestone
                         </a>
                     @endcan
                 </div>

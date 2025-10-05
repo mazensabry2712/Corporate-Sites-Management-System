@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Risks;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 
 class RisksController extends Controller
@@ -14,8 +15,9 @@ class RisksController extends Controller
      */
     public function index()
     {
-        //
-        $risks = Risks::all();
+        $risks = Cache::remember('risks_list', 3600, function () {
+            return Risks::with(['project:id,pr_number,name'])->latest()->get();
+        });
         return view('dashboard.Risks.index', compact('risks'));
     }
 
@@ -45,8 +47,9 @@ class RisksController extends Controller
         ]);
 
         Risks::create($validatedData);
+        Cache::forget('risks_list');
         session()->flash('Add', 'Registration successful');
-            return redirect('/risks');
+        return redirect()->route('risks.index');
 
 
     }
@@ -54,9 +57,10 @@ class RisksController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Risks $risks)
+    public function show($id)
     {
-        //
+        $risks = Risks::with(['project'])->findOrFail($id);
+        return view('dashboard.Risks.show', compact('risks'));
     }
 
     /**
@@ -88,16 +92,10 @@ class RisksController extends Controller
             'pr_number'=>"required|exists:projects,id"
         ]);
 
-        $risks->update([
-         'pr_number'=>$request->pr_number,
-        'risk'=>$request->risk,
-        'impact'=>$request->impact,
-        'mitigation'=>$request->mitigation,
-        'owner'=>$request->owner,
-        'status'=>$request->status,
-        ]);
+        $risks->update($validatedData);
+        Cache::forget('risks_list');
         session()->flash('edit', 'The section has been successfully modified');
-        return redirect('/risks'); // إعادة التوجيه إلى صفحة الأقسام
+        return redirect()->route('risks.index');
     }
 
     /**
@@ -105,12 +103,10 @@ class RisksController extends Controller
      */
     public function destroy(Request $request)
     {
-        //
-        $id=$request->id;
-        Risks::find($id)->delete();
+        $id = $request->id;
+        Risks::findOrFail($id)->delete();
+        Cache::forget('risks_list');
         session()->flash('delete', 'Deleted successfully');
-
-        return redirect('/risks');
-
+        return redirect()->route('risks.index');
     }
 }

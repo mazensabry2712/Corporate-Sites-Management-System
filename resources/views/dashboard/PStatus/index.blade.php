@@ -3,15 +3,24 @@
     project status
 @stop
 @section('css')
-    <!-- Internal Data table css -->
     <link href="{{ URL::asset('assets/plugins/datatable/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />
     <link href="{{ URL::asset('assets/plugins/datatable/css/buttons.bootstrap4.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" />
-    <link href="{{ URL::asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
-    <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
-    <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-
-
+    <style>
+        .pstatus-details {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .pstatus-details .text-wrap {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
 @endsection
 @section('page-header')
     <!-- breadcrumb -->
@@ -81,72 +90,95 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header pb-0">
-
-                    @can('Add')
-                    <a class=" btn btn-outline-primary btn-block"
-                        href="{{ route('pstatus.create') }}"> Add project status </a>
-                    @endcan
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="card-title">Project Status List</h4>
+                        <div>
+                            <button onclick="exportToPDF()" class="btn btn-sm btn-danger mr-1">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            <button onclick="exportToExcel()" class="btn btn-sm btn-success mr-1">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </button>
+                            <button onclick="exportToCSV()" class="btn btn-sm btn-info mr-1">
+                                <i class="fas fa-file-csv"></i> CSV
+                            </button>
+                            <button onclick="printTable()" class="btn btn-sm btn-secondary mr-2">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                            @can('Add')
+                            <a class="btn btn-primary" href="{{ route('pstatus.create') }}">
+                                <i class="fas fa-plus"></i> Add New Status
+                            </a>
+                            @endcan
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table text-md-nowrap" id="example1">
+                        <table class="table text-md-nowrap table-hover" id="pstatusTable">
                             <thead>
-
                                 <tr>
                                     <th>#</th>
-                                    <th> Operations </th>
-                                    <th>project id </th>
-                                    <th>date_time </th>
-                                    <th>pm_name </th>
-                                    <th>status </th>
-                                    <th>actual_completion </th>
-                                    <th>expected_completion </th>
-                                    <th>date_pending_cost_orders </th>
-                                    <th>notes </th>
-
-
+                                    <th>Operations</th>
+                                    <th>PR Number</th>
+                                    <th>Project Name</th>
+                                    <th>Date & Time</th>
+                                    <th>PM Name</th>
+                                    <th>Status</th>
+                                    <th>Actual %</th>
+                                    <th>Expected Date</th>
+                                    <th>Pending Cost</th>
+                                    <th>Notes</th>
                                 </tr>
-
-
-
-
                             </thead>
-
                             <tbody>
-                                <?php $i = 0; ?>
-                                @foreach ($pstatus as $x)
-                                    <?php $i++; ?>
-
-                                    <td>{{ $i }}</td>
-                                    <td>
-                                        @can('Edit')
-                                        <a class=" btn btn-sm btn-info"
-
-                                            href="{{ route('pstatus.edit',$x->id) }}" title="Upadte"><i
-                                                class="las la-pen"></i></a>
-                                        @endcan
-
-                                        @can('Delete')
-                                        <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
-                                            data-id="{{ $x->id }}" data-name="{{ $x->date_time }}"
-                                            data-toggle="modal" href="#modaldemo9" title="Delete"><i
-                                                class="las la-trash"></i></a>
-                                        @endcan
-                                    </td>
-
-                                    <td>{{ $x->pr_number}}</td>
-                                    <td>{{ $x->date_time}}</td>
-                                    <td>{{ $x->pm_name}}</td>
-                                    <td>{{ $x->status}}</td>
-                                    <td>{{ $x->actual_completion}}</td>
-                                    <td>{{ $x->expected_completion}}</td>
-                                    <td>{{ $x->date_pending_cost_orders}}</td>
-                                    <td>{{ $x->notes}}</td>
-
-
-
+                                @forelse ($pstatus as $i => $item)
+                                    <tr>
+                                        <td>{{ $i + 1 }}</td>
+                                        <td>
+                                            <a class="btn btn-sm btn-primary" href="{{ route('pstatus.show', $item->id) }}" title="Show">
+                                                <i class="las la-eye"></i>
+                                            </a>
+                                            {{-- @can('Edit') --}}
+                                            <a class="btn btn-sm btn-info" href="{{ route('pstatus.edit', $item->id) }}" title="Edit">
+                                                <i class="las la-pen"></i>
+                                            </a>
+                                            {{-- @endcan --}}
+                                            {{-- @can('Delete') --}}
+                                            <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
+                                                data-id="{{ $item->id }}" data-name="{{ $item->project->pr_number ?? 'N/A' }}"
+                                                data-toggle="modal" href="#modaldemo9" title="Delete">
+                                                <i class="las la-trash"></i>
+                                            </a>
+                                            {{-- @endcan --}}
+                                        </td>
+                                        <td>{{ $item->project->pr_number ?? 'N/A' }}</td>
+                                        <td>{{ $item->project->name ?? 'N/A' }}</td>
+                                        <td>{{ $item->date_time ? \Carbon\Carbon::parse($item->date_time)->format('d/m/Y') : 'N/A' }}</td>
+                                        <td>{{ $item->ppm->name ?? 'N/A' }}</td>
+                                        <td>
+                                            <div class="pstatus-details">
+                                                <div class="text-wrap">{{ $item->status ?: 'No status' }}</div>
+                                            </div>
+                                        </td>
+                                        <td>{{ $item->actual_completion ? number_format($item->actual_completion, 2) . '%' : 'N/A' }}</td>
+                                        <td>{{ $item->expected_completion ? \Carbon\Carbon::parse($item->expected_completion)->format('d/m/Y') : 'N/A' }}</td>
+                                        <td>
+                                            <div class="pstatus-details">
+                                                <div class="text-wrap">{{ $item->date_pending_cost_orders ?: 'N/A' }}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="pstatus-details">
+                                                <div class="text-wrap">{{ $item->notes ?: 'No notes' }}</div>
+                                            </div>
+                                        </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="11" class="text-center">No project status records found</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -194,54 +226,106 @@
 @endsection
 
 @section('js')
-    <!-- Internal Data tables -->
     <script src="{{ URL::asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.dataTables.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.dataTables.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/jquery.dataTables.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.bootstrap4.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.bootstrap4.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/pdfmake.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/vfs_fonts.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>
-    <!--Internal  Datatable js -->
-    <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
-    <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
-        $('#exampleModal2').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget)
-            var id = button.data('id')
-            var name = button.data('name')
-            var email = button.data('email')
-            var phone = button.data('phone')
-            var modal = $(this)
-            modal.find('.modal-body #id').val(id);
-            modal.find('.modal-body #name').val(name);
-            modal.find('.modal-body #email').val(email);
-            modal.find('.modal-body #phone').val(phone);
-        })
-    </script>
+        $(document).ready(function() {
+            $('#pstatusTable').DataTable({
+                "order": [[0, "desc"]],
+                "pageLength": 25,
+                "language": {
+                    "search": "Search:",
+                    "lengthMenu": "Show _MENU_ entries",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ entries"
+                }
+            });
+        });
 
-    <script>
+        // Export to PDF
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+
+            doc.setFontSize(18);
+            doc.text('Project Status Report', 14, 15);
+            doc.setFontSize(10);
+            doc.text('Generated: ' + new Date().toLocaleString(), 14, 22);
+
+            const headers = [['#', 'PR Number', 'Project Name', 'Date', 'PM Name', 'Status', 'Actual %', 'Expected', 'Pending', 'Notes']];
+            const data = [];
+
+            $('#pstatusTable tbody tr').each(function(index) {
+                if ($(this).find('td').length > 1) {
+                    const row = [];
+                    $(this).find('td').each(function(i) {
+                        if (i === 0 || i > 1) {
+                            row.push($(this).text().trim());
+                        }
+                    });
+                    data.push(row);
+                }
+            });
+
+            doc.autoTable({
+                head: headers,
+                body: data,
+                startY: 28,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 123, 255], textColor: 255 },
+                styles: { fontSize: 8, cellPadding: 2 },
+                columnStyles: {
+                    0: { cellWidth: 10 },
+                    5: { cellWidth: 35 },
+                    8: { cellWidth: 30 },
+                    9: { cellWidth: 35 }
+                }
+            });
+
+            doc.save('project_status_' + new Date().getTime() + '.pdf');
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            const table = document.getElementById('pstatusTable');
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Project Status" });
+            XLSX.writeFile(wb, 'project_status_' + new Date().getTime() + '.xlsx');
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            const table = document.getElementById('pstatusTable');
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Project Status" });
+            XLSX.writeFile(wb, 'project_status_' + new Date().getTime() + '.csv');
+        }
+
+        // Print Table
+        function printTable() {
+            const printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Project Status</title>');
+            printWindow.document.write('<style>table {width: 100%; border-collapse: collapse;} th, td {border: 1px solid #ddd; padding: 8px; text-align: left;} th {background-color: #007bff; color: white;}</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write('<h2>Project Status Report</h2>');
+            printWindow.document.write('<p>Generated: ' + new Date().toLocaleString() + '</p>');
+            printWindow.document.write(document.getElementById('pstatusTable').outerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Delete Modal
         $('#modaldemo9').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget)
-            var id = button.data('id')
-            var name = button.data('name')
-            var email = button.data('email')
-            var phone = button.data('phone')
-            var modal = $(this)
+            const button = $(event.relatedTarget);
+            const id = button.data('id');
+            const name = button.data('name');
+            const modal = $(this);
             modal.find('.modal-body #id').val(id);
             modal.find('.modal-body #name').val(name);
-            modal.find('.modal-body #email').val(email);
-            modal.find('.modal-body #phone').val(phone);
-        })
+        });
     </script>
 @endsection

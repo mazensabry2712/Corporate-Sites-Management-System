@@ -73,13 +73,16 @@ Route::delete('ppos/destroy', [PposController::class, 'destroy']);
 
         // /*Project Status  */
                 Route::resource('pstatus', PstatusController::class);
+                Route::delete('pstatus/destroy', [PstatusController::class, 'destroy']);
         // /*Project Tasks */
                 Route::resource('ptasks', PtasksController::class);
+                Route::delete('ptasks/destroy', [PtasksController::class, 'destroy']);
         // /*Project EPO */
                  Route::resource('epo', PepoController::class);
 
         // /*Risks  */
                 Route::resource('risks', RisksController::class);
+                Route::delete('risks/destroy', [RisksController::class, 'destroy']);
 
         // /*Milestones  */
                 Route::resource('milestones', MilestonesController::class);

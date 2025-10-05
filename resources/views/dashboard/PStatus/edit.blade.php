@@ -1,18 +1,21 @@
 
 @extends('layouts.master')
 @section('css')
-    <!--- Internal Select2 css-->
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    <!---Internal Fileupload css-->
-    <link href="{{ URL::asset('assets/plugins/fileuploads/css/fileupload.css') }}" rel="stylesheet" type="text/css" />
-    <!---Internal Fancy uploader css-->
-    <link href="{{ URL::asset('assets/plugins/fancyuploder/fancy_fileupload.css') }}" rel="stylesheet" />
-    <!--Internal Sumoselect css-->
-    <link rel="stylesheet" href="{{ URL::asset('assets/plugins/sumoselect/sumoselect-rtl.css') }}">
-    <!--Internal  TelephoneInput css-->
-    <link rel="stylesheet" href="{{ URL::asset('assets/plugins/telephoneinput/telephoneinput-rtl.css') }}">
+    <style>
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+    </style>
+@endsection
+
 @section('title')
-    Add Project Status
+    Edit Project Status
 @stop
 
 @section('page-header')
@@ -62,99 +65,94 @@
 
 
                         <div class="row mt-3">
-
+                            <div class="col">
+                                <label for="pr_number" class="control-label">PR Number: <span class="tx-danger">*</span></label>
+                                <select name="pr_number" id="pr_number" class="form-control SlectBox" required>
+                                    <option value="">Choose PR Number</option>
+                                    @foreach ($projects as $project)
+                                        <option value="{{ $project->id }}" data-project-name="{{ $project->name }}"
+                                            {{ (old('pr_number', $pstatus->pr_number) == $project->id) ? 'selected' : '' }}>
+                                            {{ $project->pr_number }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
                             <div class="col">
-                                <label for="date_time" class="control-label">  Date time</label>
+                                <label class="control-label">Project Name:</label>
+                                <input type="text" id="project_name_display" class="form-control" readonly
+                                       style="background-color: #f8f9fa; cursor: not-allowed;">
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label for="date_time" class="control-label">Date & Time:</label>
                                 <input type="date" class="form-control" id="date_time" name="date_time"
-                                    title="   Please enter the   " value="{{$pstatus->date_time}}">
+                                       value="{{ old('date_time', $pstatus->date_time) }}">
+                                <small class="text-muted">Auto filled once the update is sent</small>
                             </div>
 
-
-
                             <div class="col">
-                                <label for="name" class="control-label">pm_name</label>
-                                <select name="pm_name" class="form-control SlectBox" onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')">
-                                    <!--placeholder-->
-                                    <option value="" selected disabled> pm_name </option>
-                                    @foreach ($ppms as $pr_number_id)
-                                        <option value="{{ $pr_number_id->id }}"@selected($pstatus->pm_name == $pr_number_id->id)> {{ $pr_number_id->name }}</option>
+                                <label for="pm_name" class="control-label">PM Name: <span class="tx-danger">*</span></label>
+                                <select name="pm_name" class="form-control SlectBox" required>
+                                    <option value="">Choose PM Name</option>
+                                    @foreach ($ppms as $ppm)
+                                        <option value="{{ $ppm->id }}"
+                                            {{ (old('pm_name', $pstatus->pm_name) == $ppm->id) ? 'selected' : '' }}>
+                                            {{ $ppm->name }}
+                                        </option>
                                     @endforeach
                                 </select>
+                                <small class="text-muted">Taken from login name and PM details</small>
                             </div>
                         </div>
-
-
 
                         <div class="row mt-3">
-                            <div class="col">
-                                <label for="assigned" class="control-label">status </label>
-                                <input type="text" class="form-control" id="assigned" name="status"
-                                    title="   Please enter the Status " value="{{$pstatus->status}}">
-                            </div>
-
-
-                            <div class="col">
-                                <label for="actual_completion" class="control-label">actual_completion </label>
-                                <input type="number" class="form-control" id="actual_completion" name="actual_completion"
-                                    title="   Please enter the actual_completion " value="{{$pstatus->actual_completion}}">
+                            <div class="col-md-12">
+                                <label for="status" class="control-label">Status:</label>
+                                <textarea class="form-control" id="status" name="status" rows="4"
+                                          placeholder="Enter project status...">{{ old('status', $pstatus->status) }}</textarea>
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col">
-                                <label for="expected_completion" class="control-label">expected_completion </label>
-                                <input type="date" class="form-control" id="expected_completion" name="expected_completion"
-                                    title="   Please enter the expected_completion " value="{{$pstatus->expected_completion}}">
-                            </div>
-
-
-
-                            <div class="col">
-                                <label for="date_pending_cost_orders " class="control-label">date_pending_cost_orders </label>
-                                <input type="text" class="form-control" id="date_pending_cost_orders " name="date_pending_cost_orders"
-                                    title="   Please enter the date_pending_cost_orders  " value="{{$pstatus->date_pending_cost_orders}}">
-                            </div>
-                        </div>
-
-
-
-
-
 
                         <div class="row mt-3">
-                            <div class="col">
-                                <label for="notes" class="control-label">notes</label>
-                                <input type="text" class="form-control" id="notes" name="notes"
-                                    title="   Please enter the notes " value="{{$pstatus->notes}}">
+                            <div class="col-md-4">
+                                <label for="actual_completion" class="control-label">Actual Completion %:</label>
+                                <input type="number" class="form-control" id="actual_completion"
+                                       name="actual_completion" min="0" max="100" step="0.01"
+                                       value="{{ old('actual_completion', $pstatus->actual_completion) }}"
+                                       placeholder="Enter percentage (0-100)">
                             </div>
 
-                            <div class="col">
-                                <label for="name" class="control-label">PR Number</label>
-                                <select name="pr_number" class="form-control SlectBox" onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')">
-                                    <!--placeholder-->
-                                    <option value="" selected disabled> PR Number </option>
-                                    @foreach ($projects as $pr_number_id)
-                                        <option value="{{ $pr_number_id->id }}" @selected($pstatus->pr_number == $pr_number_id->id)> {{ $pr_number_id->pr_number }}</option>
-                                    @endforeach
-                                </select>
+                            <div class="col-md-4">
+                                <label for="expected_completion" class="control-label">Expected Completion Date:</label>
+                                <input type="date" class="form-control" id="expected_completion"
+                                       name="expected_completion"
+                                       value="{{ old('expected_completion', $pstatus->expected_completion) }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="date_pending_cost_orders" class="control-label">Pending Cost/Orders:</label>
+                                <input type="text" class="form-control" id="date_pending_cost_orders"
+                                       name="date_pending_cost_orders"
+                                       value="{{ old('date_pending_cost_orders', $pstatus->date_pending_cost_orders) }}"
+                                       placeholder="Enter pending costs or orders">
                             </div>
                         </div>
 
-
-
-
-
-                        <br>
-
-
-
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary"> update pstatus </button>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label for="notes" class="control-label">Notes:</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="4"
+                                          placeholder="Enter additional notes...">{{ old('notes', $pstatus->notes) }}</textarea>
+                            </div>
                         </div>
 
-
+                        <div class="mg-t-30">
+                            <button class="btn btn-outline-primary pd-x-20" type="submit">Update Project Status</button>
+                            <a href="{{ route('pstatus.index') }}" class="btn btn-outline-secondary pd-x-20">Cancel</a>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -170,62 +168,27 @@
     <!-- main-content closed -->
 @endsection
 @section('js')
-    <!-- Internal Select2 js-->
     <script src="{{ URL::asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-    <!--Internal Fileuploads js-->
-    <script src="{{ URL::asset('assets/plugins/fileuploads/js/fileupload.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fileuploads/js/file-upload.js') }}"></script>
-    <!--Internal Fancy uploader js-->
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/jquery.ui.widget.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/jquery.fileupload.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/jquery.iframe-transport.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/jquery.fancy-fileupload.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/fancyuploder/fancy-uploader.js') }}"></script>
-    <!--Internal  Form-elements js-->
-    <script src="{{ URL::asset('assets/js/advanced-form-elements.js') }}"></script>
     <script src="{{ URL::asset('assets/js/select2.js') }}"></script>
-    <!--Internal Sumoselect js-->
-    <script src="{{ URL::asset('assets/plugins/sumoselect/jquery.sumoselect.js') }}"></script>
-    <!--Internal  Datepicker js -->
-    <script src="{{ URL::asset('assets/plugins/jquery-ui/ui/widgets/datepicker.js') }}"></script>
-    <!--Internal  jquery.maskedinput js -->
-    <script src="{{ URL::asset('assets/plugins/jquery.maskedinput/jquery.maskedinput.js') }}"></script>
-    <!--Internal  spectrum-colorpicker js -->
-    <script src="{{ URL::asset('assets/plugins/spectrum-colorpicker/spectrum.js') }}"></script>
-    <!-- Internal form-elements js -->
-    <script src="{{ URL::asset('assets/js/form-elements.js') }}"></script>
 
-    <script>
-        var date = $('.fc-datepicker').datepicker({
-            dateFormat: 'mm/dd/yy'
-        }).val();
-    </script>
-
-    {{-- ds  --}}
     <script>
         $(document).ready(function() {
-            $('select[name="pr_number_id"]').on('change', function() {
-                var SectionId = $(this).val();
-                if (SectionId) {
-                    $.ajax({
-                        url: "{{ URL::to('pr_number_id') }}/" + SectionId,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(data) {
-                            $('select[name="product"]').empty();
-                            $.each(data, function(key, value) {
-                                $('select[name="product"]').append('<option value="' +
-                                    value + '">' + value + '</option>');
-                            });
-                        },
-                    });
+            // Auto-fill project name when PR Number changes
+            $('#pr_number').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const projectName = selectedOption.data('project-name');
 
+                if (projectName) {
+                    $('#project_name_display').val(projectName).css('color', '#495057');
                 } else {
-                    console.log('AJAX load did not work');
+                    $('#project_name_display').val('No project name available').css('color', '#6c757d');
                 }
             });
 
+            // Initialize on page load with current value
+            if ($('#pr_number').val()) {
+                $('#pr_number').trigger('change');
+            }
         });
     </script>
-    {{-- /ds  --}}
 @endsection

@@ -3,14 +3,12 @@
 @section('css')
     <!--- Internal Select2 css-->
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    <!---Internal Fileupload css-->
-    <link href="{{ URL::asset('assets/plugins/fileuploads/css/fileupload.css') }}" rel="stylesheet" type="text/css" />
-    <!---Internal Fancy uploader css-->
-    <link href="{{ URL::asset('assets/plugins/fancyuploder/fancy_fileupload.css') }}" rel="stylesheet" />
-    <!--Internal Sumoselect css-->
-    <link rel="stylesheet" href="{{ URL::asset('assets/plugins/sumoselect/sumoselect-rtl.css') }}">
-    <!--Internal  TelephoneInput css-->
-    <link rel="stylesheet" href="{{ URL::asset('assets/plugins/telephoneinput/telephoneinput-rtl.css') }}">
+    <style>
+        textarea.form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+    </style>
 @endsection
 @section('title')
     Add Invoice
@@ -47,7 +45,7 @@
                 @endforeach
             </ul>
         </div>
-    @endif  
+    @endif
 
 
     <!-- row -->
@@ -55,7 +53,7 @@
 
         <div class="col-lg-12 col-md-12">
             <div class="card">
-                <div class="card-body">  
+                <div class="card-body">
                     <form id="yourFormId" action="{{ route('risks.update',$risks->id) }}" method="post"
                         enctype="multipart/form-data" autocomplete="off">
                         @csrf
@@ -64,94 +62,86 @@
 
 
                         <div class="row mt-3">
-
-                           
                             <div class="col">
-                                <label for="risk" class="control-label"> risk </label>
-                                <input type="text" class="form-control" id="risk" name="risk"
-                                    title="   Please enter the   " value="{{ $risks->risk }}">
-                            </div>
-                          
-
-
-                          <div class="col">
-                                <label for="name" class="control-label">PR Number</label>
-                                <select name="pr_number" class="form-control SlectBox" onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')">
-                                    <!--placeholder-->
-                                    <option value="" selected disabled> PR Number </option>
-                                    @foreach ($projects as $pr_number_id)
-                                        <option value="{{ $pr_number_id->id }}"  @selected($risks->pr_number == $pr_number_id->id)> {{ $pr_number_id->pr_number }}</option>
+                                <label for="pr_number" class="control-label">PR# <span class="text-danger">*</span></label>
+                                <select name="pr_number" id="pr_number" class="form-control select2" required>
+                                    <option value="" disabled>Select PR Number</option>
+                                    @foreach ($projects as $project)
+                                        <option value="{{ $project->id }}" data-project-name="{{ $project->name }}"
+                                            {{ old('pr_number', $risks->pr_number) == $project->id ? 'selected' : '' }}>
+                                            {{ $project->pr_number }}
+                                        </option>
                                     @endforeach
                                 </select>
-                            </div> 
+                            </div>
 
-                      
-                        
-
+                            <div class="col">
+                                <label for="project_name_display" class="control-label">Project Name</label>
+                                <input type="text" class="form-control" id="project_name_display" readonly
+                                       style="background-color: #f8f9fa; cursor: not-allowed;">
+                            </div>
                         </div>
 
-
-
-
-
-
-
-
-
-
-
-
-                        
                         <div class="row mt-3">
                             <div class="col">
-                                <label for="Mitigation" class="control-label">Mitigation </label>
-                                <input type="text" class="form-control" id="Mitigation" name="mitigation"
-                                    title="   Please enter the Mitigation "value="{{$risks->mitigation}}">
-                            </div>
-
-                           
-                            <div class="col">
-                                <label for="owner" class="control-label">owner </label>
-                                <input type="text" class="form-control" id="owner" name="owner"
-                                    title="   Please enter the owner "value="{{ $risks->owner }}">
-                            </div>
-
-
-                            <div class="col">
-                                <label for="impact" class="control-label">impact</label>
-                                <select class="form-control SlectBox"onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')" id="impact" name="impact" required>
-                                    <option value="">Select Value</option>
-                                    <option value="low"  @selected($risks->impact =="low")>low</option>
-                                    <option value="med"  @selected($risks->impact == "med")>med</option>
-                                    <option value="high"  @selected($risks->impact == "high")>high</option>
-                                </select>
+                                <label for="risk" class="control-label">Risk/Issue <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="risk" name="risk" rows="3" required>{{ old('risk', $risks->risk) }}</textarea>
                             </div>
 
 
 
-                            <div class="col">
-                                <label for="status" class="control-label">status</label>
-                                <select class="form-control SlectBox"onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')" id="status" name="status" required>
-                                    <option value="">Select Value</option>
-                                    <option value="open"  @selected($risks->status== "open")>open</option>
-                                    <option value="closed"  @selected($risks->status== "closed")>closed</option>
-                                </select>
-                            </div>
 
-                            
-                           
                         </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label for="impact" class="control-label">Impact <span class="text-danger">*</span></label>
+                                <select class="form-control" id="impact" name="impact" required>
+                                    <option value="" disabled>Select Impact</option>
+                                    <option value="low" {{ old('impact', $risks->impact) == 'low' ? 'selected' : '' }}>Low</option>
+                                    <option value="med" {{ old('impact', $risks->impact) == 'med' ? 'selected' : '' }}>Med</option>
+                                    <option value="high" {{ old('impact', $risks->impact) == 'high' ? 'selected' : '' }}>High</option>
+                                </select>
+                            </div>
+
+                            <div class="col">
+                                <label for="mitigation" class="control-label">Mitigation/Action Plan</label>
+                                <textarea class="form-control" id="mitigation" name="mitigation" rows="3">{{ old('mitigation', $risks->mitigation) }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label for="owner" class="control-label">Owner</label>
+                                <input type="text" class="form-control" id="owner" name="owner" value="{{ old('owner', $risks->owner) }}">
+                            </div>
+
+                            <div class="col">
+                                <label for="status" class="control-label">Status <span class="text-danger">*</span></label>
+                                <select class="form-control" id="status" name="status" required>
+                                    <option value="open" {{ old('status', $risks->status) == 'open' ? 'selected' : '' }}>Open</option>
+                                    <option value="closed" {{ old('status', $risks->status) == 'closed' ? 'selected' : '' }}>Closed</option>
+                                </select>
+                            </div>
+                        </div>
 
                         <br>
 
-
-
                         <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary"> update risk </button>
+                            <button type="submit" class="btn btn-outline-primary">Update Risk</button>
+                            <a href="{{ route('risks.index') }}" class="btn btn-outline-secondary ml-2">Cancel</a>
                         </div>
 
 
@@ -201,31 +191,20 @@
         }).val();
     </script>
 
-    {{-- ds  --}}
     <script>
         $(document).ready(function() {
-            $('select[name="pr_number_id"]').on('change', function() {
-                var SectionId = $(this).val();
-                if (SectionId) {
-                    $.ajax({
-                        url: "{{ URL::to('pr_number_id') }}/" + SectionId,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(data) {
-                            $('select[name="product"]').empty();
-                            $.each(data, function(key, value) {
-                                $('select[name="product"]').append('<option value="' +
-                                    value + '">' + value + '</option>');
-                            });
-                        },
-                    });
+            // Initialize Select2
+            $('.select2').select2();
 
-                } else {
-                    console.log('AJAX load did not work');
-                }
+            // Project Name Auto-fill
+            $('#pr_number').on('change', function() {
+                var selectedOption = $(this).find('option:selected');
+                var projectName = selectedOption.data('project-name');
+                $('#project_name_display').val(projectName || '');
             });
 
+            // Trigger on page load to show existing project name
+            $('#pr_number').trigger('change');
         });
     </script>
-    {{-- /ds  --}}
 @endsection

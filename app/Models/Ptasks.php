@@ -12,8 +12,8 @@ class Ptasks extends Model
         'task_date', 'pr_number','details','assigned','expected_com_date','status'
     ];
 
-    public function ptasks ()
+    public function project()
     {
-    return $this->belongsTo(Project::class);
+        return $this->belongsTo(Project::class, 'pr_number');
     }
 }
