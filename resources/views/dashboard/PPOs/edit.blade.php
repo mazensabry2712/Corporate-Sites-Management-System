@@ -6,6 +6,28 @@
 
 @section('css')
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+    <style>
+        /* تحسين مظهر textarea في الـ forms */
+        .form-control textarea,
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea.form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+    </style>
 @endsection
 
 @section('page-header')
@@ -55,10 +77,10 @@
                             <div class="col-md-6">
                                 <div class="form-group mg-b-0">
                                     <label class="form-label">Project Number: <span class="tx-danger">*</span></label>
-                                    <select class="form-control select2" name="pr_number" required>
+                                    <select class="form-control select2" name="pr_number" id="pr_number" required>
                                         <option value="">Choose Project</option>
                                         @foreach($projects as $project)
-                                            <option value="{{ $project->id }}"
+                                            <option value="{{ $project->id }}" data-project-name="{{ $project->name }}"
                                                 {{ (old('pr_number', $ppo->pr_number) == $project->id) ? 'selected' : '' }}>
                                                 {{ $project->pr_number }}
                                             </option>
@@ -67,6 +89,16 @@
                                 </div>
                             </div>
 
+                            <div class="col-md-6">
+                                <div class="form-group mg-b-0">
+                                    <label class="form-label">Project Name:</label>
+                                    <input type="text" id="project_name_display" class="form-control" readonly
+                                           style="background-color: #f8f9fa; cursor: not-allowed;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="category" class="form-label">Category: <span class="tx-danger">*</span></label>
@@ -127,41 +159,38 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="status" class="form-label">Status: <span class="tx-danger">*</span></label>
-                                    <select class="form-control" name="status" required>
-                                        <option value="">Choose Status</option>
-                                        <option value="Active" {{ old('status', $ppo->status) == 'Active' ? 'selected' : '' }}>Active</option>
-                                        <option value="Pending" {{ old('status', $ppo->status) == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="Completed" {{ old('status', $ppo->status) == 'Completed' ? 'selected' : '' }}>Completed</option>
-                                        <option value="Cancelled" {{ old('status', $ppo->status) == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    </select>
+                                    <label for="updates" class="form-label">Updates:</label>
+                                    <textarea class="form-control" id="updates" name="updates" rows="4"
+                                              placeholder="Enter updates...">{{ old('updates', $ppo->updates) }}</textarea>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="updates" class="form-label">Updates:</label>
-                                    <textarea class="form-control" id="updates" name="updates" rows="3"
-                                              placeholder="Enter updates">{{ old('updates', $ppo->updates) }}</textarea>
+                                    <label for="status" class="form-label">Status:</label>
+                                    <textarea class="form-control" id="status" name="status" rows="4"
+                                              placeholder="Enter status...">{{ old('status', $ppo->status) }}</textarea>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="notes" class="form-label">Notes:</label>
-                                    <textarea class="form-control" id="notes" name="notes" rows="3"
-                                              placeholder="Enter notes">{{ old('notes', $ppo->notes) }}</textarea>
+                                    <textarea class="form-control" id="notes" name="notes" rows="4"
+                                              placeholder="Enter notes...">{{ old('notes', $ppo->notes) }}</textarea>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mg-t-30">
-                            <button class="btn btn-primary pd-x-20" type="submit">Update PPO</button>
-                            <a href="{{ route('ppos.index') }}" class="btn btn-secondary pd-x-20">Cancel</a>
+                            <button class="btn btn-outline-primary pd-x-20" type="submit">Update PPO</button>
+                            <a href="{{ route('ppos.index') }}" class="btn btn-outline-secondary pd-x-20">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -174,4 +203,25 @@
 @section('js')
     <script src="{{ URL::asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ URL::asset('assets/js/select2.js') }}"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Auto-fill project name when PR Number changes
+            $('#pr_number').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const projectName = selectedOption.data('project-name');
+
+                if (projectName) {
+                    $('#project_name_display').val(projectName).css('color', '#495057');
+                } else {
+                    $('#project_name_display').val('No project name available').css('color', '#6c757d');
+                }
+            });
+
+            // Initialize on page load with current value
+            if ($('#pr_number').val()) {
+                $('#pr_number').trigger('change');
+            }
+        });
+    </script>
 @endsection

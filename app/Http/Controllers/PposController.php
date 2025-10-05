@@ -8,6 +8,7 @@ use App\Models\Pepo;
 use App\Models\Ds;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 
 class PposController extends Controller
 {
@@ -16,7 +17,13 @@ class PposController extends Controller
      */
     public function index()
     {
-        $ppos = Ppos::with(['project', 'pepo', 'ds'])->orderBy('created_at', 'desc')->get();
+        // استخدام Cache + Eager Loading للسرعة الفائقة
+        $ppos = Cache::remember('ppos_list', 3600, function () {
+            return Ppos::with(['project:id,pr_number,name', 'pepo:id,category', 'ds:id,dsname'])
+                ->latest()
+                ->get();
+        });
+
         return view('dashboard.PPOs.index', compact('ppos'));
     }
 
@@ -44,7 +51,7 @@ class PposController extends Controller
             'po_number' => 'required|string|max:255|unique:ppos,po_number',
             'value' => 'nullable|numeric|min:0',
             'date' => 'nullable|date',
-            'status' => 'required|in:Active,Pending,Completed,Cancelled',
+            'status' => 'nullable|string',
             'updates' => 'nullable|string',
             'notes' => 'nullable|string'
         ]);
@@ -58,6 +65,9 @@ class PposController extends Controller
         try {
             Ppos::create($request->all());
 
+            // مسح الـ Cache بعد الإضافة
+            Cache::forget('ppos_list');
+
             return redirect()->route('ppos.index')
                 ->with('Add', 'PPO has been added successfully');
         } catch (\Exception $e) {
@@ -65,6 +75,15 @@ class PposController extends Controller
                 ->with('Error', 'Failed to create PPO: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        $ppo = Ppos::with(['project', 'pepo', 'ds'])->findOrFail($id);
+        return view('dashboard.PPOs.show', compact('ppo'));
     }
 
     /**
@@ -91,7 +110,7 @@ class PposController extends Controller
             'po_number' => 'required|string|max:255|unique:ppos,po_number,' . $ppo->id,
             'value' => 'nullable|numeric|min:0',
             'date' => 'nullable|date',
-            'status' => 'required|in:Active,Pending,Completed,Cancelled',
+            'status' => 'nullable|string',
             'updates' => 'nullable|string',
             'notes' => 'nullable|string'
         ]);
@@ -105,8 +124,11 @@ class PposController extends Controller
         try {
             $ppo->update($request->all());
 
+            // مسح الـ Cache بعد التحديث
+            Cache::forget('ppos_list');
+
             return redirect()->route('ppos.index')
-                ->with('edit', 'PPO has been updated successfully');
+                ->with('Edit', 'PPO has been updated successfully');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('Error', 'Failed to update PPO: ' . $e->getMessage())
@@ -122,6 +144,9 @@ class PposController extends Controller
         try {
             $ppo = Ppos::findOrFail($request->id);
             $ppo->delete();
+
+            // مسح الـ Cache بعد الحذف
+            Cache::forget('ppos_list');
 
             return redirect()->route('ppos.index')
                 ->with('delete', 'PPO "' . $request->name . '" has been deleted successfully');

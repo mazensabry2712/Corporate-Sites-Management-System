@@ -11,7 +11,55 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
+    <style>
+        /* تحسين شكل الجدول */
+        #example1 {
+            width: 100% !important;
+            table-layout: auto;
+        }
 
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        /* تحسين أزرار التصدير */
+        .export-buttons .btn {
+            transition: all 0.3s ease;
+            margin: 0 1px;
+            border-radius: 4px;
+        }
+
+        .export-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-group .btn {
+            border-radius: 0;
+        }
+
+        .btn-group .btn:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .btn-group .btn:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* إخفاء أزرار DataTables الافتراضية */
+        .dt-buttons {
+            display: none !important;
+        }
+
+        /* تحسين Badge الـ Margin */
+        .badge {
+            font-size: 0.875rem;
+            padding: 0.35em 0.65em;
+        }
+    </style>
 @endsection
 @section('page-header')
     <!-- breadcrumb -->
@@ -42,15 +90,28 @@
 
     @if (session()->has('Add'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('Add') }}</strong>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Success!</strong>
+                    <div>{{ session()->get('Add') }}</div>
+                </div>
+            </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
     @endif
+
     @if (session()->has('Error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('Error') }}</strong>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-circle mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Error!</strong>
+                    <div>{{ session()->get('Error') }}</div>
+                </div>
+            </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -59,7 +120,13 @@
 
     @if (session()->has('delete'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('delete') }}</strong>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-trash mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Deleted!</strong>
+                    <div>{{ session()->get('delete') }}</div>
+                </div>
+            </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -67,8 +134,14 @@
     @endif
 
     @if (session()->has('edit'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('edit') }}</strong>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-edit mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Updated!</strong>
+                    <div>{{ session()->get('edit') }}</div>
+                </div>
+            </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -81,30 +154,52 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header pb-0">
-                    @can('Add')
-                        <a class=" btn btn-outline-primary btn-block" href="{{ route('epo.create') }}"> Add Epo </a>
-                    @endcan
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Epo Management</h6>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <!-- Export buttons -->
+                                <div class="btn-group export-buttons mr-2" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()" title="Export to Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="exportToCSV()" title="Export to CSV">
+                                        <i class="fas fa-file-csv"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printTable()" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                </div>
+
+                                @can('Add')
+                                    <a class="btn btn-primary" data-effect="effect-scale" href="{{ route('epo.create') }}">
+                                        <i class="fas fa-plus"></i> Add Epo
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table text-md-nowrap" id="example1">
                             <thead>
-
                                 <tr>
                                     <th>#</th>
-                                    <th>pepo Operations </th>
-                                    <th>project_id </th>
-                                    <th>category </th>
-                                    <th>planned_cost </th>
-                                    <th>selling_price </th>
-                                    {{-- <th>margin</th> --}}
-
-
+                                    <th>Operations</th>
+                                    <th>PR Number</th>
+                                    <th>Project Name</th>
+                                    <th>Category</th>
+                                    <th>Planned Cost</th>
+                                    <th>Selling Price</th>
+                                    <th>Margin (%)</th>
                                 </tr>
-
-
-
-
                             </thead>
 
                             <tbody>
@@ -114,9 +209,14 @@
 
                                     <td>{{ $i }}</td>
                                     <td>
+                                        {{-- @can('Show') --}}
+                                        <a class="btn btn-sm btn-success" href="{{ route('epo.show', $x->id) }}"
+                                            title="View"><i class="las la-eye"></i></a>
+                                        {{-- @endcan --}}
+
                                         @can('Edit')
-                                        <a class=" btn btn-sm btn-info" href="{{ route('epo.edit', $x->id) }}"
-                                            title="Upadte"><i class="las la-pen"></i></a>
+                                        <a class="btn btn-sm btn-info" href="{{ route('epo.edit', $x->id) }}"
+                                            title="Update"><i class="las la-pen"></i></a>
                                         @endcan
 
                                         @can('Delete')
@@ -128,11 +228,19 @@
                                     </td>
 
                                     <td>{{ $x->project->pr_number }}</td>
+                                    <td>{{ $x->project->name ?? 'N/A' }}</td>
                                     <td>{{ $x->category }}</td>
-                                    <td>{{ $x->planned_cost }}</td>
-                                    <td>{{ $x->selling_price }}</td>
-                                    {{-- <td>{{ $x->margin }}</td> --}}
-
+                                    <td>{{ number_format($x->planned_cost, 2) }}</td>
+                                    <td>{{ number_format($x->selling_price, 2) }}</td>
+                                    <td>
+                                        @if($x->margin !== null)
+                                            <span class="badge badge-{{ $x->margin >= 0.2 ? 'success' : ($x->margin >= 0.1 ? 'warning' : 'danger') }}">
+                                                {{ number_format($x->margin * 100, 2) }}%
+                                            </span>
+                                        @else
+                                            <span class="badge badge-secondary">N/A</span>
+                                        @endif
+                                    </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -205,33 +313,149 @@
     <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
     <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
 
-    <script>
-        $('#exampleModal2').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget)
-            var id = button.data('id')
-            var name = button.data('name')
-            var email = button.data('email')
-            var phone = button.data('phone')
-            var modal = $(this)
-            modal.find('.modal-body #id').val(id);
-            modal.find('.modal-body #name').val(name);
-            modal.find('.modal-body #email').val(email);
-            modal.find('.modal-body #phone').val(phone);
-        })
-    </script>
+    <!-- jsPDF with autoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- SheetJS for Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
+        // Delete Modal
         $('#modaldemo9').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget)
             var id = button.data('id')
             var name = button.data('name')
-            var email = button.data('email')
-            var phone = button.data('phone')
             var modal = $(this)
             modal.find('.modal-body #id').val(id);
             modal.find('.modal-body #name').val(name);
-            modal.find('.modal-body #email').val(email);
-            modal.find('.modal-body #phone').val(phone);
         })
+
+        // Export to PDF
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(16);
+            doc.text('Epo Report', 14, 15);
+            doc.setFontSize(10);
+            doc.text('Generated on: ' + new Date().toLocaleDateString(), 14, 22);
+
+            const table = document.getElementById('example1');
+            const rows = [];
+
+            rows.push(['#', 'PR Number', 'Project Name', 'Category', 'Planned Cost', 'Selling Price', 'Margin (%)']);
+
+            const tableRows = table.querySelectorAll('tbody tr');
+            tableRows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                const rowData = [
+                    index + 1,
+                    cells[2]?.textContent.trim() || '',
+                    cells[3]?.textContent.trim() || '',
+                    cells[4]?.textContent.trim() || '',
+                    cells[5]?.textContent.trim() || '',
+                    cells[6]?.textContent.trim() || '',
+                    cells[7]?.textContent.trim() || ''
+                ];
+                rows.push(rowData);
+            });
+
+            doc.autoTable({
+                head: [rows[0]],
+                body: rows.slice(1),
+                startY: 30,
+                theme: 'grid',
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3
+                },
+                headStyles: {
+                    fillColor: [41, 128, 185],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                }
+            });
+
+            doc.save('Epo_Report_' + new Date().toISOString().slice(0,10) + '.pdf');
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            const table = document.getElementById('example1');
+            const wb = XLSX.utils.book_new();
+
+            const data = [];
+            data.push(['#', 'PR Number', 'Project Name', 'Category', 'Planned Cost', 'Selling Price', 'Margin (%)']);
+
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                data.push([
+                    index + 1,
+                    cells[2]?.textContent.trim() || '',
+                    cells[3]?.textContent.trim() || '',
+                    cells[4]?.textContent.trim() || '',
+                    cells[5]?.textContent.trim() || '',
+                    cells[6]?.textContent.trim() || '',
+                    cells[7]?.textContent.trim() || ''
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+
+            ws['!cols'] = [
+                { wch: 5 },
+                { wch: 15 },
+                { wch: 25 },
+                { wch: 20 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 }
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Epo Data');
+            XLSX.writeFile(wb, 'Epo_Report_' + new Date().toISOString().slice(0,10) + '.xlsx');
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            const table = document.getElementById('example1');
+            let csv = [];
+
+            csv.push(['#', 'PR Number', 'Project Name', 'Category', 'Planned Cost', 'Selling Price', 'Margin (%)'].join(','));
+
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                const rowData = [
+                    index + 1,
+                    '"' + (cells[2]?.textContent.trim().replace(/"/g, '""') || '') + '"',
+                    '"' + (cells[3]?.textContent.trim().replace(/"/g, '""') || '') + '"',
+                    '"' + (cells[4]?.textContent.trim().replace(/"/g, '""') || '') + '"',
+                    cells[5]?.textContent.trim() || '',
+                    cells[6]?.textContent.trim() || '',
+                    cells[7]?.textContent.trim() || ''
+                ];
+                csv.push(rowData.join(','));
+            });
+
+            const csvContent = csv.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Epo_Report_' + new Date().toISOString().slice(0,10) + '.csv';
+            link.click();
+        }
+
+        // Print Table
+        function printTable() {
+            window.print();
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
     </script>
 @endsection
