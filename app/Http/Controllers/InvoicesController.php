@@ -5,55 +5,71 @@ namespace App\Http\Controllers;
 use App\Models\invoices;
 use App\Models\Project;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class InvoicesController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource with caching for speed
      */
     public function index()
     {
-        $invoices = invoices::all();
+        // Cache for 1 hour (3600 seconds) for ultra-fast performance
+        $invoices = Cache::remember('invoices_list', 3600, function () {
+            return invoices::with('project:id,pr_number,name')->get();
+        });
+
         return view('dashboard.invoice.index', compact('invoices'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new resource with caching
      */
     public function create()
     {
-        // $invoices = invoices::all();
-    $pr_number_idd = Project::all();
+        // Cache projects list for speed
+        $pr_number_idd = Cache::remember('projects_list', 3600, function () {
+            return Project::select('id', 'pr_number', 'name')->get();
+        });
+
         return view('dashboard.invoice.create', compact('pr_number_idd'));
     }
 
     /**
      * Store a newly created resource in storage.
+     * Files saved to external 'storge' folder for speed
      */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'invoice_number' => 'required',//|unique:invoices,invoice_number',
-            'value' => 'nullable|numeric',
-            'pr_number' => "nullable|exists:projects,id",
-            'invoice_copy_path' => 'nullable|mimes:pdf',
-            'status' => 'required|string',
-            'pr_invoices_total_value' => 'nullable|numeric'
+            'invoice_number' => 'required|unique:invoices,invoice_number',
+            'value' => 'required|numeric|min:0',
+            'pr_number' => 'required|exists:projects,id',
+            'invoice_copy_path' => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif|max:10240', // 10MB max
+            'status' => 'required|in:paid,pending,overdue,cancelled',
+            'pr_invoices_total_value' => 'nullable|numeric|min:0'
         ]);
 
-        if($request->has('invoice_copy_path')) {
-            $data['invoice_copy_path'] = $request->file("invoice_copy_path")->store("uploads",[
-                "disk"=>"public",
-            ]);
+        // Handle file upload to external 'storge' folder
+        if ($request->hasFile('invoice_copy_path')) {
+            $file = $request->file('invoice_copy_path');
+            $filename = time() . '_' . $file->getClientOriginalName();
+
+            // Move to external 'storge' folder (not storage)
+            $file->move(public_path('../storge'), $filename);
+
+            $data['invoice_copy_path'] = $filename;
         }
 
-        // Create a new invoice
-        Invoices::create($data);
+        // Create invoice
+        invoices::create($data);
 
-        session()->flash('Add', 'Registration successful');
+        // Clear cache for instant update
+        Cache::forget('invoices_list');
 
-        return redirect('/invoices');
+        session()->flash('Add', 'Invoice added successfully! ✅');
+
+        return redirect()->route('invoices.index');
     }
 
     /**
@@ -65,63 +81,94 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified resource with caching
      */
     public function edit($id)
     {
-        //
-        $invoices = invoices::find($id);
-    $pr_number_idd = Project::all();
+        $invoices = invoices::findOrFail($id);
+
+        // Cache projects list for speed
+        $pr_number_idd = Cache::remember('projects_list', 3600, function () {
+            return Project::select('id', 'pr_number', 'name')->get();
+        });
+
         return view('dashboard.invoice.edit', compact('invoices', 'pr_number_idd'));
     }
 
     /**
      * Update the specified resource in storage.
+     * Files saved to external 'storge' folder for speed
      */
     public function update(Request $request, $id)
     {
-        $invoices = invoices::find($id);
+        $invoices = invoices::findOrFail($id);
 
         $data = $request->validate([
-            'invoice_number' => 'required|unique:invoices',//.$invoices->invoice_number,
-            'value' => 'nullable|numeric',
-            'invoice_copy_path' => 'nullable|mimes:pdf',
-            'status' => 'required|string',
-            'pr_invoices_total_value' => 'nullable|numeric',
-            'pr_number' => "nullable|exists:projects,id"
+            'invoice_number' => 'required|unique:invoices,invoice_number,' . $id,
+            'value' => 'required|numeric|min:0',
+            'invoice_copy_path' => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif|max:10240', // 10MB
+            'status' => 'required|in:paid,pending,overdue,cancelled',
+            'pr_invoices_total_value' => 'nullable|numeric|min:0',
+            'pr_number' => 'required|exists:projects,id'
         ]);
 
-        $invoices->update([
-            'invoice_number' => $request->invoice_number,
-            'value' => $request->value,
-            'invoice_copy_path' => $request->invoice_copy_path,
-            'status' => $request->status,
-            'pr_invoices_total_value' => $request->pr_invoices_total_value,
-            'pr_number' => $request->pr_number
-        ]);
+        // Handle new file upload to external 'storge' folder
+        if ($request->hasFile('invoice_copy_path')) {
+            // Delete old file if exists
+            if ($invoices->invoice_copy_path) {
+                $oldFilePath = public_path('../storge/' . $invoices->invoice_copy_path);
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                }
+            }
 
-        if($request->has('invoice_copy_path')) {
-            $data['invoice_copy_path'] = $request->file("invoice_copy_path")->store("uploads",[
-                "disk"=>"public",
-            ]);
+            // Upload new file to external 'storge' folder
+            $file = $request->file('invoice_copy_path');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('../storge'), $filename);
+
+            $data['invoice_copy_path'] = $filename;
+        } else {
+            // Keep existing file
+            unset($data['invoice_copy_path']);
         }
 
-        session()->flash('edit', 'The section has been successfully modified');
+        // Update invoice
+        $invoices->update($data);
 
-        return redirect('/invoices'); // إعادة التوجيه إل
+        // Clear cache for instant update
+        Cache::forget('invoices_list');
+
+        session()->flash('edit', 'Invoice updated successfully! ✅');
+
+        return redirect()->route('invoices.index');
     }
 
     /**
      * Remove the specified resource from storage.
+     * Also deletes file from external 'storge' folder
      */
     public function destroy(Request $request)
     {
-        //
         $id = $request->id;
-        invoices::find($id)->delete();
-        session()->flash('delete', 'Deleted successfully');
+        $invoice = invoices::findOrFail($id);
 
-        return redirect('/invoices');
+        // Delete file from external 'storge' folder if exists
+        if ($invoice->invoice_copy_path) {
+            $filePath = public_path('../storge/' . $invoice->invoice_copy_path);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
 
+        // Delete invoice record
+        $invoice->delete();
+
+        // Clear cache for instant update
+        Cache::forget('invoices_list');
+
+        session()->flash('delete', 'Invoice deleted successfully! 🗑️');
+
+        return redirect()->route('invoices.index');
     }
 }

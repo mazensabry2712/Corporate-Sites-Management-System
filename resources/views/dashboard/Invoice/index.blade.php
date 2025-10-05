@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    Invoices | mdsjedpr
+    Invoices
 @stop
 @section('css')
     <!-- Internal Data table css -->
@@ -10,6 +10,168 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+
+    <!-- Lightbox CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+
+    <style>
+        .img-thumbnail {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            transition: 0.3s;
+        }
+
+        .img-thumbnail:hover {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .no-file {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            width: 50px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+
+        /* تحسين شكل عرض Project name */
+        .project-name {
+            max-width: 200px !important;
+            min-width: 150px;
+            white-space: normal !important;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .project-name .badge {
+            display: inline-block;
+            max-width: 100%;
+            word-wrap: break-word;
+            white-space: normal;
+            line-height: 1.4;
+        }
+
+        /* تحسين شكل الجدول */
+        #example1 {
+            width: 100% !important;
+            table-layout: auto;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        /* تحسين أزرار التصدير */
+        .export-buttons .btn {
+            transition: all 0.3s ease;
+            margin: 0 1px;
+            border-radius: 4px;
+        }
+
+        .export-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-group .btn {
+            border-radius: 0;
+        }
+
+        .btn-group .btn:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .btn-group .btn:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* إخفاء أزرار DataTables الافتراضية */
+        .dt-buttons {
+            display: none !important;
+        }
+
+        .image-thumbnail {
+            cursor: pointer;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-thumbnail:hover {
+            border-color: #007bff;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        /* للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .card-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .btn-group {
+                margin-bottom: 10px;
+                margin-right: 0 !important;
+            }
+        }
+
+        /* تحسين شكل الـ Alerts */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            position: relative;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+            color: white;
+        }
+
+        .alert .close {
+            color: white;
+            opacity: 0.8;
+            font-size: 20px;
+        }
+
+        .alert .close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* تأكيد عدم الاختفاء السريع */
+        .alert.fade.show {
+            opacity: 1 !important;
+        }
+    </style>
 @endsection
 
 @section('page-header')
@@ -29,37 +191,69 @@
 
 @section('content')
     @if (session()->has('Add'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('Add') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif
-
-    @if (session()->has('Error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('Error') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif
-
-    @if (session()->has('delete'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('delete') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+        <div class="alert alert-success alert-dismissible fade show" role="alert"
+            style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Success!</strong>
+                    <div>{{ session()->get('Add') }}</div>
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
             </button>
         </div>
     @endif
 
     @if (session()->has('edit'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>{{ session()->get('edit') }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+        <div class="alert alert-success alert-dismissible fade show" role="alert"
+            style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-edit mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Updated!</strong>
+                    <div>{{ session()->get('edit') }}</div>
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    @if (session()->has('delete'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert"
+            style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-trash mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Deleted!</strong>
+                    <div>{{ session()->get('delete') }}</div>
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    @if (session()->has('Error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert"
+            style="position: relative; z-index: 1050;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle mr-3" style="font-size: 20px;"></i>
+                <div>
+                    <strong>Error!</strong>
+                    <div>{{ session()->get('Error') }}</div>
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                style="position: absolute; top: 15px; right: 20px;">
+                <span aria-hidden="true" style="color: white; font-size: 24px;">&times;</span>
             </button>
         </div>
     @endif
@@ -69,10 +263,43 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header pb-0">
-                    @can('Add')
-                        <a class="btn btn-outline-primary btn-block" href="{{ route('invoices.create') }}"> Add Invoice </a>
-                    @endcan
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Invoices Management</h6>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <!-- Export buttons -->
+                                <div class="btn-group export-buttons mr-2" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()"
+                                        title="Export to PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()"
+                                        title="Export to Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="exportToCSV()"
+                                        title="Export to CSV">
+                                        <i class="fas fa-file-csv"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printTable()"
+                                        title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                </div>
+
+                                @can('Add')
+                                    <a class="btn btn-primary" data-effect="effect-scale"
+                                        href="{{ route('invoices.create') }}">
+                                        <i class="fas fa-plus"></i> Add Invoice
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table text-md-nowrap" id="example1">
@@ -80,12 +307,13 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Operations</th>
-                                    <th>Project Number</th>
+                                    <th>PR Number</th>
+                                    <th>Project Name</th>
                                     <th>Invoice Number</th>
+
+                                    <th>Invoice Copy</th>
                                     <th>Value</th>
                                     <th>Status</th>
-                                    <th>Total Invoices Value</th>
-                                    <th>Invoice Copy</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -112,29 +340,72 @@
                                             @endcan
                                         </td>
                                         <td>{{ $invoice->project->pr_number ?? 'N/A' }}</td>
-                                        <td>{{ $invoice->invoice_number ?? 'N/A' }}</td>
-                                        <td>{{ number_format($invoice->value, 2) ?? 'N/A' }}</td>
-                                        <td>
-                                            @if ($invoice->status == 'paid')
-                                                <span class="badge badge-success">{{ $invoice->status }}</span>
-                                            @elseif($invoice->status == 'pending')
-                                                <span class="badge badge-warning">{{ $invoice->status }}</span>
+                                        <td class="project-name">
+                                            @if ($invoice->project && $invoice->project->name)
+                                                <span class="badge badge-info"
+                                                    style="font-size: 12px; padding: 6px 10px;">
+                                                    {{ $invoice->project->name }}
+                                                </span>
                                             @else
-                                                <span class="badge badge-danger">{{ $invoice->status }}</span>
+                                                <span class="text-muted">N/A</span>
                                             @endif
                                         </td>
-                                        <td>{{ number_format($invoice->pr_invoices_total_value, 2) ?? 'N/A' }}</td>
+                                        <td>{{ $invoice->invoice_number }}</td>
+
                                         <td>
                                             @if ($invoice->invoice_copy_path)
-                                                <a href="{{ asset('storage/' . $invoice->invoice_copy_path) }}"
-                                                    target="_blank" class="btn btn-sm btn-outline-info">
-                                                    <i class="las la-file-pdf"></i> View PDF
-                                                </a>
+                                                @php
+                                                    $filePath = '../storge/' . $invoice->invoice_copy_path;
+                                                    $extension = strtolower(
+                                                        pathinfo($invoice->invoice_copy_path, PATHINFO_EXTENSION),
+                                                    );
+                                                    $imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+                                                @endphp
+
+                                                @if (in_array($extension, $imageExtensions))
+                                                    <a href="{{ asset($filePath) }}"
+                                                        data-lightbox="invoice-{{ $invoice->id }}"
+                                                        data-title="Invoice {{ $invoice->invoice_number }}">
+                                                        <img src="{{ asset($filePath) }}" alt="Invoice Copy"
+                                                            class="image-thumbnail" width="50" height="50">
+                                                    </a>
+                                                @else
+                                                    <a href="{{ asset($filePath) }}" target="_blank"
+                                                        class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </a>
+                                                @endif
                                             @else
-                                                <span class="text-muted">No file</span>
+                                                <div class="no-file">
+                                                    <i class="fas fa-file-slash text-muted"></i>
+                                                    <small class="text-muted">No file</small>
+                                                </div>
                                             @endif
                                         </td>
-
+                                        <td>
+                                            <span class="badge badge-primary">
+                                                {{ number_format($invoice->value, 2) }} EGP
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if ($invoice->status == 'paid')
+                                                <span class="badge badge-success">
+                                                    <i class="fas fa-check-circle"></i> Paid
+                                                </span>
+                                            @elseif($invoice->status == 'pending')
+                                                <span class="badge badge-warning">
+                                                    <i class="fas fa-clock"></i> Pending
+                                                </span>
+                                            @elseif($invoice->status == 'overdue')
+                                                <span class="badge badge-danger">
+                                                    <i class="fas fa-exclamation-triangle"></i> Overdue
+                                                </span>
+                                            @else
+                                                <span class="badge badge-secondary">
+                                                    <i class="fas fa-ban"></i> Cancelled
+                                                </span>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -196,10 +467,79 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>
     <!--Internal  Datatable js -->
-    <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
+    {{-- <script src="{{ URL::asset('assets/js/table-data.js') }}"></script> --}}
     <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
 
+    <!-- Lightbox JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+
     <script>
+        // Initialize DataTable with export buttons (Only once!)
+        var table = $('#example1').DataTable({
+            dom: 'Bfrtip',
+            buttons: [{
+                    extend: 'pdfHtml5',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn btn-danger btn-sm',
+                    title: 'Invoices List',
+                    exportOptions: {
+                        columns: [0, 2, 3, 4, 6, 7]
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Invoices List',
+                    exportOptions: {
+                        columns: [0, 2, 3, 4, 6, 7]
+                    }
+                },
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="fas fa-file-csv"></i> CSV',
+                    className: 'btn btn-info btn-sm',
+                    title: 'Invoices List',
+                    exportOptions: {
+                        columns: [0, 2, 3, 4, 6, 7]
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Print',
+                    className: 'btn btn-secondary btn-sm',
+                    title: 'Invoices List',
+                    exportOptions: {
+                        columns: [0, 2, 3, 4, 6, 7]
+                    }
+                }
+            ],
+            responsive: true,
+            language: {
+                searchPlaceholder: 'Search invoices...',
+                sSearch: '',
+                lengthMenu: '_MENU_ invoices per page',
+            }
+        });
+
+        // Export functions for custom buttons
+        function exportToPDF() {
+            table.button('.buttons-pdf').trigger();
+        }
+
+        function exportToExcel() {
+            table.button('.buttons-excel').trigger();
+        }
+
+        function exportToCSV() {
+            table.button('.buttons-csv').trigger();
+        }
+
+        function printTable() {
+            table.button('.buttons-print').trigger();
+        }
+
+        // Delete modal
         $('#modaldemo9').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget)
             var id = button.data('id')
@@ -207,6 +547,18 @@
             var modal = $(this)
             modal.find('.modal-body #id').val(id);
             modal.find('.modal-body #invoice_number').val(invoice_number);
-        })
+        });
+
+        // Lightbox configuration
+        lightbox.option({
+            'resizeDuration': 200,
+            'wrapAround': true,
+            'albumLabel': 'Invoice %1 of %2'
+        });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
     </script>
 @endsection
