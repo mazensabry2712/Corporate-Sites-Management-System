@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Milestones;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class MilestonesController extends Controller
 {
@@ -13,10 +14,10 @@ class MilestonesController extends Controller
      */
     public function index()
     {
-        //
-        $Milestones = Milestones::all();
+        $Milestones = Cache::remember('milestones_list', 3600, function () {
+            return Milestones::with(['project:id,pr_number,name'])->get();
+        });
         return view('dashboard.Milestones.index', compact('Milestones'));
-
     }
 
     /**
@@ -36,8 +37,6 @@ class MilestonesController extends Controller
      */
     public function store(Request $request)
     {
-        //
-
         $validatedData = $request->validate([
             'milestone' => 'required|max:255',
             'planned_com' => 'nullable',
@@ -48,17 +47,18 @@ class MilestonesController extends Controller
         ]);
 
         Milestones::create($validatedData);
+        Cache::forget('milestones_list');
         session()->flash('Add', 'Registration successful');
-            return redirect('/milestones');
-
+        return redirect()->route('milestones.index');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Milestones $milestones)
+    public function show($id)
     {
-        //
+        $milestones = Milestones::with('project')->findOrFail($id);
+        return view('dashboard.Milestones.show', compact('milestones'));
     }
 
     /**
@@ -79,29 +79,20 @@ class MilestonesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $milestones=Milestones::find($id);
-         $validatedData = $request->validate([
-                'milestone' => 'required|max:255',
-                'planned_com' => 'nullable',
-                'actual_com' => 'nullable',
-                'status' => 'required',
-                'comments' => 'nullable|string',
-                'pr_number'=>"required|exists:projects,id"
-            ]);
-
-
-
-    $milestones->update([
-         'pr_number'=>$request->pr_number,
-        'milestone'=>$request->milestone,
-        'planned_com'=>$request->planned_com,
-        'actual_com'=>$request->actual_com,
-        'status'=>$request->status,
-        'comments'=>$request->comments
+        $milestones = Milestones::findOrFail($id);
+        $validatedData = $request->validate([
+            'milestone' => 'required|max:255',
+            'planned_com' => 'nullable',
+            'actual_com' => 'nullable',
+            'status' => 'required',
+            'comments' => 'nullable|string',
+            'pr_number'=>"required|exists:projects,id"
         ]);
+
+        $milestones->update($validatedData);
+        Cache::forget('milestones_list');
         session()->flash('edit', 'The section has been successfully modified');
-        return redirect('/milestones'); // إعادة التوجيه إلى صفحة الأقسام
+        return redirect()->route('milestones.index');
     }
 
     /**
@@ -109,15 +100,10 @@ class MilestonesController extends Controller
      */
     public function destroy(Request $request)
     {
-
-
-             $id=$request->id;
-
-            Milestones::find($id)->delete();
-
+        $id = $request->id;
+        Milestones::findOrFail($id)->delete();
+        Cache::forget('milestones_list');
         session()->flash('delete', 'Deleted successfully');
-
-        return redirect('/milestones');
-
+        return redirect()->route('milestones.index');
     }
 }

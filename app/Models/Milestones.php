@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 class Milestones extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'pr_number',
         'milestone',
@@ -18,14 +18,8 @@ class Milestones extends Model
         'comments'
     ];
 
-    public function risks ()
-    {
-    return $this->belongsTo(Project::class);
-    }
-
     public function project()
     {
-    return $this->belongsTo(Project::class, 'pr_number', 'id');
+        return $this->belongsTo(Project::class, 'pr_number', 'id');
     }
-
 }

@@ -240,9 +240,9 @@
             </li>
             <li class="slide">
                 <a class="side-menu__item" href="{{ route('reports.index') }}"><svg
-                        xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 24 24">
+                        xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M0 0h24v24H0V0z" fill="none" />
-                        <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
+                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                     </svg><span class="side-menu__label">Reports </span></a>
             </li>
 

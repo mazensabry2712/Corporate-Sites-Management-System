@@ -61,38 +61,29 @@
 
 
                         <div class="row mt-3">
-
-
                             <div class="col">
-                                <label for="milestone" class="control-label"> milestone </label>
-                                <input type="text" class="form-control" id="risk" name="milestone"
-                                    title="   Please enter the milestone  ">
-                            </div>
-
-
-
-                            <div class="col">
-                                <label for="comments" class="control-label">comments</label>
-                                <input type="text" class="form-control" id="comments" name="comments"
-                                    title="   Please enter the comments  ">
-                            </div>
-
-
-                            <div class="col">
-                                <label for="name" class="control-label">PR Number</label>
-                                <select name="pr_number" class="form-control SlectBox" onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')">
-                                    <!--placeholder-->
-                                    <option value="" selected disabled> PR Number </option>
-                                    @foreach ($projects as $pr_number_id)
-                                        <option value="{{ $pr_number_id->id }}"> {{ $pr_number_id->pr_number }}</option>
+                                <label for="pr_number" class="control-label">PR Number <span class="text-danger">*</span></label>
+                                <select name="pr_number" id="pr_number" class="form-control SlectBox" required>
+                                    <option value="" selected disabled>Select PR Number</option>
+                                    @foreach ($projects as $project)
+                                        <option value="{{ $project->id }}" data-project-name="{{ $project->name }}">
+                                            {{ $project->pr_number }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
 
+                            <div class="col">
+                                <label for="project_name" class="control-label">Project Name</label>
+                                <input type="text" class="form-control" id="project_name" readonly
+                                    placeholder="Auto-filled from PR Number">
+                            </div>
 
-
-
+                            <div class="col">
+                                <label for="milestone" class="control-label">Milestone <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="milestone" name="milestone"
+                                    placeholder="Enter milestone name" required>
+                            </div>
                         </div>
 
 
@@ -109,37 +100,31 @@
 
                         <div class="row mt-3">
                             <div class="col">
-                                <label for="expected_com_date" class="control-label">planned_com </label>
-                                <input type="date" class="form-control" id="expected_com_date" name="planned_com"
-                                    title="   Please enter the planned_com ">
+                                <label for="planned_com" class="control-label">Planned Completion Date</label>
+                                <input type="date" class="form-control" id="planned_com" name="planned_com">
                             </div>
 
-
-
                             <div class="col">
-                                <label for="expected_com_date" class="control-label">actual_com </label>
-                                <input type="date" class="form-control" id="expected_com_date" name="actual_com"
-                                    title="   Please enter the actual_com ">
+                                <label for="actual_com" class="control-label">Actual Completion Date</label>
+                                <input type="date" class="form-control" id="actual_com" name="actual_com">
                             </div>
 
-
-
                             <div class="col">
-                                <label for="status" class="control-label">status</label>
-                                <select class="form-control SlectBox"onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')" id="status" name="status" required>
-                                    <option value="">Select Value</option>
-                                    <option value="on track">on track</option>
-                                    <option value="delayed">delayed</option>
+                                <label for="status" class="control-label">Status <span class="text-danger">*</span></label>
+                                <select class="form-control" id="status" name="status" required>
+                                    <option value="">Select Status</option>
+                                    <option value="on track">On Track</option>
+                                    <option value="delayed">Delayed</option>
                                 </select>
                             </div>
+                        </div>
 
-
-
-
-
-
-
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label for="comments" class="control-label">Comments</label>
+                                <textarea class="form-control" id="comments" name="comments" rows="3"
+                                    placeholder="Enter any additional comments" style="min-height: 80px;"></textarea>
+                            </div>
                         </div>
 
 
@@ -195,36 +180,13 @@
     <script src="{{ URL::asset('assets/js/form-elements.js') }}"></script>
 
     <script>
-        var date = $('.fc-datepicker').datepicker({
-            dateFormat: 'mm/dd/yy'
-        }).val();
-    </script>
-
-    {{-- ds  --}}
-    <script>
         $(document).ready(function() {
-            $('select[name="pr_number_id"]').on('change', function() {
-                var SectionId = $(this).val();
-                if (SectionId) {
-                    $.ajax({
-                        url: "{{ URL::to('pr_number_id') }}/" + SectionId,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(data) {
-                            $('select[name="product"]').empty();
-                            $.each(data, function(key, value) {
-                                $('select[name="product"]').append('<option value="' +
-                                    value + '">' + value + '</option>');
-                            });
-                        },
-                    });
-
-                } else {
-                    console.log('AJAX load did not work');
-                }
+            // Auto-fill Project Name when PR Number is selected
+            $('#pr_number').on('change', function() {
+                var selectedOption = $(this).find('option:selected');
+                var projectName = selectedOption.data('project-name');
+                $('#project_name').val(projectName);
             });
-
         });
     </script>
-    {{-- /ds  --}}
 @endsection
