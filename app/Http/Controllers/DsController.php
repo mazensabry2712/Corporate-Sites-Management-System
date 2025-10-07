@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ds;
+use App\Models\Ds;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,7 +14,7 @@ class DsController extends Controller
     public function index()
     {
         $ds = Cache::remember('ds_list', 3600, function () {
-            return ds::select('id', 'dsname', 'ds_contact', 'created_at', 'updated_at')->get();
+            return Ds::select('id', 'dsname', 'ds_contact', 'created_at', 'updated_at')->get();
         });
 
         return view('dashboard.ds.index', compact('ds'));
@@ -38,7 +38,7 @@ class DsController extends Controller
             'ds_contact' => 'required|string|max:2000',
         ]);
 
-        ds::create([
+        Ds::create([
             'dsname' => $validatedData['dsname'],
             'ds_contact' => $validatedData['ds_contact'],
         ]);
@@ -51,7 +51,7 @@ class DsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ds $ds)
+    public function show(Ds $ds)
     {
         //
     }
@@ -59,7 +59,7 @@ class DsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ds $ds)
+    public function edit(Ds $ds)
     {
         //
     }
@@ -79,7 +79,7 @@ class DsController extends Controller
             ]
         );
 
-        $ds = ds::findOrFail($id);
+        $ds = Ds::findOrFail($id);
         $ds->update([
             'dsname' => $request->dsname,
             'ds_contact' => $request->ds_contact,
@@ -96,7 +96,7 @@ class DsController extends Controller
     public function destroy(Request $request)
     {
         $id = $request->id;
-        $ds = ds::findOrFail($id);
+        $ds = Ds::findOrFail($id);
         $ds->delete();
 
         Cache::forget('ds_list');

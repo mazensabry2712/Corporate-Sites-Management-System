@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    Invoices
+    Invoices | MDSJEDPR
 @stop
 @section('css')
     <!-- Internal Data table css -->

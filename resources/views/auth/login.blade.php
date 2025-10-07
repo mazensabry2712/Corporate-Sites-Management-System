@@ -1,5 +1,5 @@
 @section('title')
-    Login MDSJEDPR
+    Login | MDSJEDPR
 @stop
 
 <x-guest-layout>

@@ -6,7 +6,7 @@ use App\Models\aams;
 use App\Models\Coc;
 use App\Models\Cust;
 use App\Models\Dn;
-use App\Models\ds;
+use App\Models\Ds;
 use App\Models\invoices;
 use App\Models\Milestones;
 use App\Models\Pepo;
@@ -37,7 +37,7 @@ class DashboardController extends Controller
         $pmCount = ppms::count();
         $amCount = aams::count();
         $VendorsCount = vendors::count();
-        $dsCount = ds::count();
+        $dsCount = Ds::count();
         $invoiceCount = invoices::count();
         $dnCount = Dn::count();
         $cocCount = Coc::count();

@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    PPOs Management
+    PPOs Management | MDSJEDPR
 @stop
 
 @section('css')

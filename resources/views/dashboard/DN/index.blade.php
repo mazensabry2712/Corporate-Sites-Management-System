@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    DN
+    DN | MDSJEDPR
 @stop
 @section('css')
     <!-- Internal Data table css -->

@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-Disti/ Supplier
+    Disti/ Supplier | MDSJEDPR
 @stop
 @section('css')
     <!-- Internal Data table css -->

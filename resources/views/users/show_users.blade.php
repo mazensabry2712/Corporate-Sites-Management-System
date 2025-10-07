@@ -2,7 +2,7 @@
 @section('css')
 
 @section('title')
-Users
+    Users | MDSJEDPR
 @stop
 
 <!-- Internal Data table css -->

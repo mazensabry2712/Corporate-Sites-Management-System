@@ -7,7 +7,7 @@ use App\Models\vendors;
 use App\Models\Cust;
 use App\Models\ppms;
 use App\Models\aams;
-use App\Models\ds;
+use App\Models\Ds;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -123,7 +123,7 @@ class ReportService
                 'projectManagers' => $this->getDistinctValues(ppms::class, 'name'),
                 'customerNames' => $this->getDistinctValues(Cust::class, 'name'),
                 'vendorsList' => $this->getDistinctValues(vendors::class, 'vendors'),
-                'suppliers' => $this->getDistinctValues(ds::class, 'dsname'),
+                'suppliers' => $this->getDistinctValues(Ds::class, 'dsname'),
                 'ams' => $this->getDistinctValues(aams::class, 'name'),
             ];
         });
@@ -140,7 +140,7 @@ class ReportService
                 'allCustomers' => Cust::orderBy('created_at', 'desc')->get(),
                 'allProjectManagers' => ppms::orderBy('created_at', 'desc')->get(),
                 'allAccountManagers' => aams::orderBy('created_at', 'desc')->get(),
-                'allDeliverySpecialists' => ds::orderBy('created_at', 'desc')->get(),
+                'allDeliverySpecialists' => Ds::orderBy('created_at', 'desc')->get(),
                 'projectCustomers' => $this->getProjectCustomers(),
                 'projectVendors' => $this->getProjectVendors(),
                 'projectDS' => $this->getProjectDS(),
@@ -244,7 +244,7 @@ class ReportService
     public function exportFilteredData(array $filters = []): array
     {
         $reports = $this->getFilteredReports($filters);
-        
+
         return $reports->map(function ($report) {
             return [
                 'PR Number' => $report->pr_number,

@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    Epo
+    Project EPO | MDSJEDPR
 @stop
 @section('css')
     <!-- Internal Data table css -->

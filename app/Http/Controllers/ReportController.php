@@ -7,7 +7,7 @@ use App\Models\Project;
 use App\Models\ppms;
 use App\Models\aams;
 use App\Models\vendors;
-use App\Models\ds;
+use App\Models\Ds;
 use App\Models\Cust;
 use App\Http\Requests\ReportFilterRequest;
 use App\Services\ReportService;

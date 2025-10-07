@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    project status
+    Project Status | MDSJEDPR
 @stop
 @section('css')
     <link href="{{ URL::asset('assets/plugins/datatable/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />

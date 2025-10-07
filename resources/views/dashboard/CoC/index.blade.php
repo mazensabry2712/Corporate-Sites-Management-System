@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    Certificate of Compliance
+    Certificate of Compliance | MDSJEDPR
 @stop
 @section('css')
     <!-- Internal Data table css -->

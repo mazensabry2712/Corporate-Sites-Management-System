@@ -1,7 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    Customers
-
+    Customers | MDSJEDPR
 @stop
 @section('css')
     <!-- Internal Data table css -->
