@@ -203,46 +203,48 @@
                             </thead>
 
                             <tbody>
-                                <?php $i = 0; ?>
-                                @foreach ($pepo as $x)
-                                    <?php $i++; ?>
+                                @forelse ($pepo as $i => $x)
+                                    <tr>
+                                        <td>{{ $i + 1 }}</td>
+                                        <td style="white-space: nowrap;">
+                                            {{-- @can('Show') --}}
+                                                <a class="btn btn-sm btn-primary" href="{{ route('epo.show', $x->id) }}"
+                                                    title="View"><i class="las la-eye"></i></a>
+                                            {{-- @endcan --}}
 
-                                    <td>{{ $i }}</td>
-                                    <td>
-                                        {{-- @can('Show') --}}
-                                        <a class="btn btn-sm btn-success" href="{{ route('epo.show', $x->id) }}"
-                                            title="View"><i class="las la-eye"></i></a>
-                                        {{-- @endcan --}}
+                                            {{-- @can('Edit') --}}
+                                                <a class="btn btn-sm btn-info" href="{{ route('epo.edit', $x->id) }}"
 
-                                        @can('Edit')
-                                        <a class="btn btn-sm btn-info" href="{{ route('epo.edit', $x->id) }}"
-                                            title="Update"><i class="las la-pen"></i></a>
-                                        @endcan
+                                                    title="Update"><i class="las la-pen"></i></a>
+                                            {{-- @endcan --}}
 
-                                        @can('Delete')
-                                        <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
-                                            data-id="{{ $x->id }}" data-name="{{ $x->category }}"
-                                            data-toggle="modal" href="#modaldemo9" title="Delete"><i
-                                                class="las la-trash"></i></a>
-                                        @endcan
-                                    </td>
-
-                                    <td>{{ $x->project->pr_number }}</td>
-                                    <td>{{ $x->project->name ?? 'N/A' }}</td>
-                                    <td>{{ $x->category }}</td>
-                                    <td>{{ number_format($x->planned_cost, 2) }}</td>
-                                    <td>{{ number_format($x->selling_price, 2) }}</td>
-                                    <td>
-                                        @if($x->margin !== null)
-                                            <span class="badge badge-{{ $x->margin >= 0.2 ? 'success' : ($x->margin >= 0.1 ? 'warning' : 'danger') }}">
-                                                {{ number_format($x->margin * 100, 2) }}%
-                                            </span>
-                                        @else
-                                            <span class="badge badge-secondary">N/A</span>
-                                        @endif
-                                    </td>
+                                            {{-- @can('Delete') --}}
+                                                <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
+                                                    data-id="{{ $x->id }}" data-name="{{ $x->category }}"
+                                                    data-toggle="modal" href="#modaldemo9" title="Delete"><i
+                                                        class="las la-trash"></i></a>
+                                            {{-- @endcan --}}
+                                        </td>
+                                        <td>{{ $x->project->pr_number ?? 'N/A' }}</td>
+                                        <td>{{ $x->project->name ?? 'N/A' }}</td>
+                                        <td>{{ $x->category ?? '-' }}</td>
+                                        <td>{{ number_format($x->planned_cost, 2) }}</td>
+                                        <td>{{ number_format($x->selling_price, 2) }}</td>
+                                        <td>
+                                            @if($x->margin !== null)
+                                                <span class="badge badge-{{ $x->margin >= 0.2 ? 'success' : ($x->margin >= 0.1 ? 'warning' : 'danger') }}">
+                                                    {{ number_format($x->margin * 100, 2) }}%
+                                                </span>
+                                            @else
+                                                <span class="badge badge-secondary">N/A</span>
+                                            @endif
+                                        </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center">No EPO records found</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

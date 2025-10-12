@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pepo;
-use App\Models\Ppos;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -15,10 +14,8 @@ class PepoController extends Controller
      */
     public function index()
     {
-        // استخدام Cache + Eager Loading للسرعة الفائقة
-        $pepo = Cache::remember('pepo_list', 3600, function () {
-            return Pepo::with('project:id,pr_number')->latest()->get();
-        });
+        // استخدام Eager Loading للسرعة
+        $pepo = Pepo::with(['project:id,pr_number,name'])->latest()->get();
 
         return view('dashboard.PEPO.index', compact('pepo'));
     }
@@ -28,9 +25,11 @@ class PepoController extends Controller
      */
     public function create()
     {
-        //
-    $projects=Project::all();
-        return view('dashboard.PEPO.create',compact('projects'));
+        $projects = Project::select('id', 'pr_number', 'name')
+            ->orderBy('pr_number')
+            ->get();
+
+        return view('dashboard.PEPO.create', compact('projects'));
     }
 
     /**
@@ -38,20 +37,17 @@ class PepoController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'pr_number' => 'required|exists:projects,id',
             'category' => 'nullable|string|max:255',
             'planned_cost' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
         ]);
 
-        Pepo::create($data);
-
-        // مسح الـ Cache بعد الإضافة
-        Cache::forget('pepo_list');
+        Pepo::create($validated);
 
         session()->flash('Add', 'PEPO added successfully');
-        return redirect('/epo');
+        return redirect()->route('epo.index');
     }
 
     /**
@@ -68,31 +64,32 @@ class PepoController extends Controller
      */
     public function edit($id)
     {
-        //
-        $Pepo=Pepo::find($id);
-    $projects=Project::all();
-        return view('dashboard.PEPO.edit',compact('projects','Pepo'));
+        $pepo = Pepo::with('project')->findOrFail($id);
+        $projects = Project::select('id', 'pr_number', 'name')
+            ->orderBy('pr_number')
+            ->get();
+
+        return view('dashboard.PEPO.edit', compact('pepo', 'projects'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Pepo $pepo)
+    public function update(Request $request, $id)
     {
-        $data = $request->validate([
+        $pepo = Pepo::findOrFail($id);
+
+        $validated = $request->validate([
             'pr_number' => 'required|exists:projects,id',
             'category' => 'nullable|string|max:255',
             'planned_cost' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
         ]);
 
-        $pepo->update($data);
-
-        // مسح الـ Cache بعد التعديل
-        Cache::forget('pepo_list');
+        $pepo->update($validated);
 
         session()->flash('edit', 'PEPO updated successfully');
-        return redirect('/epo');
+        return redirect()->route('epo.index');
     }
 
     /**
@@ -100,13 +97,10 @@ class PepoController extends Controller
      */
     public function destroy(Request $request)
     {
-        $id = $request->id;
-        Pepo::findOrFail($id)->delete();
-
-        // مسح الـ Cache بعد الحذف
-        Cache::forget('pepo_list');
+        $pepo = Pepo::findOrFail($request->id);
+        $pepo->delete();
 
         session()->flash('delete', 'PEPO deleted successfully');
-        return redirect('/epo');
+        return redirect()->route('epo.index');
     }
 }

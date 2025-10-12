@@ -1,4 +1,3 @@
-
 @extends('layouts.master')
 @section('css')
     <!--- Internal Select2 css-->
@@ -55,93 +54,75 @@
         <div class="col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <form id="yourFormId" action="{{ route('epo.update',$Pepo->id) }}" method="post"
+                    <form id="yourFormId" action="{{ route('epo.update', $pepo->id) }}" method="post"
                         enctype="multipart/form-data" autocomplete="off">
                         @csrf
                         @method('PUT')
-                        {{-- 1 --}}
 
-
+                        {{-- PR Number & Project Name --}}
                         <div class="row mt-3">
-
-
-                            <div class="col">
-                                <label for="category" class="control-label"> category </label>
-                                <input type="text" class="form-control" id="risk" name="category"
-                                    title="   Please enter the category  " value="{{$Pepo->category}}">
-                            </div>
-
-
-
-
-
-                          <div class="col">
-                                <label for="name" class="control-label">PR Number</label>
-                                <select name="pr_number" class="form-control SlectBox" onclick="console.log($(this).val())"
-                                    onchange="console.log('change is firing')">
-                                    <!--placeholder-->
-                                    <option value="" selected disabled> PR Number </option>
-                                    @foreach ($projects as $pr_number_id)
-                                        <option value="{{ $pr_number_id->id }}" @selected($Pepo->pr_number == $pr_number_id->id)> {{ $pr_number_id->pr_number }}</option>
+                            <!-- PR Number -->
+                            <div class="col-md-6">
+                                <label for="pr_number" class="control-label">PR Number <span class="text-danger">*</span></label>
+                                <select id="pr_number" name="pr_number" class="form-control select2" required>
+                                    <option value="">Select PR Number</option>
+                                    @foreach($projects as $project)
+                                        <option value="{{ $project->id }}"
+                                                data-project-name="{{ $project->name }}"
+                                                {{ old('pr_number', $pepo->pr_number) == $project->id ? 'selected' : '' }}>
+                                            {{ $project->pr_number }}
+                                        </option>
                                     @endforeach
                                 </select>
+                                @error('pr_number')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
 
-
-
-
+                            <!-- Project Name (Auto-filled, readonly) -->
+                            <div class="col-md-6">
+                                <label for="project_name" class="control-label">Project Name</label>
+                                <input type="text"
+                                       id="project_name"
+                                       class="form-control"
+                                       value="{{ old('project_name', $pepo->project->name ?? '') }}"
+                                       placeholder="Project Name will appear here"
+                                       readonly
+                                       style="background-color: #e9ecef; cursor: not-allowed;">
+                            </div>
                         </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
+                        {{-- Category --}}
                         <div class="row mt-3">
-                        <div class="col">
-                                <label for="expected_com_date" class="control-label">Planned Cost </label>
-                                <input type="number" class="form-control" id="expected_com_date" name="planned_cost"
-                                    title="   Please enter the planned_cost " value="{{$Pepo->planned_cost}}">
+                            <div class="col">
+                                <label for="category" class="control-label">Category</label>
+                                <input type="text" class="form-control" id="category" name="category"
+                                    value="{{ old('category', $pepo->category) }}"
+                                    title="Please enter the category">
                             </div>
+                        </div>
 
-
+                        {{-- Planned Cost & Selling Price --}}
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label for="planned_cost" class="control-label">Planned Cost</label>
+                                <input type="number" class="form-control" id="planned_cost" name="planned_cost"
+                                    value="{{ old('planned_cost', $pepo->planned_cost) }}"
+                                    title="Please enter the planned cost">
+                            </div>
 
                             <div class="col">
-                                <label for="" class="control-label">Selling Price </label>
-                                <input type="number" class="form-control" id="" name="selling_price"
-                                    title="   Please enter the selling_price " value="{{$Pepo->selling_price}}">
+                                <label for="selling_price" class="control-label">Selling Price</label>
+                                <input type="number" class="form-control" id="selling_price" name="selling_price"
+                                    value="{{ old('selling_price', $pepo->selling_price) }}"
+                                    title="Please enter the selling price">
                             </div>
-
-
-
-
-
-
-
-
-
-
-
                         </div>
 
-
-
-                        <br>
-
-
-
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-primary"> update pepo </button>
+                        {{-- Submit Button --}}
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn btn-primary">Update PEPO</button>
                         </div>
-
-
                     </form>
                 </div>
             </div>
@@ -215,4 +196,21 @@
         });
     </script>
     {{-- /ds  --}}
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('.select2').select2();
+
+            // Auto-fill Project Name when PR Number changes
+            $('#pr_number').on('change', function() {
+                var selectedOption = $(this).find(':selected');
+                var projectName = selectedOption.data('project-name') || '';
+                $('#project_name').val(projectName);
+            });
+
+            // Trigger on page load (for edit page or old values)
+            var initialProjectName = $('#pr_number').find(':selected').data('project-name') || '';
+            $('#project_name').val(initialProjectName);
+        });
+    </script>
 @endsection

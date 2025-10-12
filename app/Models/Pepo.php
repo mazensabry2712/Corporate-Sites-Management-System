@@ -18,7 +18,7 @@ class Pepo extends Model
 
     public function project()
     {
-    return $this->belongsTo(Project::class, 'pr_number', 'id');
+        return $this->belongsTo(Project::class, 'pr_number', 'id');
     }
 
 }
