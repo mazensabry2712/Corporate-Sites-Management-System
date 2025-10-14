@@ -271,7 +271,7 @@
 
                             <div class="col-md-4">
                                 <label for="value" class="control-label">
-                                    <i class="fas fa-dollar-sign mr-2"></i>Value (EGP)
+                                    <i class="fas fa-dollar-sign mr-2"></i>Value (SAR)
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="number"

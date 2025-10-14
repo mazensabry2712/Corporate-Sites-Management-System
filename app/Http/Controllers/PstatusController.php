@@ -27,13 +27,12 @@ class PstatusController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+     public function create()
     {
-        //
-    $projects=Project::all();
-        $ppms=ppms::all();
-        return view('dashboard.PStatus.create',compact('projects','ppms'));
-
+        // يجب جلب علاقة ppms مع المشاريع لكي تتمكن من الوصول لاسم مدير المشروع
+        $projects = Project::with('ppms')->get(); // ⬅️ تم التعديل هنا
+        $ppms = ppms::all();
+        return view('dashboard.PStatus.create', compact('projects', 'ppms'));
     }
 
     /**

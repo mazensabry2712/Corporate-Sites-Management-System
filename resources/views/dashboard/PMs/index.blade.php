@@ -153,35 +153,20 @@
                             <h5 class="card-title mb-0">Project Managers</h5>
                             <small class="text-muted">Manage and view all PM information</small>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <!-- Export Buttons -->
-                            <div class="btn-group mr-3" role="group" aria-label="Export Options">
-                                <button type="button" class="btn btn-outline-success btn-sm" onclick="exportTableToPDF()"
-                                    title="Export to PDF">
-                                    <i class="fas fa-file-pdf"></i> PDF
-                                </button>
-                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportTableToExcel()"
-                                    title="Export to Excel">
-                                    <i class="fas fa-file-excel"></i> Excel
-                                </button>
-                                <button type="button" class="btn btn-outline-info btn-sm" onclick="exportTableToCSV()"
-                                    title="Export to CSV">
-                                    <i class="fas fa-file-csv"></i> CSV
-                                </button>
-                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="printTableData()"
-                                    title="Print">
-                                    <i class="fas fa-print"></i> Print
-                                </button>
-                            </div>
+                   <div class="d-flex justify-content-between align-items-center flex-wrap">
+  
+    <div class="d-flex align-items-center">
 
-                            <!-- Add New PM Button -->
-                            @can('Add')
-                            <a class="btn btn-primary modal-effect" data-effect="effect-scale" data-toggle="modal"
-                                href="#modaldemo8">
-                                <i class="fas fa-plus"></i> Add PM
-                            </a>
-                            @endcan
-                        </div>
+        <div id="buttons-container" class="mr-2"></div>
+
+        @can('Add')
+        <a class="btn btn-primary modal-effect" data-effect="effect-scale" data-toggle="modal"
+            href="#modaldemo8">
+            <i class="fas fa-plus"></i> Add PM
+        </a>
+        @endcan
+    </div>
+</div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -448,7 +433,6 @@
 @endsection
 
 @section('js')
-    <!-- Internal Data tables -->
     <script src="{{ URL::asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.dataTables.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
@@ -465,199 +449,203 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>
-    <!--Internal  Datatable js -->
-    <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
     <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
 
     <script>
-        // View modal
-        $('#viewModal').on('show.bs.modal', function(event) {
-            const button = $(event.relatedTarget);
-            const modal = $(this);
+        $(function() {
+            // Initialize DataTable with Export Buttons
+            var table = $('#example1').DataTable({
+                responsive: true,
+                lengthChange: false,
+                autoWidth: false,
+                dom: 'Bfrtip', // This is key to show buttons and other elements
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel"></i>',
+                        className: 'btn btn-sm btn-outline-success',
+                        titleAttr: 'Export to Excel',
+                        exportOptions: {
+                            columns: [0, 2, 3, 4] // Export specified columns
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf"></i>',
+                        className: 'btn btn-sm btn-outline-danger',
+                        titleAttr: 'Export to PDF',
+                        exportOptions: {
+                            columns: [0, 2, 3, 4]
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i>',
+                        className: 'btn btn-sm btn-outline-secondary',
+                        titleAttr: 'Print',
+                         exportOptions: {
+                            columns: [0, 2, 3, 4]
+                        }
+                    }
+                ]
+            // This line appends the buttons to your custom container
+            }).buttons().container().appendTo('#buttons-container');
 
-            modal.find('#view-name').val(button.data('name'));
-            modal.find('#view-email').val(button.data('email'));
-            modal.find('#view-phone').val(button.data('phone'));
+
+            // View modal handler
+            $('#viewModal').on('show.bs.modal', function(event) {
+                const button = $(event.relatedTarget);
+                const modal = $(this);
+                modal.find('#view-name').val(button.data('name'));
+                modal.find('#view-email').val(button.data('email'));
+                modal.find('#view-phone').val(button.data('phone'));
+            });
+
+            // Edit modal handler
+            $('#exampleModal2').on('show.bs.modal', function(event) {
+                const button = $(event.relatedTarget);
+                const modal = $(this);
+                modal.find('.modal-body #id').val(button.data('id'));
+                modal.find('.modal-body #name').val(button.data('name'));
+                modal.find('.modal-body #email').val(button.data('email'));
+                modal.find('.modal-body #phone').val(button.data('phone'));
+            });
+
+            // Delete modal handler
+            $('#modaldemo9').on('show.bs.modal', function(event) {
+                const button = $(event.relatedTarget);
+                const modal = $(this);
+                modal.find('.modal-body #id').val(button.data('id'));
+                modal.find('.modal-body #name').val(button.data('name'));
+            });
+
+            // Auto-hide alerts after 5 seconds
+            setTimeout(() => {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // Add loading state to form submission buttons
+            $('form').on('submit', function() {
+                $(this).find('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+            });
         });
 
-        // Edit modal
-        $('#exampleModal2').on('show.bs.modal', function(event) {
-            const button = $(event.relatedTarget);
-            const modal = $(this);
+        // --- Functions for actions inside the View Modal ---
 
-            modal.find('.modal-body #id').val(button.data('id'));
-            modal.find('.modal-body #name').val(button.data('name'));
-            modal.find('.modal-body #email').val(button.data('email'));
-            modal.find('.modal-body #phone').val(button.data('phone'));
-        });
-
-        // Delete modal
-        $('#modaldemo9').on('show.bs.modal', function(event) {
-            const button = $(event.relatedTarget);
-            const modal = $(this);
-
-            modal.find('.modal-body #id').val(button.data('id'));
-            modal.find('.modal-body #name').val(button.data('name'));
-        });
-
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
-            $('.alert').fadeOut('slow');
-        }, 5000);
-
-        // Form validation feedback
-        $('form').on('submit', function() {
-            $(this).find('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
-        });
-
-        // Print PM Function
         function printPM() {
             const button = event.target.closest('button');
             showLoadingButton(button);
-
             try {
                 const pmName = document.getElementById('view-name').value;
                 const pmEmail = document.getElementById('view-email').value;
                 const pmPhone = document.getElementById('view-phone').value;
-
                 const printWindow = window.open('', '_blank');
                 const printContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>PM Details - ${pmName}</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-                            .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #667eea; padding-bottom: 20px; }
-                            .header h1 { color: #667eea; margin: 0; font-size: 28px; }
-                            .header p { color: #666; margin: 10px 0 0 0; }
-                            .pm-details { margin: 30px 0; background: #f8f9fa; padding: 30px; border-radius: 10px; }
-                            .detail-row { display: flex; margin: 20px 0; padding: 15px; background: white; border-radius: 5px; border-left: 4px solid #667eea; }
-                            .detail-label { font-weight: bold; width: 150px; color: #495057; }
-                            .detail-value { flex: 1; color: #212529; }
-                            .footer { margin-top: 50px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px; }
-                            @media print {
-                                body { margin: 20px; }
-                                .no-print { display: none; }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <h1>Project Manager Details</h1>
-                            <p>Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <!DOCTYPE html><html><head><title>PM Details - ${pmName}</title>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+                    <style>
+                        body { font-family: 'Segoe UI', sans-serif; margin: 20px; background-color: #f4f7f6; }
+                        .container { max-width: 700px; margin: auto; background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                        .header { text-align: center; border-bottom: 2px solid #667eea; padding-bottom: 20px; margin-bottom: 30px; }
+                        .header h1 { margin: 0; color: #667eea; font-size: 2.2em; }
+                        .detail-item { display: flex; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid #764ba2; margin-bottom: 15px; }
+                        .detail-item i { font-size: 24px; color: #764ba2; margin-right: 15px; width: 30px; text-align: center; }
+                        .detail-content .label { font-size: 0.9em; color: #888; margin-bottom: 3px; }
+                        .detail-content .value { font-size: 1.1em; color: #333; font-weight: 500; }
+                        .footer { margin-top: 40px; text-align: center; font-size: 0.8em; color: #aaa; border-top: 1px solid #eee; padding-top: 20px; }
+                        @media print { body { background-color: #fff; } .container { box-shadow: none; border: 1px solid #ccc; } }
+                    </style></head><body>
+                    <div class="container">
+                        <div class="header"><h1>Project Manager Details</h1></div>
+                        <div class="details-grid">
+                            <div class="detail-item"><i class="fas fa-user"></i><div class="detail-content"><div class="label">Name</div><div class="value">${pmName}</div></div></div>
+                            <div class="detail-item"><i class="fas fa-envelope"></i><div class="detail-content"><div class="label">Email</div><div class="value">${pmEmail}</div></div></div>
+                            <div class="detail-item"><i class="fas fa-phone"></i><div class="detail-content"><div class="label">Phone</div><div class="value">${pmPhone}</div></div></div>
                         </div>
-                        <div class="pm-details">
-                            <div class="detail-row">
-                                <div class="detail-label">👤 Name:</div>
-                                <div class="detail-value">${pmName}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">📧 Email:</div>
-                                <div class="detail-value">${pmEmail}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">📱 Phone:</div>
-                                <div class="detail-value">${pmPhone}</div>
-                            </div>
-                        </div>
-                        <div class="footer">
-                            <p>Corporate Sites Management System - PM Report</p>
-                            <p>This is an automatically generated document</p>
-                        </div>
-                    </body>
-                    </html>
-                `;
-
+                        <div class="footer"><p>Report generated on: ${new Date().toLocaleString()}</p><p>MDSJEDPR - Management System</p></div>
+                    </div></body></html>`;
                 printWindow.document.write(printContent);
                 printWindow.document.close();
-
-                setTimeout(() => {
-                    printWindow.print();
-                    hideLoadingButton(button);
-                }, 500);
-
-                showSuccessToast('Print dialog opened!');
-            } catch (error) {
-                console.error('Print error:', error);
-                window.print();
+                setTimeout(() => { printWindow.print(); hideLoadingButton(button); }, 500);
+            } catch (e) {
+                console.error("Print Error:", e);
                 hideLoadingButton(button);
-                showSuccessToast('Browser print opened as alternative!');
+                showErrorToast('Could not generate print view.');
             }
         }
 
-        // Export PM to Excel Function
         function exportPMToExcel() {
             const button = event.target.closest('button');
             showLoadingButton(button);
-
             try {
                 const pmName = document.getElementById('view-name').value;
-                const pmEmail = document.getElementById('view-email').value;
-                const pmPhone = document.getElementById('view-phone').value;
-
                 const data = [
                     ['Field', 'Value'],
                     ['PM Name', pmName],
-                    ['PM Email', pmEmail],
-                    ['PM Phone', pmPhone],
-                    ['', ''],
-                    ['Generated On', new Date().toLocaleString()]
+                    ['PM Email', document.getElementById('view-email').value],
+                    ['PM Phone', document.getElementById('view-phone').value]
                 ];
-
-                const csv = data.map(row => row.join(',')).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-
-                link.setAttribute('href', url);
-                link.setAttribute('download', `PM_${pmName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`);
-                link.style.visibility = 'hidden';
+                const csvContent = "data:text/csv;charset=utf-8," + data.map(e => e.join(",")).join("\n");
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `PM_${pmName.replace(/\s+/g, '_')}.csv`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-
+                showSuccessToast('File exported successfully!');
+            } catch (e) {
+                console.error("Export Error:", e);
+                showErrorToast('Export failed.');
+            } finally {
                 hideLoadingButton(button);
-                showSuccessToast('Excel file exported successfully!');
-            } catch (error) {
-                console.error('Excel export error:', error);
-                hideLoadingButton(button);
-                showSuccessToast('Export failed. Please try again.');
             }
         }
 
-        // Export PM to CSV Function
         function exportPMToCSV() {
-            exportPMToExcel(); // Same functionality
+            exportPMToExcel(); // They perform the same function of creating a CSV
         }
 
-        // Helper Functions
+        // --- Helper Functions ---
+
         function showLoadingButton(button) {
+            if (!button) return;
             button.classList.add('btn-loading');
             const icon = button.querySelector('i');
-            if (icon) icon.classList.add('fa-spin');
+            if (icon) {
+                icon.dataset.originalIcon = icon.className;
+                icon.className = 'fas fa-spinner fa-spin';
+            }
         }
 
         function hideLoadingButton(button) {
+            if (!button) return;
             button.classList.remove('btn-loading');
             const icon = button.querySelector('i');
-            if (icon) icon.classList.remove('fa-spin');
+            if (icon && icon.dataset.originalIcon) {
+                icon.className = icon.dataset.originalIcon;
+            }
         }
 
         function showSuccessToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'alert alert-success position-fixed';
-            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 250px; animation: slideIn 0.3s ease-out;';
-            toast.innerHTML = `
-                <strong><i class="fas fa-check-circle"></i> Success!</strong>
-                <p class="mb-0">${message}</p>
-            `;
-            document.body.appendChild(toast);
+            showToast(message, 'alert-success', '<i class="fas fa-check-circle"></i> Success!');
+        }
 
+        function showErrorToast(message) {
+            showToast(message, 'alert-danger', '<i class="fas fa-exclamation-circle"></i> Error!');
+        }
+
+        function showToast(message, type, title) {
+            const toast = document.createElement('div');
+            toast.className = `alert ${type} position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 250px; animation: slideIn 0.3s ease-out;';
+            toast.innerHTML = `<strong>${title}</strong><p class="mb-0">${message}</p>`;
+            document.body.appendChild(toast);
             setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease-in';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+                const fadeOutKeyframes = [{ opacity: 1 }, { opacity: 0 }];
+                const fadeOutOptions = { duration: 500, easing: 'ease-in' };
+                toast.animate(fadeOutKeyframes, fadeOutOptions).onfinish = () => toast.remove();
+            }, 4000);
         }
     </script>
 @endsection

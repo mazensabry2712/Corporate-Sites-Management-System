@@ -393,7 +393,7 @@
                                     </div>
                                     <div class="info-content">
                                         <div class="info-label">Invoice Value</div>
-                                        <div class="info-value">{{ number_format($invoice->value, 2) }} EGP</div>
+                                        <div class="info-value">{{ number_format($invoice->value, 2) }} SAR</div>
                                     </div>
                                 </div>
 
@@ -404,7 +404,7 @@
                                         </div>
                                         <div class="info-content">
                                             <div class="info-label">Project Total Value</div>
-                                            <div class="info-value">{{ number_format($invoice->project->value, 2) }} EGP</div>
+                                            <div class="info-value">{{ number_format($invoice->project->value, 2) }} SAR</div>
                                         </div>
                                     </div>
 
@@ -416,7 +416,7 @@
                                             <div class="info-label">Invoice Percentage</div>
                                             <div class="info-value">
                                                 {{ number_format(($invoice->value / $invoice->project->value) * 100, 2) }}%
-                                                <small class="text-muted">({{ number_format($invoice->value, 2) }} of {{ number_format($invoice->project->value, 2) }} EGP)</small>
+                                                <small class="text-muted">({{ number_format($invoice->value, 2) }} of {{ number_format($invoice->project->value, 2) }} SAR)</small>
                                             </div>
                                         </div>
                                     </div>
@@ -607,9 +607,9 @@
                 ['Invoice Number', '{{ $invoice->invoice_number }}'],
                 ['Project Number', '{{ $invoice->project->pr_number ?? "N/A" }}'],
                 ['Project Name', '{{ $invoice->project->name ?? "N/A" }}'],
-                ['Invoice Value', '{{ number_format($invoice->value, 2) }} EGP'],
+                ['Invoice Value', '{{ number_format($invoice->value, 2) }} SAR'],
                 @if($invoice->project && $invoice->project->value)
-                ['Project Total Value', '{{ number_format($invoice->project->value, 2) }} EGP'],
+                ['Project Total Value', '{{ number_format($invoice->project->value, 2) }} SAR'],
                 ['Invoice Percentage', '{{ number_format(($invoice->value / $invoice->project->value) * 100, 2) }}%'],
                 @endif
                 ['Status', '{{ $invoice->status }}'],
@@ -630,9 +630,9 @@
                 ['Invoice Number', '{{ $invoice->invoice_number }}'],
                 ['Project Number', '{{ $invoice->project->pr_number ?? "N/A" }}'],
                 ['Project Name', '{{ $invoice->project->name ?? "N/A" }}'],
-                ['Invoice Value', '{{ number_format($invoice->value, 2) }} EGP'],
+                ['Invoice Value', '{{ number_format($invoice->value, 2) }} SAR'],
                 @if($invoice->project && $invoice->project->value)
-                ['Project Total Value', '{{ number_format($invoice->project->value, 2) }} EGP'],
+                ['Project Total Value', '{{ number_format($invoice->project->value, 2) }} SAR'],
                 ['Invoice Percentage', '{{ number_format(($invoice->value / $invoice->project->value) * 100, 2) }}%'],
                 @endif
                 ['Status', '{{ $invoice->status }}'],

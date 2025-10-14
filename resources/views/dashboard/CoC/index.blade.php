@@ -3,7 +3,6 @@
     Certificate of Compliance | MDSJEDPR
 @stop
 @section('css')
-    <!-- Internal Data table css -->
     <link href="{{ URL::asset('assets/plugins/datatable/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />
     <link href="{{ URL::asset('assets/plugins/datatable/css/buttons.bootstrap4.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" />
@@ -11,7 +10,6 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
-    <!-- Lightbox CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
 
     <style>
@@ -183,11 +181,80 @@
         .date-info i {
             margin-right: 4px;
         }
+
+        /* ==================== PRINT STYLES ==================== */
+        @media print {
+            /* إخفاء عناصر الواجهة التي لا نحتاجها */
+            body > *:not(.main-content) { /* يفترض أن الجدول داخل .main-content */
+                display: none !important;
+            }
+
+            /* إظهار المحتوى الرئيسي والجدول بوضوح */
+            .main-content, .card, .card-body, .table-responsive, #example1 {
+                visibility: visible !important;
+                position: static !important;
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            /* إخفاء الأعمدة غير الضرورية (مثل العمليات والملفات) */
+            /* العواميد المراد إخفاؤها هي: العمليات (index 1) و CoC File (index 4) */
+            #example1 th:nth-child(2),
+            #example1 td:nth-child(2),
+            #example1 th:nth-child(5),
+            #example1 td:nth-child(5),
+            .export-buttons, /* إخفاء أزرار التصدير */
+            .breadcrumb-header, /* إخفاء شريط العنوان */
+            .card-header .d-flex > div:last-child a /* إخفاء زر إضافة جديد */
+            {
+                display: none !important;
+            }
+
+            /* إضافة عنوان التقرير وتاريخ الطباعة */
+            @page {
+                size: landscape; /* استخدام وضع أفقي إذا كان الجدول عريضًا */
+                margin: 1cm;
+            }
+
+            body:before {
+                content: "Certificate of Compliance Report";
+                display: block;
+                text-align: center;
+                font-size: 20pt;
+                font-weight: bold;
+                margin-bottom: 15px;
+            }
+
+            body:after {
+                content: "Printed on: " attr(data-print-date);
+                display: block;
+                text-align: right;
+                font-size: 10pt;
+                margin-top: 15px;
+            }
+
+            /* إزالة الـ badge background لتوفير الحبر */
+            .badge {
+                background: none !important;
+                color: #000 !important;
+                border: 1px solid #ccc;
+                padding: 4px 8px;
+            }
+
+            /* لضمان رؤية محتوى الخلايا بشكل جيد */
+            #example1 td, #example1 th {
+                border: 1px solid #000 !important;
+                padding: 5px !important;
+            }
+        }
     </style>
 @endsection
 
 @section('page-header')
-    <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="my-auto">
             <div class="d-flex">
@@ -199,8 +266,7 @@
 
         </div>
     </div>
-    <!-- breadcrumb -->
-@endsection
+    @endsection
 
 @section('content')
 
@@ -253,7 +319,6 @@
     @endif
 
 
-    <!-- row opened -->
     <div class="row row-sm">
         <div class="col-xl-12">
             <div class="card">
@@ -264,7 +329,6 @@
                         </div>
                         <div>
                             <div class="d-flex align-items-center">
-                                <!-- Export buttons -->
                                 <div class="btn-group export-buttons mr-2" role="group">
                                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
                                         <i class="fas fa-file-pdf"></i>
@@ -365,7 +429,7 @@
 
                                                 @if($isImage)
                                                     <a href="{{ asset($filePath) }}" data-lightbox="gallery-{{$item->id}}"
-                                                        data-title="CoC Copy - {{ $item->project->name ?? 'N/A' }}" title="Click to view full size">
+                                                         data-title="CoC Copy - {{ $item->project->name ?? 'N/A' }}" title="Click to view full size">
                                                         <img src="{{ asset($filePath) }}" alt="CoC Copy"
                                                              height="50" width="50" class="image-thumbnail"
                                                              title="CoC Copy - Click to enlarge">
@@ -403,7 +467,6 @@
         </div>
     </div>
 
-    <!-- Delete Modal -->
     <div class="modal" id="modaldemo9">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content modal-content-demo">
@@ -436,34 +499,22 @@
 @endsection
 
 @section('js')
-    <!-- Internal Data tables -->
     <script src="{{ URL::asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.dataTables.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.dataTables.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/jquery.dataTables.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.bootstrap4.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.bootstrap4.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/pdfmake.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/vfs_fonts.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>
-    <!--Internal  Datatable js -->
     <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
 
-    <!-- Lightbox JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 
-    <!-- jsPDF & html2canvas for PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- SheetJS for Excel Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
@@ -477,7 +528,7 @@
             modal.find('.modal-body #project_name').val(project_name);
         });
 
-        // Export to PDF
+        // Export to PDF (بقي كما هو - ولكن تم تحديث طريقة الحصول على البيانات لتناسب شكل الجدول)
         function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4');
@@ -490,7 +541,8 @@
             const table = document.getElementById('example1');
             const rows = [];
 
-            const headers = ['#', 'PR Number', 'Project', 'Upload Date'];
+            // الأعمدة المراد تصديرها: #, PR Number, Project Name, Upload Date
+            const headers = ['#', 'PR Number', 'Project Name', 'Upload Date'];
             rows.push(headers);
 
             const dataRows = table.querySelectorAll('tbody tr');
@@ -498,8 +550,11 @@
                 const cells = row.querySelectorAll('td');
                 const rowData = [
                     index + 1,
+                    // cells[2] هو PR Number
                     cells[2]?.textContent.trim().replace(/\s+/g, ' ') || '',
+                    // cells[3] هو Project Name
                     cells[3]?.textContent.trim().replace(/\s+/g, ' ') || '',
+                    // cells[5] هو Upload Date
                     cells[5]?.textContent.trim().replace(/\s+/g, ' ') || ''
                 ];
                 rows.push(rowData);
@@ -524,21 +579,24 @@
             doc.save('CoC_List_' + new Date().toISOString().slice(0,10) + '.pdf');
         }
 
-        // Export to Excel
+        // Export to Excel (بقي كما هو)
         function exportToExcel() {
             const table = document.getElementById('example1');
             const wb = XLSX.utils.book_new();
 
             const data = [];
-            data.push(['#', 'PR Number', 'Project', 'Upload Date']);
+            data.push(['#', 'PR Number', 'Project Name', 'Upload Date']);
 
             const rows = table.querySelectorAll('tbody tr');
             rows.forEach((row, index) => {
                 const cells = row.querySelectorAll('td');
                 data.push([
                     index + 1,
+                    // cells[2] هو PR Number
                     cells[2]?.textContent.trim().replace(/\s+/g, ' ') || '',
+                    // cells[3] هو Project Name
                     cells[3]?.textContent.trim().replace(/\s+/g, ' ') || '',
+                    // cells[5] هو Upload Date
                     cells[5]?.textContent.trim().replace(/\s+/g, ' ') || ''
                 ]);
             });
@@ -557,20 +615,23 @@
             XLSX.writeFile(wb, 'CoC_List_' + new Date().toISOString().slice(0,10) + '.xlsx');
         }
 
-        // Export to CSV
+        // Export to CSV (بقي كما هو)
         function exportToCSV() {
             const table = document.getElementById('example1');
             let csv = [];
 
-            csv.push(['#', 'PR Number', 'Project', 'Upload Date'].join(','));
+            csv.push(['#', 'PR Number', 'Project Name', 'Upload Date'].join(','));
 
             const rows = table.querySelectorAll('tbody tr');
             rows.forEach((row, index) => {
                 const cells = row.querySelectorAll('td');
                 const rowData = [
                     index + 1,
+                    // cells[2] هو PR Number
                     '"' + (cells[2]?.textContent.trim().replace(/\s+/g, ' ').replace(/"/g, '""') || '') + '"',
+                    // cells[3] هو Project Name
                     '"' + (cells[3]?.textContent.trim().replace(/\s+/g, ' ').replace(/"/g, '""') || '') + '"',
+                    // cells[5] هو Upload Date
                     cells[5]?.textContent.trim().replace(/\s+/g, ' ') || ''
                 ];
                 csv.push(rowData.join(','));
@@ -584,8 +645,13 @@
             link.click();
         }
 
-        // Print Table
+        // Print Table (تم تعديلها)
         function printTable() {
+            // إضافة تاريخ الطباعة كـ Attribute في الـ body ليتم استخدامه في CSS
+            document.body.setAttribute('data-print-date', new Date().toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            }));
+
             window.print();
         }
 
@@ -598,7 +664,31 @@
         lightbox.option({
             'resizeDuration': 200,
             'wrapAround': true,
+            'fadeDuration': 300,
             'albumLabel': 'Image %1 of %2'
+        });
+
+        // DataTables initialization (تم تعديلها لإزالة تهيئة الأزرار المدمجة)
+        $(document).ready(function() {
+            if ($.fn.DataTable.isDataTable('#example1')) {
+                $('#example1').DataTable().destroy();
+            }
+
+            $('#example1').DataTable({
+                // لا نستخدم زرار DataTables Buttons هنا لأن التصدير يتم يدويًا
+                dom: 'lfrtip', // لضمان ظهور شريط البحث وخيارات العرض
+                responsive: true,
+                columnDefs: [
+                    // الأعمدة التي لا يمكن فرزها أو البحث فيها
+                    { targets: [1, 4], orderable: false, searchable: false },
+                    // العمود رقم 5 (Upload Date) هو الأخير، يمكن الفرز فيه
+                ],
+                language: {
+                    searchPlaceholder: 'Search...',
+                    sSearch: '',
+                    lengthMenu: '_MENU_ items/page',
+                }
+            });
         });
     </script>
 @endsection

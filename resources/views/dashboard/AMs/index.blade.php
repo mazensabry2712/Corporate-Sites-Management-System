@@ -567,9 +567,15 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>
-    <!--Internal  Datatable js -->
     <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
     <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
+
+    <!-- jsPDF with autoTable (IMPORTANT!) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- SheetJS for Excel (IMPORTANT!) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
         // View modal
@@ -595,9 +601,7 @@
             modal.find('.modal-body #email').val(email);
             modal.find('.modal-body #phone').val(phone);
         })
-    </script>
 
-    <script>
         // Delete modal
         $('#modaldemo9').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget)
@@ -622,101 +626,468 @@
     <script>
         // Export to PDF
         function exportToPDF() {
-            $('#example1').DataTable().button('.buttons-pdf').trigger();
+            try {
+                const { jsPDF } = window.jspdf;
+
+                if (!jsPDF) {
+                    alert('PDF library not loaded. Please refresh the page.');
+                    return;
+                }
+
+                const doc = new jsPDF();
+
+                // Header
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Account Managers Report', 14, 20);
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Generated on: ' + new Date().toLocaleString(), 14, 28);
+
+                // Line
+                doc.setDrawColor(41, 128, 185);
+                doc.setLineWidth(0.5);
+                doc.line(14, 32, 196, 32);
+
+                const rows = [['#', 'AM Name', 'Email', 'Phone']];
+
+                const tableRows = document.querySelectorAll('#example1 tbody tr');
+
+                tableRows.forEach((row) => {
+                    const cells = row.querySelectorAll('td');
+                    // التأكد إن الصف مش فاضي وفيه بيانات
+                    if(cells.length >= 5) {
+                        rows.push([
+                            cells[0]?.textContent.trim() || '',
+                            cells[2]?.textContent.trim() || '-',
+                            cells[3]?.textContent.trim() || '-',
+                            cells[4]?.textContent.trim() || '-'
+                        ]);
+                    }
+                });
+
+                if (rows.length <= 1) {
+                    alert('No data to export!');
+                    return;
+                }
+
+                doc.autoTable({
+                    head: [rows[0]],
+                    body: rows.slice(1),
+                    startY: 36,
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [41, 128, 185],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        halign: 'center'
+                    },
+                    styles: {
+                        fontSize: 10,
+                        cellPadding: 4
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 15, halign: 'center' },
+                        1: { cellWidth: 60 },
+                        2: { cellWidth: 60 },
+                        3: { cellWidth: 45 }
+                    }
+                });
+
+                const pageCount = doc.internal.getNumberOfPages();
+                for(let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.text('Page ' + i + ' of ' + pageCount, 105, 285, { align: 'center' });
+                }
+
+                doc.save('AMs_Report_' + new Date().toISOString().slice(0,10) + '.pdf');
+
+            } catch (error) {
+                console.error('PDF Export Error:', error);
+                alert('Error exporting PDF: ' + error.message);
+            }
         }
 
-        // Export to Excel
+        // Export to Excel - FIXED VERSION
         function exportToExcel() {
-            $('#example1').DataTable().button('.buttons-excel').trigger();
+            try {
+                if (typeof XLSX === 'undefined') {
+                    alert('Excel library not loaded. Please refresh the page.');
+                    return;
+                }
+
+                const data = [['#', 'AM Name', 'Email', 'Phone']];
+
+                const tableRows = document.querySelectorAll('#example1 tbody tr');
+
+                tableRows.forEach((row) => {
+                    const cells = row.querySelectorAll('td');
+                    // التأكد إن الصف مش فاضي وفيه بيانات
+                    if(cells.length >= 5) {
+                        data.push([
+                            cells[0]?.textContent.trim() || '',
+                            cells[2]?.textContent.trim() || '-',
+                            cells[3]?.textContent.trim() || '-',
+                            cells[4]?.textContent.trim() || '-'
+                        ]);
+                    }
+                });
+
+                if (data.length <= 1) {
+                    alert('No data to export!');
+                    return;
+                }
+
+                const ws = XLSX.utils.aoa_to_sheet(data);
+
+                // Column widths
+                ws['!cols'] = [
+                    { wch: 5 },
+                    { wch: 30 },
+                    { wch: 35 },
+                    { wch: 20 }
+                ];
+
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'AMs Data');
+                XLSX.writeFile(wb, 'AMs_Report_' + new Date().toISOString().slice(0,10) + '.xlsx');
+
+            } catch (error) {
+                console.error('Excel Export Error:', error);
+                alert('Error exporting Excel: ' + error.message);
+            }
         }
 
         // Export to CSV
         function exportToCSV() {
-            $('#example1').DataTable().button('.buttons-csv').trigger();
+            try {
+                let csv = [['#', 'AM Name', 'Email', 'Phone'].join(',')];
+
+                const tableRows = document.querySelectorAll('#example1 tbody tr');
+
+                tableRows.forEach((row) => {
+                    const cells = row.querySelectorAll('td');
+                    if(cells.length >= 5) {
+                        csv.push([
+                            cells[0]?.textContent.trim() || '',
+                            '"' + (cells[2]?.textContent.trim().replace(/"/g, '""') || '-') + '"',
+                            '"' + (cells[3]?.textContent.trim().replace(/"/g, '""') || '-') + '"',
+                            '"' + (cells[4]?.textContent.trim().replace(/"/g, '""') || '-') + '"'
+                        ].join(','));
+                    }
+                });
+
+                if (csv.length <= 1) {
+                    alert('No data to export!');
+                    return;
+                }
+
+                const blob = new Blob(['\uFEFF' + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'AMs_Report_' + new Date().toISOString().slice(0,10) + '.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (error) {
+                console.error('CSV Export Error:', error);
+                alert('Error exporting CSV: ' + error.message);
+            }
         }
 
         // Print Table
         function printTable() {
-            $('#example1').DataTable().button('.buttons-print').trigger();
-        }
-
-        // Print AM Function
-        function printAM() {
-            const button = event.target.closest('button');
-            showLoadingButton(button);
-
             try {
-                const amName = document.getElementById('view-name').value;
-                const amEmail = document.getElementById('view-email').value;
-                const amPhone = document.getElementById('view-phone').value;
+                const printWindow = window.open('', '', 'height=700,width=900');
 
-                const printWindow = window.open('', '_blank');
-                const printContent = `
-                    <!DOCTYPE html>
+                if (!printWindow) {
+                    alert('Please allow popups for this website');
+                    return;
+                }
+
+                printWindow.document.write(`
                     <html>
                     <head>
-                        <title>AM Details - ${amName}</title>
+                        <title>AMs Report</title>
                         <style>
-                            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-                            .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #667eea; padding-bottom: 20px; }
-                            .header h1 { color: #667eea; margin: 0; font-size: 28px; }
-                            .header p { color: #666; margin: 10px 0 0 0; }
-                            .am-details { margin: 30px 0; background: #f8f9fa; padding: 30px; border-radius: 10px; }
-                            .detail-row { display: flex; margin: 20px 0; padding: 15px; background: white; border-radius: 5px; border-left: 4px solid #667eea; }
-                            .detail-label { font-weight: bold; width: 150px; color: #495057; }
-                            .detail-value { flex: 1; color: #212529; }
-                            .footer { margin-top: 50px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px; }
-                            @media print {
-                                body { margin: 20px; }
-                                .no-print { display: none; }
-                            }
+                            body { font-family: Arial, sans-serif; margin: 30px; }
+                            h1 { color: #2c3e50; text-align: center; margin-bottom: 10px; }
+                            .date { text-align: center; color: #7f8c8d; margin-bottom: 30px; font-size: 14px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                            th { background-color: #2980b9; color: white; font-weight: bold; text-align: center; }
+                            tr:nth-child(even) { background-color: #f9f9f9; }
+                            @media print { body { margin: 20px; } }
                         </style>
                     </head>
                     <body>
-                        <div class="header">
-                            <h1>Account Manager Details</h1>
-                            <p>Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                        </div>
-                        <div class="am-details">
-                            <div class="detail-row">
-                                <div class="detail-label">👤 Name:</div>
-                                <div class="detail-value">${amName}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">📧 Email:</div>
-                                <div class="detail-value">${amEmail}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">📱 Phone:</div>
-                                <div class="detail-value">${amPhone}</div>
-                            </div>
-                        </div>
-                        <div class="footer">
-                            <p>Corporate Sites Management System - AM Report</p>
-                            <p>This is an automatically generated document</p>
+                        <h1>Account Managers Report</h1>
+                        <div class="date">Generated on: ${new Date().toLocaleString()}</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">#</th>
+                                    <th>AM Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `);
+
+                document.querySelectorAll('#example1 tbody tr').forEach((row) => {
+                    const cells = row.querySelectorAll('td');
+                    if(cells.length >= 5) {
+                        printWindow.document.write(`
+                            <tr>
+                                <td style="text-align: center;">${cells[0]?.textContent.trim() || ''}</td>
+                                <td>${cells[2]?.textContent.trim() || '-'}</td>
+                                <td>${cells[3]?.textContent.trim() || '-'}</td>
+                                <td>${cells[4]?.textContent.trim() || '-'}</td>
+                            </tr>
+                        `);
+                    }
+                });
+
+                printWindow.document.write(`
+                            </tbody>
+                        </table>
+                        <div style="margin-top:40px;text-align:center;color:#95a5a6;font-size:11px;border-top:1px solid #ddd;padding-top:15px;">
+                            <strong>MDSJEDPR - Account Managers Management System</strong><br>
+                            This is a system generated report
                         </div>
                     </body>
                     </html>
-                `;
+                `);
 
-                printWindow.document.write(printContent);
                 printWindow.document.close();
-
                 setTimeout(() => {
+                    printWindow.focus();
                     printWindow.print();
-                    hideLoadingButton(button);
+                    printWindow.close();
                 }, 500);
 
-                showSuccessToast('Print dialog opened!');
             } catch (error) {
-                console.error('Print error:', error);
-                window.print();
-                hideLoadingButton(button);
-                showSuccessToast('Browser print opened as alternative!');
+                console.error('Print Error:', error);
+                alert('Error printing: ' + error.message);
             }
         }
 
-        // Export AM to Excel Function
+        // Print AM Function - Fixed Version
+function printAM() {
+    const button = event.target.closest('button');
+    showLoadingButton(button);
+
+    try {
+        const amName = document.getElementById('view-name').value;
+        const amEmail = document.getElementById('view-email').value;
+        const amPhone = document.getElementById('view-phone').value;
+
+        // Create print container
+        const printContainer = document.createElement('div');
+        printContainer.id = 'print-container-' + Date.now();
+        printContainer.style.display = 'none';
+
+        const currentDate = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Account Manager Details - ${amName}</title>
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background: #fff;
+                        color: #333;
+                        line-height: 1.6;
+                    }
+                    .print-wrapper {
+                        padding: 40px 30px;
+                        max-width: 900px;
+                        margin: 0 auto;
+                    }
+                    .print-header {
+                        text-align: center;
+                        margin-bottom: 50px;
+                        border-bottom: 3px solid #667eea;
+                        padding-bottom: 30px;
+                    }
+                    .print-header h1 {
+                        color: #667eea;
+                        font-size: 32px;
+                        margin-bottom: 15px;
+                        font-weight: 700;
+                    }
+                    .print-header p {
+                        color: #666;
+                        font-size: 14px;
+                    }
+                    .am-details {
+                        margin: 40px 0;
+                    }
+                    .detail-row {
+                        display: flex;
+                        margin: 25px 0;
+                        padding: 20px;
+                        background: #f8f9fa;
+                        border-radius: 8px;
+                        border-left: 5px solid #667eea;
+                    }
+                    .detail-label {
+                        font-weight: 700;
+                        width: 140px;
+                        color: #667eea;
+                        flex-shrink: 0;
+                    }
+                    .detail-value {
+                        flex: 1;
+                        color: #212529;
+                        word-break: break-word;
+                    }
+                    .print-footer {
+                        margin-top: 60px;
+                        text-align: center;
+                        border-top: 2px solid #eee;
+                        padding-top: 30px;
+                        color: #999;
+                        font-size: 12px;
+                    }
+                    .print-footer p {
+                        margin: 8px 0;
+                    }
+                    @media print {
+                        body {
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .print-wrapper {
+                            padding: 20mm 15mm;
+                        }
+                        .detail-row {
+                            page-break-inside: avoid;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-wrapper">
+                    <div class="print-header">
+                        <h1>Account Manager Details</h1>
+                        <p>Generated on: ${currentDate}</p>
+                    </div>
+
+                    <div class="am-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Name:</div>
+                            <div class="detail-value">${amName || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Email:</div>
+                            <div class="detail-value">${amEmail || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Phone:</div>
+                            <div class="detail-value">${amPhone || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    <div class="print-footer">
+                        <p>Corporate Sites Management System</p>
+                        <p>Account Manager Report - Automatically Generated Document</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        // Create and append iframe
+        const iframe = document.createElement('iframe');
+        iframe.id = 'print-iframe-' + Date.now();
+        iframe.style.display = 'none';
+        iframe.style.position = 'absolute';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = 'none';
+        document.body.appendChild(iframe);
+
+        // Write content to iframe
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(htmlContent);
+        iframeDoc.close();
+
+        // Wait for content to load then print
+        iframe.onload = function() {
+            try {
+                iframe.contentWindow.print();
+                hideLoadingButton(button);
+                showSuccessToast('Print dialog opened successfully!');
+            } catch (e) {
+                console.error('Error:', e);
+                hideLoadingButton(button);
+                showErrorToast('Printing failed. Please try again.');
+            }
+
+            // Clean up after print
+            setTimeout(function() {
+                document.body.removeChild(iframe);
+            }, 1000);
+        };
+
+        // Fallback if onload doesn't trigger
+        setTimeout(function() {
+            if (document.body.contains(iframe)) {
+                try {
+                    iframe.contentWindow.print();
+                    hideLoadingButton(button);
+                } catch (e) {
+                    console.error('Error:', e);
+                    hideLoadingButton(button);
+                }
+            }
+        }, 500);
+
+    } catch (error) {
+        console.error('Print error:', error);
+        hideLoadingButton(button);
+        showErrorToast('An error occurred. Please try again.');
+    }
+}
+
+// Error toast function
+function showErrorToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-danger position-fixed';
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; border-radius: 8px;';
+    toast.innerHTML = `
+        <strong><i class="fas fa-times-circle"></i> Error!</strong>
+        <p class="mb-0">${message}</p>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast && toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 4000);
+}
+
+// Export AM to Excel Function
         function exportAMToExcel() {
             const button = event.target.closest('button');
             showLoadingButton(button);

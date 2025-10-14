@@ -16,23 +16,32 @@ class Project extends Model
         'description', 'Created_by', 'cust_id',
     ];
 
+    /**
+     * Relationships (One-to-One / One-to-Many)
+     */
+
+    // العلاقة القديمة لـ Vendor (Single assignment)
     public function vendor()
     {
         return $this->belongsTo(vendors::class, 'vendors_id');
     }
 
+    // العلاقة القديمة لـ Customer (Single assignment)
     public function cust()
     {
         return $this->belongsTo(Cust::class, 'cust_id')
             ->withDefault(['name' => 'nothing']);
     }
+
+    // العلاقة القديمة لـ Delivery Specialist (Single assignment)
     public function ds()
     {
         return $this->belongsTo(Ds::class, 'ds_id')
-                ->withDefault(['name' => 'nothing']);
+            ->withDefault(['name' => 'nothing']);
 
     }
 
+    // العلاقة لـ AAM (Account Assignment Manager)
     public function aams()
     {
         return $this->belongsTo(aams::class, 'aams_id')
@@ -40,6 +49,7 @@ class Project extends Model
 
     }
 
+    // العلاقة لـ PPM (Project Portfolio Manager) - يتم استخدامها لتعبئة PM Name تلقائياً
     public function ppms()
     {
         return $this->belongsTo(ppms::class, 'ppms_id')
@@ -47,16 +57,19 @@ class Project extends Model
 
     }
 
+    // علاقة لـ Project Status (واحد لأكثر)
     public function statuses()
     {
         return $this->hasMany(Pstatus::class, 'pr_number', 'id');
     }
 
+    // للحصول على آخر حالة للمشروع
     public function latestStatus()
     {
         return $this->hasOne(Pstatus::class, 'pr_number', 'id')->latestOfMany();
     }
 
+    // علاقات إضافية (Tasks, Milestones, Invoices, Risks)
     public function tasks()
     {
         return $this->hasMany(Ptasks::class, 'pr_number', 'id');
@@ -77,42 +90,57 @@ class Project extends Model
         return $this->hasMany(Risks::class, 'pr_number', 'id');
     }
 
-    // Many-to-many relationships for multiple assignments
+    // --------------------------------------------------------------------------------
+
+    /**
+     * Many-to-Many Relationships (Multiple Assignments)
+     */
+
+    // عملاء متعددون للمشروع
     public function customers()
     {
         return $this->belongsToMany(Cust::class, 'project_customers', 'project_id', 'customer_id')
-                    ->withPivot('is_primary', 'role', 'notes')
-                    ->withTimestamps();
+                     ->withPivot('is_primary', 'role', 'notes')
+                     ->withTimestamps();
     }
 
+    // بائعون متعددون للمشروع
     public function vendors()
     {
         return $this->belongsToMany(vendors::class, 'project_vendors', 'project_id', 'vendor_id')
-                    ->withPivot('is_primary', 'service_type', 'contract_value', 'start_date', 'end_date', 'notes')
-                    ->withTimestamps();
+                     ->withPivot('is_primary', 'service_type', 'contract_value', 'start_date', 'end_date', 'notes')
+                     ->withTimestamps();
     }
 
+    // أخصائيي تسليم (Delivery Specialists) متعددون للمشروع
     public function deliverySpecialists()
     {
         return $this->belongsToMany(Ds::class, 'project_delivery_specialists', 'project_id', 'ds_id')
-                    ->withPivot('is_lead', 'responsibility', 'allocation_percentage', 'assigned_date', 'notes')
-                    ->withTimestamps();
+                     ->withPivot('is_lead', 'responsibility', 'allocation_percentage', 'assigned_date', 'notes')
+                     ->withTimestamps();
     }
 
-    // Helper methods to get primary/lead relationships
+    // --------------------------------------------------------------------------------
+
+    /**
+     * Helper Methods for Multi-Assignments
+     */
+
+    // للحصول على العميل الأساسي
     public function primaryCustomer()
     {
         return $this->customers()->wherePivot('is_primary', true)->first();
     }
 
+    // للحصول على البائع الأساسي
     public function primaryVendor()
     {
         return $this->vendors()->wherePivot('is_primary', true)->first();
     }
 
+    // للحصول على أخصائي التسليم القائد
     public function leadDeliverySpecialist()
     {
         return $this->deliverySpecialists()->wherePivot('is_lead', true)->first();
     }
-
 }

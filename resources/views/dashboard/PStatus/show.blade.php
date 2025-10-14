@@ -144,13 +144,12 @@
                     <p><i class="fas fa-hashtag"></i> PR Number: {{ $pstatus->project->pr_number ?? 'N/A' }}</p>
                 </div>
                 <div class="card-body">
-                    <!-- Basic Information -->
                     <h5 class="section-title"><i class="fas fa-info-circle"></i> Basic Information</h5>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="info-card">
                                 <h5><i class="fas fa-calendar-alt"></i> Date & Time</h5>
-                                <p>{{ $pstatus->date_time ? \Carbon\Carbon::parse($pstatus->date_time)->format('d/m/Y') : 'N/A' }}</p>
+                                <p>{{ $pstatus->date_time ? \Carbon\Carbon::parse($pstatus->date_time)->format('d/m/Y H:i A') : 'N/A' }}</p> {{-- ⬅️ عرض الوقت --}}
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -161,7 +160,6 @@
                         </div>
                     </div>
 
-                    <!-- Completion Progress -->
                     <h5 class="section-title"><i class="fas fa-chart-line"></i> Completion Status</h5>
                     <div class="row">
                         <div class="col-md-6">
@@ -182,26 +180,22 @@
                         </div>
                     </div>
 
-                    <!-- Status Details -->
                     <h5 class="section-title"><i class="fas fa-clipboard-list"></i> Status Details</h5>
                     <div class="detail-box">
                         <h5><i class="fas fa-flag"></i> Current Status</h5>
                         <pre>{{ $pstatus->status ?: 'No status information available' }}</pre>
                     </div>
 
-                    <!-- Pending Cost/Orders -->
                     <div class="detail-box">
                         <h5><i class="fas fa-money-bill-wave"></i> Pending Cost/Orders</h5>
                         <pre>{{ $pstatus->date_pending_cost_orders ?: 'No pending costs or orders' }}</pre>
                     </div>
 
-                    <!-- Notes -->
                     <div class="detail-box">
                         <h5><i class="fas fa-sticky-note"></i> Notes</h5>
                         <pre>{{ $pstatus->notes ?: 'No additional notes' }}</pre>
                     </div>
 
-                    <!-- Export Options -->
                     <div class="row mt-4">
                         <div class="col-12">
                             <h5 class="section-title"><i class="fas fa-download"></i> Export Options</h5>
@@ -220,7 +214,6 @@
             </div>
         </div>
 
-        <!-- Sidebar Actions -->
         <div class="col-lg-3">
             <div class="quick-actions">
                 <div class="card">
@@ -244,7 +237,6 @@
                     </div>
                 </div>
 
-                <!-- Project Info Card -->
                 <div class="card mt-3">
                     <div class="card-header" style="background: #007bff; color: white;">
                         <h6 class="mb-0"><i class="fas fa-project-diagram"></i> Project Info</h6>
@@ -267,7 +259,6 @@
         </div>
     </div>
 
-    <!-- Delete Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -331,7 +322,7 @@
             doc.setTextColor(0, 0, 0);
             doc.text('PR Number: {{ $pstatus->project->pr_number ?? "N/A" }}', 14, yPos);
             yPos += 7;
-            doc.text('Date & Time: {{ $pstatus->date_time ? \Carbon\Carbon::parse($pstatus->date_time)->format("d/m/Y") : "N/A" }}', 14, yPos);
+            doc.text('Date & Time: {{ $pstatus->date_time ? \Carbon\Carbon::parse($pstatus->date_time)->format("d/m/Y H:i A") : "N/A" }}', 14, yPos);
             yPos += 7;
             doc.text('Project Manager: {{ $pstatus->ppm->name ?? "N/A" }}', 14, yPos);
             yPos += 10;
@@ -415,7 +406,7 @@
                 [''],
                 ['PR Number', '{{ $pstatus->project->pr_number ?? "N/A" }}'],
                 ['Project Name', '{{ $pstatus->project->name ?? "N/A" }}'],
-                ['Date & Time', '{{ $pstatus->date_time ? \Carbon\Carbon::parse($pstatus->date_time)->format("d/m/Y") : "N/A" }}'],
+                ['Date & Time', '{{ $pstatus->date_time ? \Carbon\Carbon::parse($pstatus->date_time)->format("d/m/Y H:i A") : "N/A" }}'],
                 ['Project Manager', '{{ $pstatus->ppm->name ?? "N/A" }}'],
                 [''],
                 ['Actual Completion', '{{ number_format($pstatus->actual_completion ?? 0, 2) }}%'],
@@ -446,7 +437,8 @@
             .breadcrumb-header,
             .quick-actions,
             .btn,
-            .card-header {
+            .card-header,
+            .export-options { /* إخفاء أزرار التصدير في صفحة التفاصيل */
                 display: none !important;
             }
             .card {

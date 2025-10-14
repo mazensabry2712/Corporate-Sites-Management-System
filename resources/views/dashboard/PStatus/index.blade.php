@@ -23,31 +23,29 @@
     </style>
 @endsection
 @section('page-header')
-    <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="my-auto">
             <div class="d-flex">
                 <h4 class="content-title mb-0 my-auto">General</h4><span class="text-muted mt-1 tx-13 mr-2 mb-0">/
-                project status</span>
+                    project status</span>
             </div>
         </div>
         <div class="d-flex my-xl-auto right-content">
 
         </div>
     </div>
-    <!-- breadcrumb -->
-@endsection
+    @endsection
 @section('content')
 
      @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+         <div class="alert alert-danger">
+             <ul>
+                 @foreach ($errors->all() as $error)
+                     <li>{{ $error }}</li>
+                 @endforeach
+             </ul>
+         </div>
+     @endif
 
     @if (session()->has('Add'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -85,7 +83,6 @@
     @endif
 
 
-    <!-- row opened -->
     <div class="row row-sm">
         <div class="col-xl-12">
             <div class="card">
@@ -154,7 +151,7 @@
                                         </td>
                                         <td>{{ $item->project->pr_number ?? 'N/A' }}</td>
                                         <td>{{ $item->project->name ?? 'N/A' }}</td>
-                                        <td>{{ $item->date_time ? \Carbon\Carbon::parse($item->date_time)->format('d/m/Y') : 'N/A' }}</td>
+                                        <td>{{ $item->date_time ? \Carbon\Carbon::parse($item->date_time)->format('d/m/Y H:i') : 'N/A' }}</td>
                                         <td>{{ $item->ppm->name ?? 'N/A' }}</td>
                                         <td>
                                             <div class="pstatus-details">
@@ -188,12 +185,6 @@
     </div>
 
 
-
-
-
-
-
-    <!-- delete -->
     <div class="modal" id="modaldemo9">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content modal-content-demo">
@@ -213,17 +204,14 @@
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger">Confirm</button>
                     </div>
-            </div>
+                </div>
             </form>
         </div>
     </div>
 
 
-
-    <!-- Container closed -->
     </div>
-    <!-- main-content closed -->
-@endsection
+    @endsection
 
 @section('js')
     <script src="{{ URL::asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
@@ -257,15 +245,16 @@
             doc.setFontSize(10);
             doc.text('Generated: ' + new Date().toLocaleString(), 14, 22);
 
-            const headers = [['#', 'PR Number', 'Project Name', 'Date', 'PM Name', 'Status', 'Actual %', 'Expected', 'Pending', 'Notes']];
+            const headers = [['#', 'PR Number', 'Project Name', 'Date & Time', 'PM Name', 'Status', 'Actual %', 'Expected', 'Pending', 'Notes']];
             const data = [];
 
             $('#pstatusTable tbody tr').each(function(index) {
                 if ($(this).find('td').length > 1) {
                     const row = [];
+                    // يتم استبعاد العمود 1 (Operations)
                     $(this).find('td').each(function(i) {
                         if (i === 0 || i > 1) {
-                            row.push($(this).text().trim());
+                            row.push($(this).text().trim().replace(/\s+/g, ' '));
                         }
                     });
                     data.push(row);
@@ -278,44 +267,83 @@
                 startY: 28,
                 theme: 'grid',
                 headStyles: { fillColor: [0, 123, 255], textColor: 255 },
-                styles: { fontSize: 8, cellPadding: 2 },
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
                 columnStyles: {
-                    0: { cellWidth: 10 },
-                    5: { cellWidth: 35 },
-                    8: { cellWidth: 30 },
-                    9: { cellWidth: 35 }
+                    0: { cellWidth: 8 },
+                    4: { cellWidth: 20 }, // Date & Time
+                    5: { cellWidth: 20 }, // PM Name
+                    6: { cellWidth: 40 }, // Status
+                    8: { cellWidth: 20 }, // Expected
+                    9: { cellWidth: 35 }, // Pending Cost
+                    10: { cellWidth: 35 } // Notes
                 }
             });
 
             doc.save('project_status_' + new Date().getTime() + '.pdf');
         }
 
-        // Export to Excel
+        // Export to Excel (تم تعديلها لاستبعاد عمود العمليات)
         function exportToExcel() {
-            const table = document.getElementById('pstatusTable');
-            const wb = XLSX.utils.table_to_book(table, { sheet: "Project Status" });
+            const data = [];
+
+            // إضافة العناوين
+            const headerRow = ['#', 'PR Number', 'Project Name', 'Date & Time', 'PM Name', 'Status', 'Actual %', 'Expected Date', 'Pending Cost', 'Notes'];
+            data.push(headerRow);
+
+            // إضافة البيانات
+            $('#pstatusTable tbody tr').each(function() {
+                const row = [];
+                $(this).find('td').each(function(i) {
+                    // استبعاد عمود العمليات (Index 1)
+                    if (i === 0 || i > 1) {
+                        row.push($(this).text().trim().replace(/\s+/g, ' '));
+                    }
+                });
+                if (row.length > 1) { // التأكد من أنها ليست صف "No records found"
+                    data.push(row);
+                }
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Project Status');
             XLSX.writeFile(wb, 'project_status_' + new Date().getTime() + '.xlsx');
         }
 
         // Export to CSV
         function exportToCSV() {
-            const table = document.getElementById('pstatusTable');
-            const wb = XLSX.utils.table_to_book(table, { sheet: "Project Status" });
-            XLSX.writeFile(wb, 'project_status_' + new Date().getTime() + '.csv');
+            const data = [];
+
+            // إضافة العناوين
+            const headerRow = ['#', 'PR Number', 'Project Name', 'Date & Time', 'PM Name', 'Status', 'Actual %', 'Expected Date', 'Pending Cost', 'Notes'];
+            data.push(headerRow);
+
+            // إضافة البيانات
+            $('#pstatusTable tbody tr').each(function() {
+                const row = [];
+                $(this).find('td').each(function(i) {
+                    // استبعاد عمود العمليات (Index 1)
+                    if (i === 0 || i > 1) {
+                        // إضافة علامات اقتباس للتعامل مع الفواصل في النصوص الطويلة
+                        row.push('"' + $(this).text().trim().replace(/\s+/g, ' ').replace(/"/g, '""') + '"');
+                    }
+                });
+                if (row.length > 1) {
+                    data.push(row.join(','));
+                }
+            });
+
+            const csvContent = data.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'project_status_' + new Date().getTime() + '.csv';
+            link.click();
         }
 
         // Print Table
         function printTable() {
-            const printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>Project Status</title>');
-            printWindow.document.write('<style>table {width: 100%; border-collapse: collapse;} th, td {border: 1px solid #ddd; padding: 8px; text-align: left;} th {background-color: #007bff; color: white;}</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write('<h2>Project Status Report</h2>');
-            printWindow.document.write('<p>Generated: ' + new Date().toLocaleString() + '</p>');
-            printWindow.document.write(document.getElementById('pstatusTable').outerHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
+            window.print();
         }
 
         // Delete Modal

@@ -391,7 +391,7 @@
                                         </td>
                                         <td>
                                             <span class="badge badge-primary">
-                                                {{ number_format($invoice->value, 2) }} EGP
+                                                {{ number_format($invoice->value, 2) }} SAR
                                             </span>
                                         </td>
                                         <td>
@@ -399,7 +399,7 @@
                                                 <span class="badge badge-info" style="font-size: 13px; padding: 8px 12px;">
                                                     <i class="fas fa-file-invoice"></i> {{ number_format($invoice->value, 2) }}
                                                     <strong>of</strong>
-                                                    <i class="fas fa-project-diagram"></i> {{ number_format($invoice->project->value, 2) }} EGP
+                                                    <i class="fas fa-project-diagram"></i> {{ number_format($invoice->project->value, 2) }} SAR
                                                 </span>
                                             @else
                                                 <span class="text-muted">N/A</span>

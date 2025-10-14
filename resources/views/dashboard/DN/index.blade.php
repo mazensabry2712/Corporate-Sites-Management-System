@@ -3,7 +3,6 @@
     DN | MDSJEDPR
 @stop
 @section('css')
-    <!-- Internal Data table css -->
     <link href="{{ URL::asset('assets/plugins/datatable/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />
     <link href="{{ URL::asset('assets/plugins/datatable/css/buttons.bootstrap4.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" />
@@ -11,7 +10,6 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
-    <!-- Lightbox CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
 
     <style>
@@ -203,27 +201,50 @@
         .alert.fade.show {
             opacity: 1 !important;
         }
-    </style>
 
-            .dn-details .text-wrap {
-                font-size: 12px;
-                padding: 6px 8px;
+        /* ============== PRINT STYLES (تحسينات الطباعة) ============== */
+        @media print {
+            /* إخفاء كل العناصر غير المرغوب فيها */
+            body * {
+                visibility: hidden;
             }
 
-            .card-header .d-flex {
-                flex-direction: column;
-                align-items: flex-start !important;
+            /* إظهار حاوية الجدول وكل ما بداخلها فقط */
+            .table-responsive, .table-responsive *,
+            .modal-content-demo, .modal-content-demo * { /* لطباعة المودال إذا لزم الأمر */
+                visibility: visible;
             }
 
-            .btn-group {
-                margin-bottom: 10px;
-                margin-right: 0 !important;
+            /* تحديد موقع الجدول في أعلى الصفحة المطبوعة */
+            .table-responsive {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none !important;
+            }
+
+            /* إزالة الظلال والحدود غير المرغوبة */
+            .card, .card-header, .card-body {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            /* ضمان أن الجدول يأخذ عرض الصفحة بالكامل */
+            #example1 {
+                width: 100% !important;
+            }
+
+            /* منع تكسر الصفوف بين الصفحات */
+            tr {
+                page-break-inside: avoid;
             }
         }
     </style>
 @endsection
 @section('page-header')
-    <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="my-auto">
             <div class="d-flex">
@@ -235,19 +256,8 @@
 
         </div>
     </div>
-    <!-- breadcrumb -->
-@endsection
+    @endsection
 @section('content')
-
-    {{-- @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif --}}
 
     @if (session()->has('delete'))
         <div class="alert alert-danger alert-dismissible fade show"
@@ -266,7 +276,6 @@
     @endif
 
 
-    <!-- row opened -->
     <div class="row row-sm">
         <div class="col-xl-12">
             <div class="card">
@@ -277,7 +286,6 @@
                         </div>
                         <div>
                             <div class="d-flex align-items-center">
-                                <!-- Export buttons -->
                                 <div class="btn-group export-buttons mr-2" role="group">
                                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
                                         <i class="fas fa-file-pdf"></i>
@@ -310,7 +318,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th> Operations </th>
-                                    <th>DN number  </th>
+                                    <th>DN number </th>
                                     <th>PR number</th>
                                     <th>Project Name</th>
                                     <th>DN Copy</th>
@@ -322,70 +330,71 @@
                                 @foreach ($dn as $dnnn)
                                     <?php $i++; ?>
 
-                                    <td>{{ $i }}</td>
-                                    <td>
-                                        {{-- @can('Show') --}}
-                                        <a class="btn btn-sm btn-primary"
-                                            href="{{route('dn.show',$dnnn->id)}}" title="View"><i class="las la-eye"></i></a>
-                                        {{-- @endcan --}}
+                                    <tr>
+                                        <td>{{ $i }}</td>
+                                        <td>
+                                            {{-- @can('Show') --}}
+                                            <a class="btn btn-sm btn-primary"
+                                                href="{{route('dn.show',$dnnn->id)}}" title="View"><i class="las la-eye"></i></a>
+                                            {{-- @endcan --}}
 
-                                         @can('Edit')
-                                        <a class=" btn btn-sm btn-info"
-                                            href="{{route('dn.edit',$dnnn->id)}}" title="Upadte"><i class="las la-pen"></i></a>
-                                        @endcan
+                                             @can('Edit')
+                                            <a class=" btn btn-sm btn-info"
+                                                href="{{route('dn.edit',$dnnn->id)}}" title="Upadte"><i class="las la-pen"></i></a>
+                                             @endcan
 
-                                        @can('Delete')
-                                        <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
-                                            data-id="{{ $dnnn->id }}" data-dn_number="{{ $dnnn->dn_number }}"
-                                            data-toggle="modal" href="#modaldemo9" title="Delete"><i
-                                                class="las la-trash"></i></a>
-                                        @endcan
-                                    </td>
-                                    <td>{{ $dnnn->dn_number }}</td>
-                                    <td>{{ $dnnn->project->pr_number}}</td>
-                                    <td class="project-name">
-                                        @if($dnnn->project && $dnnn->project->name)
-                                            <span class="badge badge-info" style="font-size: 12px; padding: 6px 10px;">
-                                                {{ $dnnn->project->name }}
-                                            </span>
-                                        @else
-                                            <span class="badge badge-secondary" style="font-size: 11px; padding: 5px 8px;">
-                                                No name available
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($dnnn->dn_copy && file_exists(public_path($dnnn->dn_copy)))
-                                            @php
-                                                $fileExtension = pathinfo($dnnn->dn_copy, PATHINFO_EXTENSION);
-                                                $isImage = in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                                            @endphp
-
-                                            @if($isImage)
-                                                <a href="{{ asset($dnnn->dn_copy) }}" data-lightbox="gallery-{{$dnnn->id}}"
-                                                    data-title="DN Copy - {{$dnnn->dn_number}}" title="Click to view full size">
-                                                    <img src="{{ asset($dnnn->dn_copy) }}" alt="DN Copy"
-                                                         height="50" width="50" class="img-thumbnail"
-                                                         title="DN Copy - Click to enlarge">
-                                                </a>
+                                             @can('Delete')
+                                            <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
+                                                data-id="{{ $dnnn->id }}" data-dn_number="{{ $dnnn->dn_number }}"
+                                                data-toggle="modal" href="#modaldemo9" title="Delete"><i
+                                                    class="las la-trash"></i></a>
+                                             @endcan
+                                        </td>
+                                        <td>{{ $dnnn->dn_number }}</td>
+                                        <td>{{ $dnnn->project->pr_number}}</td>
+                                        <td class="project-name">
+                                            @if($dnnn->project && $dnnn->project->name)
+                                                <span class="badge badge-info" style="font-size: 12px; padding: 6px 10px;">
+                                                    {{ $dnnn->project->name }}
+                                                </span>
                                             @else
-                                                <a href="{{ asset($dnnn->dn_copy) }}" target="_blank"
-                                                   title="Click to view/download file" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-file-pdf"></i> View File
-                                                </a>
+                                                <span class="badge badge-secondary" style="font-size: 11px; padding: 5px 8px;">
+                                                    No name available
+                                                </span>
                                             @endif
-                                        @else
-                                            <div class="no-file" title="No file uploaded">
-                                                <i class="fas fa-file text-muted" style="font-size: 20px;"></i>
-                                                <small class="text-muted" style="font-size: 10px;">No File</small>
+                                        </td>
+                                        <td>
+                                            @if ($dnnn->dn_copy && file_exists(public_path($dnnn->dn_copy)))
+                                                @php
+                                                    $fileExtension = pathinfo($dnnn->dn_copy, PATHINFO_EXTENSION);
+                                                    $isImage = in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                                @endphp
+
+                                                @if($isImage)
+                                                    <a href="{{ asset($dnnn->dn_copy) }}" data-lightbox="gallery-{{$dnnn->id}}"
+                                                        data-title="DN Copy - {{$dnnn->dn_number}}" title="Click to view full size">
+                                                        <img src="{{ asset($dnnn->dn_copy) }}" alt="DN Copy"
+                                                             height="50" width="50" class="img-thumbnail"
+                                                             title="DN Copy - Click to enlarge">
+                                                    </a>
+                                                @else
+                                                    <a href="{{ asset($dnnn->dn_copy) }}" target="_blank"
+                                                       title="Click to view/download file" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-file-pdf"></i> View File
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <div class="no-file" title="No file uploaded">
+                                                    <i class="fas fa-file text-muted" style="font-size: 20px;"></i>
+                                                    <small class="text-muted" style="font-size: 10px;">No File</small>
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td class="dn-details">
+                                            <div class="text-wrap">
+                                                {{ $dnnn->status }}
                                             </div>
-                                        @endif
-                                    </td>
-                                    <td class="dn-details">
-                                        <div class="text-wrap">
-                                            {{ $dnnn->status }}
-                                        </div>
-                                    </td>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -398,12 +407,10 @@
 
 
 
-    <!-- /row -->
     </div>
 
 
 
-    <!-- delete -->
     <div class="modal" id="modaldemo9">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content modal-content-demo">
@@ -430,13 +437,10 @@
 
 
 
-    <!-- Container closed -->
     </div>
-    <!-- main-content closed -->
-@endsection
+    @endsection
 
 @section('js')
-    <!-- Internal Data tables -->
     <script src="{{ URL::asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.dataTables.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
@@ -453,7 +457,6 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>
-    <!--Internal  Datatable js -->
     <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
     <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
 
@@ -532,39 +535,74 @@
                 $('#example1').DataTable().destroy();
             }
 
+            // تهيئة الجدول مع إعدادات طباعة محسّنة
             $('#example1').DataTable({
                 dom: 'Bfrtip',
                 buttons: [
                     {
                         extend: 'pdfHtml5',
                         className: 'buttons-pdf d-none',
+                        exportOptions: { columns: [0, 2, 3, 4, 6] }, // تحديد الأعمدة للتصدير
                         title: 'Delivery Notes List'
                     },
                     {
                         extend: 'excelHtml5',
                         className: 'buttons-excel d-none',
+                        exportOptions: { columns: [0, 2, 3, 4, 6] },
                         title: 'Delivery Notes List'
                     },
                     {
                         extend: 'csvHtml5',
                         className: 'buttons-csv d-none',
+                        exportOptions: { columns: [0, 2, 3, 4, 6] },
                         title: 'Delivery Notes List'
                     },
                     {
                         extend: 'print',
                         className: 'buttons-print d-none',
-                        title: 'Delivery Notes List'
+                        autoPrint: true, // فتح نافذة الطباعة تلقائياً
+                        title: '', // إزالة العنوان الافتراضي لكي نضع عنواننا الخاص
+                        exportOptions: {
+                            // تحديد الأعمدة التي ستتم طباعتها (استبعاد العمليات ونسخة الـ DN)
+                            columns: [0, 2, 3, 4, 6]
+                        },
+                        customize: function (win) {
+                            $(win.document.body)
+                                .css('font-size', '10pt')
+                                .prepend(
+                                    '<h1 style="text-align: center; margin-bottom: 20px;">Delivery Notes Report</h1>'
+                                );
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit')
+                                .css('border', '1px solid #000')
+                                .css('width', '100%');
+
+                            $(win.document.body).find('thead th')
+                                .css('text-align', 'center')
+                                .css('border-bottom', '1px solid #000')
+                                .css('padding', '8px');
+
+                            $(win.document.body).find('tbody td')
+                                .css('border', '1px solid #ccc')
+                                .css('padding', '5px');
+                        },
+                        messageTop: function () {
+                            // إضافة تاريخ ووقت الطباعة
+                            return '<div style="text-align:center; margin-bottom: 15px;">Printed on: ' + new Date().toLocaleString() + '</div>';
+                        }
                     }
                 ],
                 responsive: true,
                 columnDefs: [
-                    { width: "5%", targets: 0 },    // # column
-                    { width: "15%", targets: 1 },   // Operations column
-                    { width: "15%", targets: 2 },   // DN number column
-                    { width: "15%", targets: 3 },   // PR number column
-                    { width: "20%", targets: 4 },   // Project Name column
-                    { width: "10%", targets: 5 },   // DN Copy column
-                    { width: "20%", targets: 6 }    // Status column
+                    { width: "5%", targets: 0 },   // # column
+                    { width: "15%", targets: 1, orderable: false, searchable: false }, // Operations column (تم تعطيل الفرز والبحث)
+                    { width: "15%", targets: 2 },  // DN number column
+                    { width: "15%", targets: 3 },  // PR number column
+                    { width: "20%", targets: 4 },  // Project Name column
+                    { width: "10%", targets: 5, orderable: false, searchable: false }, // DN Copy column (تم تعطيل الفرز والبحث)
+                    { width: "20%", targets: 6 }   // Status column
                 ],
                 language: {
                     searchPlaceholder: 'Search...',
@@ -583,6 +621,5 @@
         });
     </script>
 
-    <!-- Lightbox JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 @endsection
