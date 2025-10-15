@@ -38,6 +38,7 @@ class InvoicesController extends Controller
     /**
      * Store a newly created resource in storage.
      * Files saved to external 'storge' folder for speed
+     * Auto-calculates pr_invoices_total_value
      */
     public function store(Request $request)
     {
@@ -60,8 +61,18 @@ class InvoicesController extends Controller
             $data['invoice_copy_path'] = $filename;
         }
 
+        // Calculate total value for this PR_NUMBER
+        // Sum all existing invoices with same pr_number + current value
+        $existingTotal = invoices::where('pr_number', $data['pr_number'])->sum('value');
+        $data['pr_invoices_total_value'] = $existingTotal + $data['value'];
+
         // Create invoice
         invoices::create($data);
+
+        // Update all other invoices with same pr_number to have the same total
+        $newTotal = invoices::where('pr_number', $data['pr_number'])->sum('value');
+        invoices::where('pr_number', $data['pr_number'])
+            ->update(['pr_invoices_total_value' => $newTotal]);
 
         // Clear cache for instant update
         Cache::forget('invoices_list');
@@ -98,10 +109,12 @@ class InvoicesController extends Controller
     /**
      * Update the specified resource in storage.
      * Files saved to external 'storge' folder for speed
+     * Auto-recalculates pr_invoices_total_value
      */
     public function update(Request $request, $id)
     {
         $invoices = invoices::findOrFail($id);
+        $oldPrNumber = $invoices->pr_number; // Store old PR number in case it changes
 
         $data = $request->validate([
             'invoice_number' => 'required|unique:invoices,invoice_number,' . $id,
@@ -135,6 +148,18 @@ class InvoicesController extends Controller
         // Update invoice
         $invoices->update($data);
 
+        // Recalculate total for NEW pr_number
+        $newTotal = invoices::where('pr_number', $data['pr_number'])->sum('value');
+        invoices::where('pr_number', $data['pr_number'])
+            ->update(['pr_invoices_total_value' => $newTotal]);
+
+        // If pr_number changed, recalculate total for OLD pr_number too
+        if ($oldPrNumber != $data['pr_number']) {
+            $oldTotal = invoices::where('pr_number', $oldPrNumber)->sum('value');
+            invoices::where('pr_number', $oldPrNumber)
+                ->update(['pr_invoices_total_value' => $oldTotal]);
+        }
+
         // Clear cache for instant update
         Cache::forget('invoices_list');
 
@@ -146,12 +171,13 @@ class InvoicesController extends Controller
     /**
      * Remove the specified resource from storage.
      * Also deletes file from external 'storge' folder
+     * Auto-recalculates pr_invoices_total_value after deletion
      */
     public function destroy(Request $request)
     {
         $id = $request->id;
         $invoice = invoices::findOrFail($id);
-        $projectId = $invoice->pr_number;
+        $prNumber = $invoice->pr_number; // Store before deletion
 
         // Delete file from external 'storge' folder if exists
         if ($invoice->invoice_copy_path) {
@@ -163,6 +189,11 @@ class InvoicesController extends Controller
 
         // Delete invoice record
         $invoice->delete();
+
+        // Recalculate total for remaining invoices with same pr_number
+        $newTotal = invoices::where('pr_number', $prNumber)->sum('value');
+        invoices::where('pr_number', $prNumber)
+            ->update(['pr_invoices_total_value' => $newTotal]);
 
         // Clear cache for instant update
         Cache::forget('invoices_list');

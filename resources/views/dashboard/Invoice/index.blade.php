@@ -390,13 +390,15 @@
                                         </td>
                                         <td>
                                             @if($invoice->project && $invoice->project->value)
-                                                <span class="badge badge-info" style="font-size: 13px; padding: 8px 12px;">
-                                                    <i class="fas fa-file-invoice"></i> {{ number_format($invoice->value, 2) }}
+                                                <span class="badge badge-success" style="font-size: 13px; padding: 8px 12px;">
+                                                    <i class="fas fa-calculator"></i> {{ number_format($invoice->pr_invoices_total_value, 2) }}
                                                     <strong>of</strong>
                                                     <i class="fas fa-project-diagram"></i> {{ number_format($invoice->project->value, 2) }} SAR
                                                 </span>
                                             @else
-                                                <span class="text-muted">N/A</span>
+                                                <span class="badge badge-success" style="font-size: 13px; padding: 8px 12px;">
+                                                    <i class="fas fa-calculator"></i> {{ number_format($invoice->pr_invoices_total_value, 2) }} SAR
+                                                </span>
                                             @endif
                                         </td>
                                         <td>
