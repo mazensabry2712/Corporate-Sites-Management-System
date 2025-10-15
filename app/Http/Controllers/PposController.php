@@ -155,4 +155,26 @@ class PposController extends Controller
                 ->with('Error', 'Failed to delete PPO: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Get categories for a specific project (AJAX)
+     */
+    public function getCategoriesByProject($pr_number)
+    {
+        try {
+            $categories = Pepo::where('pr_number', $pr_number)
+                ->select('id', 'category')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'categories' => $categories
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pstatuses', function (Blueprint $table) {
-            // تغيير نوع الحقل من date إلى datetime
             $table->dateTime('date_time')->nullable()->change();
         });
     }
@@ -23,7 +22,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pstatuses', function (Blueprint $table) {
-            // الرجوع إلى date
             $table->date('date_time')->nullable()->change();
         });
     }

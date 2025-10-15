@@ -102,7 +102,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="category" class="form-label">Category: <span class="tx-danger">*</span></label>
-                                    <select class="form-control select2" name="category" required>
+                                    <select class="form-control select2" id="category" name="category" required>
                                         <option value="">Choose Category</option>
                                         @foreach($pepos as $pepo)
                                             <option value="{{ $pepo->id }}"
@@ -206,21 +206,68 @@
 
     <script>
         $(document).ready(function() {
-            // Auto-fill project name when PR Number changes
+            // Auto-fill project name and load categories when PR Number changes
             $('#pr_number').on('change', function() {
                 const selectedOption = $(this).find('option:selected');
                 const projectName = selectedOption.data('project-name');
+                const prNumber = $(this).val();
 
+                // Fill Project Name
                 if (projectName) {
                     $('#project_name_display').val(projectName).css('color', '#495057');
                 } else {
                     $('#project_name_display').val('No project name available').css('color', '#6c757d');
                 }
+
+                // Load Categories from EPO
+                if (prNumber) {
+                    loadCategories(prNumber);
+                }
             });
 
             // Initialize on page load with current value
             if ($('#pr_number').val()) {
-                $('#pr_number').trigger('change');
+                const currentCategory = {{ $ppo->category ?? 'null' }};
+                loadCategories($('#pr_number').val(), currentCategory);
+            }
+
+            // Function to load categories based on PR Number
+            function loadCategories(prNumber, selectedCategory = null) {
+                // Show loading state
+                $('#category').prop('disabled', true);
+                $('#category').html('<option value="">Loading categories...</option>');
+
+                $.ajax({
+                    url: `/ppos/categories/${prNumber}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success && response.categories.length > 0) {
+                            let options = '';
+
+                            response.categories.forEach(function(category) {
+                                const selected = selectedCategory && selectedCategory == category.id ? 'selected' : '';
+                                options += `<option value="${category.id}" ${selected}>${category.category || 'N/A'}</option>`;
+                            });
+
+                            $('#category').html(options);
+                            $('#category').prop('disabled', false);
+
+                            // If no previous selection, auto-select the first category
+                            if (!selectedCategory && response.categories.length > 0) {
+                                $('#category').val(response.categories[0].id);
+                            }
+                        } else {
+                            $('#category').html('<option value="">No categories available</option>');
+                            $('#category').prop('disabled', true);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading categories:', error);
+                        $('#category').html('<option value="">Error loading categories</option>');
+                        $('#category').prop('disabled', true);
+                    }
+                });
             }
         });
     </script>

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pepos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pr_number')->references('id')->on('projects')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('category')->nullable();
+            $table->string('category')->unique()->nullable();
             $table->decimal('planned_cost', 10, 2);
             $table->decimal('selling_price', 10, 2);
             $table->decimal('margin', 5, 2)->storedAs('(selling_price - planned_cost) / selling_price ');

@@ -70,6 +70,7 @@ Route::group(['middleware' => ['auth']], function() {
         // /*Project POs Form */
 Route::resource('ppos', PposController::class);
 Route::delete('ppos/destroy', [PposController::class, 'destroy']);
+Route::get('ppos/categories/{pr_number}', [PposController::class, 'getCategoriesByProject'])->name('ppos.categories');
 
         // /*Project Status  */
                 Route::resource('pstatus', PstatusController::class);
