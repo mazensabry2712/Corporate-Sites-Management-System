@@ -257,20 +257,18 @@
                         <div>
                             <div class="d-flex align-items-center">
                                 <!-- Export buttons -->
-                                <div class="btn-group export-buttons mr-2" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()" title="Export to Excel">
-                                        <i class="fas fa-file-excel"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="exportToCSV()" title="Export to CSV">
-                                        <i class="fas fa-file-csv"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printTable()" title="Print">
-                                        <i class="fas fa-print"></i>
-                                    </button>
-                                </div>
+                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </button>
+                                <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
+                                    <i class="fas fa-file-excel"></i> Excel
+                                </button>
+                                <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                    <i class="fas fa-file-csv"></i> CSV
+                                </button>
+                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
 
                                 @can('Add')
                                     <a class="modal-effect btn btn-primary" data-effect="effect-scale" data-toggle="modal"
@@ -620,28 +618,10 @@
         }, 5000);
     </script>
 
+    <!-- Export Functions -->
+    <script src="{{ URL::asset('assets/js/export-functions.js') }}"></script>
+
     <script>
-        // Export functions for table
-        function exportToPDF() {
-            const table = $('#example1').DataTable();
-            table.button('.buttons-pdf').trigger();
-        }
-
-        function exportToExcel() {
-            const table = $('#example1').DataTable();
-            table.button('.buttons-excel').trigger();
-        }
-
-        function exportToCSV() {
-            const table = $('#example1').DataTable();
-            table.button('.buttons-csv').trigger();
-        }
-
-        function printTable() {
-            const table = $('#example1').DataTable();
-            table.button('.buttons-print').trigger();
-        }
-
         // Print Vendor Function
         function printVendor() {
             const button = event.target.closest('button');

@@ -232,26 +232,20 @@
                             <h5 class="card-title mb-0">Projects Management</h5>
                             <small class="text-muted">Manage and view all project information</small>
                         </div>
-                        <div class="d-flex align-items-center export-buttons">
+                        <div class="d-flex align-items-center">
                             <!-- Export Buttons -->
-                            <div class="btn-group mr-3" role="group" aria-label="Export Options">
-                                <button type="button" class="btn btn-outline-success btn-sm" onclick="exportToPDF()"
-                                    title="Export to PDF">
-                                    <i class="fas fa-file-pdf"></i> PDF
-                                </button>
-                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportToExcel()"
-                                    title="Export to Excel">
-                                    <i class="fas fa-file-excel"></i> Excel
-                                </button>
-                                <button type="button" class="btn btn-outline-info btn-sm" onclick="exportToCSV()"
-                                    title="Export to CSV">
-                                    <i class="fas fa-file-csv"></i> CSV
-                                </button>
-                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="printTable()"
-                                    title="Print">
-                                    <i class="fas fa-print"></i> Print
-                                </button>
-                            </div>
+                            <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </button>
+                            <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                <i class="fas fa-file-csv"></i> CSV
+                            </button>
+                            <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                                <i class="fas fa-print"></i> Print
+                            </button>
 
                             <!-- Add New Project Button -->
                             <a class="btn btn-primary" href="{{ route('projects.create') }}">
@@ -918,4 +912,7 @@
             printWindow.print();
         }
     </script>
+
+    <!-- Export Functions -->
+    <script src="{{ URL::asset('assets/js/export-functions.js') }}"></script>
 @endsection

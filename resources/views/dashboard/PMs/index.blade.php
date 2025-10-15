@@ -157,7 +157,19 @@
   
     <div class="d-flex align-items-center">
 
-        <div id="buttons-container" class="mr-2"></div>
+        <!-- Export Buttons -->
+        <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+            <i class="fas fa-file-pdf"></i> PDF
+        </button>
+        <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
+            <i class="fas fa-file-excel"></i> Excel
+        </button>
+        <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+            <i class="fas fa-file-csv"></i> CSV
+        </button>
+        <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+            <i class="fas fa-print"></i> Print
+        </button>
 
         @can('Add')
         <a class="btn btn-primary modal-effect" data-effect="effect-scale" data-toggle="modal"
@@ -348,17 +360,15 @@
                 <div class="modal-body" id="pm-details-content">
                     <!-- Export Buttons -->
                     <div class="d-flex justify-content-end mb-3">
-                        <div class="btn-group" role="group" aria-label="Export Options">
-                            <button type="button" class="btn btn-outline-success btn-sm" onclick="printPM()" title="Print PM Details">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportPMToExcel()" title="Export to Excel">
-                                <i class="fas fa-file-excel"></i> Excel
-                            </button>
-                            <button type="button" class="btn btn-outline-info btn-sm" onclick="exportPMToCSV()" title="Export to CSV">
-                                <i class="fas fa-file-csv"></i> CSV
-                            </button>
-                        </div>
+                        <button type="button" class="btn btn-sm btn-secondary mr-1" onclick="printPM()" title="Print PM Details">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success mr-1" onclick="exportPMToExcel()" title="Export to Excel">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button type="button" class="btn btn-sm btn-info mr-2" onclick="exportPMToCSV()" title="Export to CSV">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
                     </div>
 
                     <!-- PM Information Card -->
@@ -453,43 +463,12 @@
 
     <script>
         $(function() {
-            // Initialize DataTable with Export Buttons
+            // Initialize DataTable
             var table = $('#example1').DataTable({
                 responsive: true,
                 lengthChange: false,
-                autoWidth: false,
-                dom: 'Bfrtip', // This is key to show buttons and other elements
-                buttons: [
-                    {
-                        extend: 'excel',
-                        text: '<i class="fas fa-file-excel"></i>',
-                        className: 'btn btn-sm btn-outline-success',
-                        titleAttr: 'Export to Excel',
-                        exportOptions: {
-                            columns: [0, 2, 3, 4] // Export specified columns
-                        }
-                    },
-                    {
-                        extend: 'pdf',
-                        text: '<i class="fas fa-file-pdf"></i>',
-                        className: 'btn btn-sm btn-outline-danger',
-                        titleAttr: 'Export to PDF',
-                        exportOptions: {
-                            columns: [0, 2, 3, 4]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print"></i>',
-                        className: 'btn btn-sm btn-outline-secondary',
-                        titleAttr: 'Print',
-                         exportOptions: {
-                            columns: [0, 2, 3, 4]
-                        }
-                    }
-                ]
-            // This line appends the buttons to your custom container
-            }).buttons().container().appendTo('#buttons-container');
+                autoWidth: false
+            });
 
 
             // View modal handler
@@ -648,4 +627,7 @@
             }, 4000);
         }
     </script>
+
+    <!-- Unified Export Functions -->
+    <script src="{{ URL::asset('assets/js/export-functions.js') }}"></script>
 @endsection

@@ -11,6 +11,9 @@
     <link href="{{ URL::asset('assets/plugins/datatable/css/responsive.dataTables.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
+    <!-- Unified Export Buttons CSS -->
+    <link href="{{ URL::asset('assets/css/export-buttons.css') }}" rel="stylesheet">
+
     <style>
         /* تحسين أزرار التصدير */
         .export-buttons .btn {
@@ -255,21 +258,19 @@
                         </div>
                         <div>
                             <div class="d-flex align-items-center">
-                                <!-- Export buttons -->
-                                <div class="btn-group export-buttons mr-2" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportToPDF()" title="Export to PDF">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()" title="Export to Excel">
-                                        <i class="fas fa-file-excel"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="exportToCSV()" title="Export to CSV">
-                                        <i class="fas fa-file-csv"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printTable()" title="Print">
-                                        <i class="fas fa-print"></i>
-                                    </button>
-                                </div>
+                                <!-- Export Buttons - Matching PStatus Style -->
+                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </button>
+                                <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
+                                    <i class="fas fa-file-excel"></i> Excel
+                                </button>
+                                <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                    <i class="fas fa-file-csv"></i> CSV
+                                </button>
+                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
 
                                 @can('Add')
                                     <a class="btn btn-primary" data-effect="effect-scale" data-toggle="modal"
@@ -281,6 +282,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <div class="card-body">
                     <div class="table-responsive">
@@ -412,17 +414,15 @@
                 <div class="modal-body" id="am-details-content">
                     <!-- Export Buttons -->
                     <div class="d-flex justify-content-end mb-3">
-                        <div class="btn-group" role="group" aria-label="Export Options">
-                            <button type="button" class="btn btn-outline-success btn-sm" onclick="printAM()" title="Print AM Details">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportAMToExcel()" title="Export to Excel">
-                                <i class="fas fa-file-excel"></i> Excel
-                            </button>
-                            <button type="button" class="btn btn-outline-info btn-sm" onclick="exportAMToCSV()" title="Export to CSV">
-                                <i class="fas fa-file-csv"></i> CSV
-                            </button>
-                        </div>
+                        <button type="button" class="btn btn-sm btn-secondary mr-1" onclick="printAM()" title="Print AM Details">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success mr-1" onclick="exportAMToExcel()" title="Export to Excel">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button type="button" class="btn btn-sm btn-info mr-2" onclick="exportAMToCSV()" title="Export to CSV">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
                     </div>
 
                     <!-- AM Information Card -->
@@ -570,12 +570,8 @@
     <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
     <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
 
-    <!-- jsPDF with autoTable (IMPORTANT!) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
-    <!-- SheetJS for Excel (IMPORTANT!) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Unified Export Functions (New!) -->
+    <script src="{{ URL::asset('assets/js/export-functions.js') }}"></script>
 
     <script>
         // View modal
@@ -620,261 +616,6 @@
         setTimeout(function() {
             $('.alert').fadeOut('slow');
         }, 5000);
-    </script>
-
-    <!-- Export Functions -->
-    <script>
-        // Export to PDF
-        function exportToPDF() {
-            try {
-                const { jsPDF } = window.jspdf;
-
-                if (!jsPDF) {
-                    alert('PDF library not loaded. Please refresh the page.');
-                    return;
-                }
-
-                const doc = new jsPDF();
-
-                // Header
-                doc.setFontSize(18);
-                doc.setFont('helvetica', 'bold');
-                doc.text('Account Managers Report', 14, 20);
-
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.text('Generated on: ' + new Date().toLocaleString(), 14, 28);
-
-                // Line
-                doc.setDrawColor(41, 128, 185);
-                doc.setLineWidth(0.5);
-                doc.line(14, 32, 196, 32);
-
-                const rows = [['#', 'AM Name', 'Email', 'Phone']];
-
-                const tableRows = document.querySelectorAll('#example1 tbody tr');
-
-                tableRows.forEach((row) => {
-                    const cells = row.querySelectorAll('td');
-                    // التأكد إن الصف مش فاضي وفيه بيانات
-                    if(cells.length >= 5) {
-                        rows.push([
-                            cells[0]?.textContent.trim() || '',
-                            cells[2]?.textContent.trim() || '-',
-                            cells[3]?.textContent.trim() || '-',
-                            cells[4]?.textContent.trim() || '-'
-                        ]);
-                    }
-                });
-
-                if (rows.length <= 1) {
-                    alert('No data to export!');
-                    return;
-                }
-
-                doc.autoTable({
-                    head: [rows[0]],
-                    body: rows.slice(1),
-                    startY: 36,
-                    theme: 'striped',
-                    headStyles: {
-                        fillColor: [41, 128, 185],
-                        textColor: 255,
-                        fontStyle: 'bold',
-                        halign: 'center'
-                    },
-                    styles: {
-                        fontSize: 10,
-                        cellPadding: 4
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 15, halign: 'center' },
-                        1: { cellWidth: 60 },
-                        2: { cellWidth: 60 },
-                        3: { cellWidth: 45 }
-                    }
-                });
-
-                const pageCount = doc.internal.getNumberOfPages();
-                for(let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    doc.setFontSize(8);
-                    doc.text('Page ' + i + ' of ' + pageCount, 105, 285, { align: 'center' });
-                }
-
-                doc.save('AMs_Report_' + new Date().toISOString().slice(0,10) + '.pdf');
-
-            } catch (error) {
-                console.error('PDF Export Error:', error);
-                alert('Error exporting PDF: ' + error.message);
-            }
-        }
-
-        // Export to Excel - FIXED VERSION
-        function exportToExcel() {
-            try {
-                if (typeof XLSX === 'undefined') {
-                    alert('Excel library not loaded. Please refresh the page.');
-                    return;
-                }
-
-                const data = [['#', 'AM Name', 'Email', 'Phone']];
-
-                const tableRows = document.querySelectorAll('#example1 tbody tr');
-
-                tableRows.forEach((row) => {
-                    const cells = row.querySelectorAll('td');
-                    // التأكد إن الصف مش فاضي وفيه بيانات
-                    if(cells.length >= 5) {
-                        data.push([
-                            cells[0]?.textContent.trim() || '',
-                            cells[2]?.textContent.trim() || '-',
-                            cells[3]?.textContent.trim() || '-',
-                            cells[4]?.textContent.trim() || '-'
-                        ]);
-                    }
-                });
-
-                if (data.length <= 1) {
-                    alert('No data to export!');
-                    return;
-                }
-
-                const ws = XLSX.utils.aoa_to_sheet(data);
-
-                // Column widths
-                ws['!cols'] = [
-                    { wch: 5 },
-                    { wch: 30 },
-                    { wch: 35 },
-                    { wch: 20 }
-                ];
-
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'AMs Data');
-                XLSX.writeFile(wb, 'AMs_Report_' + new Date().toISOString().slice(0,10) + '.xlsx');
-
-            } catch (error) {
-                console.error('Excel Export Error:', error);
-                alert('Error exporting Excel: ' + error.message);
-            }
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            try {
-                let csv = [['#', 'AM Name', 'Email', 'Phone'].join(',')];
-
-                const tableRows = document.querySelectorAll('#example1 tbody tr');
-
-                tableRows.forEach((row) => {
-                    const cells = row.querySelectorAll('td');
-                    if(cells.length >= 5) {
-                        csv.push([
-                            cells[0]?.textContent.trim() || '',
-                            '"' + (cells[2]?.textContent.trim().replace(/"/g, '""') || '-') + '"',
-                            '"' + (cells[3]?.textContent.trim().replace(/"/g, '""') || '-') + '"',
-                            '"' + (cells[4]?.textContent.trim().replace(/"/g, '""') || '-') + '"'
-                        ].join(','));
-                    }
-                });
-
-                if (csv.length <= 1) {
-                    alert('No data to export!');
-                    return;
-                }
-
-                const blob = new Blob(['\uFEFF' + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'AMs_Report_' + new Date().toISOString().slice(0,10) + '.csv';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-            } catch (error) {
-                console.error('CSV Export Error:', error);
-                alert('Error exporting CSV: ' + error.message);
-            }
-        }
-
-        // Print Table
-        function printTable() {
-            try {
-                const printWindow = window.open('', '', 'height=700,width=900');
-
-                if (!printWindow) {
-                    alert('Please allow popups for this website');
-                    return;
-                }
-
-                printWindow.document.write(`
-                    <html>
-                    <head>
-                        <title>AMs Report</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 30px; }
-                            h1 { color: #2c3e50; text-align: center; margin-bottom: 10px; }
-                            .date { text-align: center; color: #7f8c8d; margin-bottom: 30px; font-size: 14px; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-                            th { background-color: #2980b9; color: white; font-weight: bold; text-align: center; }
-                            tr:nth-child(even) { background-color: #f9f9f9; }
-                            @media print { body { margin: 20px; } }
-                        </style>
-                    </head>
-                    <body>
-                        <h1>Account Managers Report</h1>
-                        <div class="date">Generated on: ${new Date().toLocaleString()}</div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 60px;">#</th>
-                                    <th>AM Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `);
-
-                document.querySelectorAll('#example1 tbody tr').forEach((row) => {
-                    const cells = row.querySelectorAll('td');
-                    if(cells.length >= 5) {
-                        printWindow.document.write(`
-                            <tr>
-                                <td style="text-align: center;">${cells[0]?.textContent.trim() || ''}</td>
-                                <td>${cells[2]?.textContent.trim() || '-'}</td>
-                                <td>${cells[3]?.textContent.trim() || '-'}</td>
-                                <td>${cells[4]?.textContent.trim() || '-'}</td>
-                            </tr>
-                        `);
-                    }
-                });
-
-                printWindow.document.write(`
-                            </tbody>
-                        </table>
-                        <div style="margin-top:40px;text-align:center;color:#95a5a6;font-size:11px;border-top:1px solid #ddd;padding-top:15px;">
-                            <strong>MDSJEDPR - Account Managers Management System</strong><br>
-                            This is a system generated report
-                        </div>
-                    </body>
-                    </html>
-                `);
-
-                printWindow.document.close();
-                setTimeout(() => {
-                    printWindow.focus();
-                    printWindow.print();
-                    printWindow.close();
-                }, 500);
-
-            } catch (error) {
-                console.error('Print Error:', error);
-                alert('Error printing: ' + error.message);
-            }
-        }
 
         // Print AM Function - Fixed Version
 function printAM() {
