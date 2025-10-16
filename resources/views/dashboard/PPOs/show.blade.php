@@ -175,10 +175,29 @@
                         <div class="col-md-6">
                             <div class="info-card">
                                 <div class="info-label">
-                                    <i class="fas fa-tags mr-1"></i>Category
+                                    <i class="fas fa-tags mr-1"></i>Categories
                                 </div>
                                 <div class="info-value">
-                                    {{ $ppo->pepo->category ?? 'N/A' }}
+                                    @php
+                                        // Get all categories for this PO Number
+                                        $allPpoCategories = \App\Models\Ppos::where('po_number', $ppo->po_number)
+                                            ->with('pepo:id,category')
+                                            ->get();
+
+                                        $categories = $allPpoCategories->pluck('pepo.category')->filter()->unique();
+                                    @endphp
+
+                                    @if($categories->count() > 0)
+                                        @foreach($categories as $category)
+                                            <span class="badge badge-primary mr-1 mb-1" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;">
+                                                {{ $category }}
+                                            </span>
+                                        @endforeach
+                                        <br>
+                                        <small class="text-muted">{{ $categories->count() }} categor{{ $categories->count() > 1 ? 'ies' : 'y' }}</small>
+                                    @else
+                                        N/A
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -409,11 +428,21 @@
             doc.setFontSize(11);
             doc.text('Generated on: ' + new Date().toLocaleDateString(), 14, 28);
 
+            @php
+                $categoriesForExport = \App\Models\Ppos::where('po_number', $ppo->po_number)
+                    ->with('pepo:id,category')
+                    ->get()
+                    ->pluck('pepo.category')
+                    ->filter()
+                    ->unique()
+                    ->implode(', ');
+            @endphp
+
             const data = [
                 ['PR Number', '{{ $ppo->project->pr_number ?? "N/A" }}'],
                 ['Project', '{{ $ppo->project->name ?? "N/A" }}'],
                 ['PO Number', '{{ $ppo->po_number }}'],
-                ['Category', '{{ $ppo->pepo->category ?? "N/A" }}'],
+                ['Categories', '{{ $categoriesForExport ?: "N/A" }}'],
                 ['Supplier', '{{ $ppo->ds->dsname ?? "N/A" }}'],
                 ['Value', '{{ $ppo->value ? number_format($ppo->value, 2) . " SAR" : "N/A" }}'],
                 ['Date', '{{ $ppo->date ? $ppo->date->format("Y-m-d") : "N/A" }}'],
@@ -445,7 +474,7 @@
                 ['PR Number', '{{ $ppo->project->pr_number ?? "N/A" }}'],
                 ['Project', '{{ $ppo->project->name ?? "N/A" }}'],
                 ['PO Number', '{{ $ppo->po_number }}'],
-                ['Category', '{{ $ppo->pepo->category ?? "N/A" }}'],
+                ['Categories', '{{ $categoriesForExport ?: "N/A" }}'],
                 ['Supplier', '{{ $ppo->ds->dsname ?? "N/A" }}'],
                 ['Value', '{{ $ppo->value ? number_format($ppo->value, 2) : "N/A" }}'],
                 ['Date', '{{ $ppo->date ? $ppo->date->format("Y-m-d") : "N/A" }}'],
@@ -468,7 +497,7 @@
             csv += 'PR Number,{{ $ppo->project->pr_number ?? "N/A" }}\n';
             csv += 'Project,{{ $ppo->project->name ?? "N/A" }}\n';
             csv += 'PO Number,{{ $ppo->po_number }}\n';
-            csv += 'Category,{{ $ppo->pepo->category ?? "N/A" }}\n';
+            csv += 'Categories,"{{ str_replace('"', '""', $categoriesForExport ?: "N/A") }}"\n';
             csv += 'Supplier,{{ $ppo->ds->dsname ?? "N/A" }}\n';
             csv += 'Value,{{ $ppo->value ? number_format($ppo->value, 2) : "N/A" }}\n';
             csv += 'Date,{{ $ppo->date ? $ppo->date->format("Y-m-d") : "N/A" }}\n';

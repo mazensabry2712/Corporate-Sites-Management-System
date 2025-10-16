@@ -103,17 +103,13 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+            <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="category" class="form-label">Category: <span class="tx-danger">*</span></label>
-                                    <select class="form-control select2" id="category" name="category" required>
-                                        <option value="">Choose Category</option>
-                                        @foreach($pepos as $pepo)
-                                            <option value="{{ $pepo->id }}" {{ old('category') == $pepo->id ? 'selected' : '' }}>
-                                                {{ $pepo->category }}
-                                            </option>
-                                        @endforeach
+                                    <label for="category" class="form-label">Categories: <span class="tx-danger">*</span></label>
+                                    <select class="form-control select2" id="category" name="category[]" multiple required>
+                                        <option value="" disabled>Select PR Number first</option>
                                     </select>
+                                    <small class="text-muted">You can select multiple categories after selecting PR Number</small>
                                 </div>
                             </div>
                         </div>
@@ -207,61 +203,90 @@
 
     <script>
         $(document).ready(function() {
-            // Auto-fill Project Name and Load Categories when PR Number is selected
-            $('#pr_number').on('change', function() {
-                const selectedOption = $(this).find('option:selected');
-                const projectName = selectedOption.data('project-name');
-                const prNumber = $(this).val();
+            console.log('✅ PPOS Create page loaded');
 
-                // Fill Project Name
-                if (projectName) {
-                    $('#project_name_display').val(projectName).css('color', '#495057');
-                } else {
-                    $('#project_name_display').val('No project name available').css('color', '#6c757d');
+            // Wait for Select2 to initialize, then attach event
+            setTimeout(function() {
+                console.log('🔵 Attaching PR Number change event');
+
+                // Auto-fill Project Name and Load Categories when PR Number is selected
+                // Use Select2's special event to ensure it fires after Select2 initialization
+                $('#pr_number').on('change select2:select', function() {
+                    console.log('🔔 PR Number changed!');
+
+                    const selectedOption = $(this).find('option:selected');
+                    const projectName = selectedOption.data('project-name');
+                    const prNumber = $(this).val();
+
+                    console.log('Selected PR Number:', prNumber);
+
+                    // Fill Project Name
+                    if (projectName) {
+                        $('#project_name_display').val(projectName).css('color', '#495057');
+                    } else {
+                        $('#project_name_display').val('No project name available').css('color', '#6c757d');
+                    }
+
+                    // Load Categories from EPO
+                    if (prNumber) {
+                        loadCategories(prNumber);
+                    } else {
+                        resetCategoryDropdown();
+                    }
+                });
+
+                // Initialize on page load if old value exists
+                if ($('#pr_number').val()) {
+                    $('#pr_number').trigger('change');
                 }
-
-                // Load Categories from EPO
-                if (prNumber) {
-                    loadCategories(prNumber);
-                } else {
-                    resetCategoryDropdown();
-                }
-            });
-
-            // Initialize on page load if old value exists
-            if ($('#pr_number').val()) {
-                $('#pr_number').trigger('change');
-            }
+            }, 500); // Wait 500ms for Select2 to initialize
 
             // Function to load categories based on PR Number
             function loadCategories(prNumber) {
+                console.log('📡 Loading categories for PR:', prNumber);
+
                 // Show loading state
                 $('#category').prop('disabled', true);
-                $('#category').html('<option value="">Loading...</option>');
+                $('#category').html('<option disabled>Loading...</option>');
 
                 $.ajax({
                     url: `/ppos/categories/${prNumber}`,
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
+                        console.log('✅ AJAX Success:', response);
+
                         if (response.success && response.categories.length > 0) {
                             let options = '';
 
                             response.categories.forEach(function(category) {
                                 options += `<option value="${category.id}">${category.category || 'N/A'}</option>`;
+                                console.log('  ➕ Category:', category.category);
                             });
 
                             $('#category').html(options);
                             $('#category').prop('disabled', false);
 
-                            // Auto-select the first category silently (no messages)
-                            $('#category').val(response.categories[0].id);
+                            // Re-initialize Select2 with multiple selection support
+                            if (typeof $.fn.select2 !== 'undefined') {
+                                $('#category').select2({
+                                    placeholder: 'Choose one or more categories',
+                                    allowClear: true,
+                                    closeOnSelect: false,
+                                    width: '100%'
+                                });
+                            }
+
+                            console.log(`✅ Loaded ${response.categories.length} categories for PR ${prNumber}`);
                         } else {
+                            console.log('⚠️ No categories found');
                             resetCategoryDropdown();
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error loading categories:', error);
+                        console.error('❌ AJAX Error:', error);
+                        console.error('Status:', status);
+                        console.error('Response:', xhr.responseText);
                         resetCategoryDropdown();
                     }
                 });

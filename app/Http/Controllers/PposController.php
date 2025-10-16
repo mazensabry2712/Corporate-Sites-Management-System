@@ -32,7 +32,7 @@ class PposController extends Controller
      */
     public function create()
     {
-    $projects = Project::all();
+        $projects = Project::all();
         $pepos = Pepo::all();
         $dses = Ds::all();
 
@@ -46,7 +46,8 @@ class PposController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'pr_number' => 'required|exists:projects,id',
-            'category' => 'required|exists:pepos,id',
+            'category' => 'required|array',
+            'category.*' => 'required|exists:pepos,id',
             'dsname' => 'required|exists:ds,id',
             'po_number' => 'required|string|max:255|unique:ppos,po_number',
             'value' => 'nullable|numeric|min:0',
@@ -63,13 +64,29 @@ class PposController extends Controller
         }
 
         try {
-            Ppos::create($request->all());
+            $categories = $request->input('category');
+
+            // Create a PPO record for each selected category
+            foreach ($categories as $categoryId) {
+                Ppos::create([
+                    'pr_number' => $request->pr_number,
+                    'category' => $categoryId,
+                    'dsname' => $request->dsname,
+                    'po_number' => $request->po_number,
+                    'value' => $request->value,
+                    'date' => $request->date,
+                    'status' => $request->status,
+                    'updates' => $request->updates,
+                    'notes' => $request->notes,
+                ]);
+            }
 
             // مسح الـ Cache بعد الإضافة
             Cache::forget('ppos_list');
 
+            $categoryCount = count($categories);
             return redirect()->route('ppos.index')
-                ->with('Add', 'PPO has been added successfully');
+                ->with('Add', "Successfully created {$categoryCount} PPO record(s) for the selected categories");
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('Error', 'Failed to create PPO: ' . $e->getMessage())
@@ -105,7 +122,8 @@ class PposController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'pr_number' => 'required|exists:projects,id',
-            'category' => 'required|exists:pepos,id',
+            'category' => 'required|array',
+            'category.*' => 'required|exists:pepos,id',
             'dsname' => 'required|exists:ds,id',
             'po_number' => 'required|string|max:255|unique:ppos,po_number,' . $ppo->id,
             'value' => 'nullable|numeric|min:0',
@@ -122,13 +140,49 @@ class PposController extends Controller
         }
 
         try {
-            $ppo->update($request->all());
+            $categories = $request->input('category');
+
+            // Update the current record with the first category
+            $ppo->update([
+                'pr_number' => $request->pr_number,
+                'category' => $categories[0], // First category
+                'dsname' => $request->dsname,
+                'po_number' => $request->po_number,
+                'value' => $request->value,
+                'date' => $request->date,
+                'status' => $request->status,
+                'updates' => $request->updates,
+                'notes' => $request->notes,
+            ]);
+
+            // Create additional records for remaining categories
+            for ($i = 1; $i < count($categories); $i++) {
+                Ppos::create([
+                    'pr_number' => $request->pr_number,
+                    'category' => $categories[$i],
+                    'dsname' => $request->dsname,
+                    'po_number' => $request->po_number,
+                    'value' => $request->value,
+                    'date' => $request->date,
+                    'status' => $request->status,
+                    'updates' => $request->updates,
+                    'notes' => $request->notes,
+                ]);
+            }
 
             // مسح الـ Cache بعد التحديث
             Cache::forget('ppos_list');
 
+            $totalRecords = count($categories);
+            $newRecords = $totalRecords - 1;
+
+            $message = 'PPO has been updated successfully';
+            if ($newRecords > 0) {
+                $message .= " and {$newRecords} additional record(s) created for other categories";
+            }
+
             return redirect()->route('ppos.index')
-                ->with('Edit', 'PPO has been updated successfully');
+                ->with('Edit', $message);
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('Error', 'Failed to update PPO: ' . $e->getMessage())

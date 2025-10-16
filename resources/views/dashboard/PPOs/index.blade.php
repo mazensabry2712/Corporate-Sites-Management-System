@@ -226,9 +226,9 @@
                                     <th>Operations</th>
                                     <th>PR Number</th>
                                     <th>Project Name</th>
-                                    <th>PO Number</th>
                                     <th>Category</th>
                                     <th>Supplier Name</th>
+                                    <th>PO Number</th>
                                     <th>Value</th>
                                     <th>Date</th>
                                     <th>Status</th>
@@ -258,9 +258,23 @@
                                         </td>
                                         <td>{{ $x->project->pr_number ?? 'N/A' }}</td>
                                         <td>{{ $x->project->name ?? 'N/A' }}</td>
-                                        <td>{{ $x->po_number }}</td>
-                                        <td>{{ $x->pepo->category ?? 'N/A' }}</td>
+                                        <td>
+                                            @php
+                                                // Get all categories for this PO Number
+                                                $allCategories = \App\Models\Ppos::where('po_number', $x->po_number)
+                                                    ->with('pepo:id,category')
+                                                    ->get()
+                                                    ->pluck('pepo.category')
+                                                    ->filter()
+                                                    ->unique()
+                                                    ->implode(', ');
+                                            @endphp
+                                            <span class="badge badge-primary-light" title="{{ $allCategories }}">
+                                                {{ $allCategories ?: 'N/A' }}
+                                            </span>
+                                        </td>
                                         <td>{{ $x->ds->dsname ?? 'N/A' }}</td>
+                                        <td>{{ $x->po_number }}</td>
                                         <td>
                                             @if($x->value)
                                                 ${{ number_format($x->value, 2) }}
@@ -366,9 +380,9 @@
         // Export to PDF
         function exportToPDF() {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape for more space
 
-            doc.setFontSize(18);
+            doc.setFontSize(16);
             doc.text('PPOs Report', 14, 15);
 
             const tableData = [];
@@ -383,20 +397,43 @@
                     cells[3].innerText, // Project Name
                     cells[4].innerText, // Category
                     cells[5].innerText, // Supplier Name
-                    cells[6].innerText, // PO Number
                     cells[7].innerText, // Value
                     cells[8].innerText, // Date
-                    cells[9].innerText, // Status
-                    cells[10].innerText, // Updates
-                    cells[11].innerText  // Notes
+                    cells[9].innerText  // Status
                 ]);
             }
 
             doc.autoTable({
-                head: [['#', 'PR Number', 'Project Name', 'Category', 'Supplier', 'PO Number', 'Value', 'Date', 'Status', 'Updates', 'Notes']],
+                head: [['#', 'PR', 'Project', 'Category', 'Supplier', 'Value', 'Date', 'Status']],
                 body: tableData,
                 startY: 20,
-                styles: { fontSize: 8 }
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    overflow: 'linebreak',
+                    halign: 'left'
+                },
+                headStyles: {
+                    fillColor: [41, 128, 185],
+                    textColor: 255,
+                    fontSize: 9,
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                columnStyles: {
+                    0: { cellWidth: 12, halign: 'center' },  // #
+                    1: { cellWidth: 18, halign: 'center' },  // PR
+                    2: { cellWidth: 45 },                     // Project
+                    3: { cellWidth: 60 },                     // Category (wider for multiple)
+                    4: { cellWidth: 45 },                     // Supplier
+                    5: { cellWidth: 30, halign: 'right' },   // Value
+                    6: { cellWidth: 28, halign: 'center' },  // Date
+                    7: { cellWidth: 28, halign: 'center' }   // Status
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                },
+                margin: { top: 20, right: 10, bottom: 10, left: 10 }
             });
 
             doc.save('ppos_report.pdf');
@@ -415,17 +452,17 @@
             for (let i = 0; i < rows.length; i++) {
                 const cells = rows[i].getElementsByTagName('td');
                 data.push([
-                    cells[0].innerText,
-                    cells[2].innerText,
-                    cells[3].innerText,
-                    cells[4].innerText,
-                    cells[5].innerText,
-                    cells[6].innerText,
-                    cells[7].innerText,
-                    cells[8].innerText,
-                    cells[9].innerText,
-                    cells[10].innerText,
-                    cells[11].innerText
+                    cells[0].innerText,  // #
+                    cells[2].innerText,  // PR Number
+                    cells[3].innerText,  // Project Name
+                    cells[4].innerText,  // Category
+                    cells[5].innerText,  // Supplier Name
+                    cells[6].innerText,  // PO Number
+                    cells[7].innerText,  // Value
+                    cells[8].innerText,  // Date
+                    cells[9].innerText,  // Status
+                    cells[10].innerText, // Updates
+                    cells[11].innerText  // Notes
                 ]);
             }
 
@@ -444,17 +481,17 @@
             for (let i = 0; i < rows.length; i++) {
                 const cells = rows[i].getElementsByTagName('td');
                 const row = [
-                    cells[0].innerText,
-                    cells[2].innerText,
-                    cells[3].innerText,
-                    cells[4].innerText,
-                    cells[5].innerText,
-                    cells[6].innerText,
-                    cells[7].innerText,
-                    cells[8].innerText,
-                    cells[9].innerText,
-                    cells[10].innerText,
-                    cells[11].innerText
+                    cells[0].innerText,  // #
+                    cells[2].innerText,  // PR Number
+                    cells[3].innerText,  // Project Name
+                    cells[4].innerText,  // Category
+                    cells[5].innerText,  // Supplier Name
+                    cells[6].innerText,  // PO Number
+                    cells[7].innerText,  // Value
+                    cells[8].innerText,  // Date
+                    cells[9].innerText,  // Status
+                    cells[10].innerText, // Updates
+                    cells[11].innerText  // Notes
                 ].map(cell => `"${cell}"`).join(',');
                 csv += row + '\n';
             }
