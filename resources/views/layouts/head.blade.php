@@ -56,12 +56,12 @@
 
 <!-- Custom Logo Styling -->
 <style>
-    /* Logo in sidebar menu */
+    /* Logo above red line - outside menu */
     .sidebar-logo-container {
-        padding: 20px 15px !important;
+        padding: 5px 10px 0 !important;
         text-align: center;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #e9ecef;
+        background: transparent;
+        margin-bottom: 0 !important;
     }
 
     .sidebar-logo-link {
@@ -69,30 +69,37 @@
     }
 
     .sidebar-main-logo {
-        max-width: 130px;
+        max-width: 140px;
         height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* Remove top margin from main-sidemenu to stick to logo */
+    .app-sidebar .main-sidemenu {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Remove top spacing from first category */
+    .app-sidebar .side-menu .side-item-category:first-child {
+        margin-top: 0 !important;
+        padding-top: 8px !important;
     }
 
     /* Dark mode */
     .dark-mode .sidebar-logo-container {
-        border-bottom-color: rgba(255, 255, 255, 0.1);
-    }
-
-    /* Remove default category styling from logo */
-    .sidebar-logo-container.side-item-category {
-        background: transparent !important;
-        color: inherit !important;
-        text-transform: none !important;
+        background: transparent;
     }
 
     /* Mobile responsive */
     @media (max-width: 768px) {
         .sidebar-logo-container {
-            padding: 15px 10px !important;
+            padding: 5px 8px 0 !important;
         }
 
         .sidebar-main-logo {
-            max-width: 100px;
+            max-width: 110px;
         }
     }
 </style>

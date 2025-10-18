@@ -1,14 +1,14 @@
 <!-- main-sidebar -->
 <aside class="app-sidebar sidebar-scroll">
+    <!-- Logo Section - Above Red Line -->
+    <div class="sidebar-logo-container">
+        <a href="{{ url('/dashboard') }}" class="sidebar-logo-link">
+            <img src="{{ URL::asset('assets/img/brand/logosidbar.png') }}" class="sidebar-main-logo" alt="MDSJEDPR Logo">
+        </a>
+    </div>
+
     <div class="main-sidemenu">
         <ul class="side-menu">
-            <!-- Logo Section -->
-            <li class="side-item sidebar-logo-container">
-                <a href="{{ url('/dashboard') }}" class="sidebar-logo-link">
-                    <img src="{{ URL::asset('assets/img/brand/logo.png') }}" class="sidebar-main-logo" alt="MDSJEDPR Logo">
-                </a>
-            </li>
-
             <li class="side-item side-item-category">Main</li>
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('dashboard') }}"><svg xmlns="http://www.w3.org/2000/svg"
