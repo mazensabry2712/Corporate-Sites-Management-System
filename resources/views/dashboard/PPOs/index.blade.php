@@ -200,9 +200,9 @@
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                     <i class="fas fa-file-csv"></i> CSV
-                                </button>
+                                </button> --}}
                                 <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
@@ -469,41 +469,6 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'PPOs');
             XLSX.writeFile(wb, 'ppos_report.xlsx');
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            const table = document.getElementById('example1');
-            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-            let csv = 'Number,PR Number,Project Name,Category,Supplier Name,PO Number,Value,Date,Status,Updates,Notes\n';
-
-            for (let i = 0; i < rows.length; i++) {
-                const cells = rows[i].getElementsByTagName('td');
-                const row = [
-                    cells[0].innerText,  // #
-                    cells[2].innerText,  // PR Number
-                    cells[3].innerText,  // Project Name
-                    cells[4].innerText,  // Category
-                    cells[5].innerText,  // Supplier Name
-                    cells[6].innerText,  // PO Number
-                    cells[7].innerText,  // Value
-                    cells[8].innerText,  // Date
-                    cells[9].innerText,  // Status
-                    cells[10].innerText, // Updates
-                    cells[11].innerText  // Notes
-                ].map(cell => `"${cell}"`).join(',');
-                csv += row + '\n';
-            }
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'ppos_report.csv');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
         }
 
         // Print table

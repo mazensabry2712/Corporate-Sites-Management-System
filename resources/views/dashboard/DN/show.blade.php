@@ -248,9 +248,9 @@
                 <button type="button" class="btn btn-primary btn-sm" onclick="exportToExcel()" title="Export to Excel">
                     <i class="fas fa-file-excel"></i> Excel
                 </button>
-                <button type="button" class="btn btn-info btn-sm" onclick="exportToCSV()" title="Export to CSV">
+                {{-- <button type="button" class="btn btn-info btn-sm" onclick="exportToCSV()" title="Export to CSV">
                     <i class="fas fa-file-csv"></i> CSV
-                </button>
+                </button> --}}
                 <button type="button" class="btn btn-warning btn-sm" onclick="printDN()" title="Print">
                     <i class="fas fa-print"></i> Print
                 </button>
@@ -568,11 +568,6 @@
             document.body.removeChild(a);
 
             hideLoading(button);
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            exportToExcel(); // Same functionality
         }
 
         // Print DN

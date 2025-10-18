@@ -288,22 +288,19 @@
                                 </div>
                             </div>
 
-                            <!-- Customers (Multiple Selection) -->
+                            <!-- Customer Selection -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="customers">Customers <span class="text-info">*Multiple Selection</span></label>
-                                    <select class="form-control select2-multiple @error('customers') is-invalid @enderror"
-                                            id="customers" name="customers[]" multiple>
+                                    <label for="customer">Customer <span class="text-danger">*</span></label>
+                                    <select class="form-control select2 @error('cust_id') is-invalid @enderror"
+                                            id="customer" name="cust_id" required>
+                                        <option value="">Select Customer</option>
                                         @foreach($custs as $cust)
-                                            <option value="{{ $cust->id }}" {{ in_array($cust->id, old('customers', [])) ? 'selected' : '' }}>
+                                            <option value="{{ $cust->id }}" {{ old('cust_id') == $cust->id ? 'selected' : '' }}>
                                                 {{ $cust->name }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    <small class="form-text text-muted">Select one or more customers. First selected will be primary.</small>
-                                    @error('customers')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                     @error('cust_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

@@ -259,9 +259,9 @@
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                     <i class="fas fa-file-csv"></i> CSV
-                                </button>
+                                </button> --}}
                                 <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
@@ -388,9 +388,9 @@
                         <button type="button" class="btn btn-sm btn-success" onclick="exportDSToExcel()">
                             <i class="fas fa-file-excel"></i> Excel
                         </button>
-                        <button type="button" class="btn btn-sm btn-secondary" onclick="exportDSToCSV()">
+                        {{-- <button type="button" class="btn btn-sm btn-secondary" onclick="exportDSToCSV()">
                             <i class="fas fa-file-csv"></i> CSV
-                        </button>
+                        </button> --}}
                     </div>
 
                     <div class="row">
@@ -581,11 +581,6 @@
             table.button('.buttons-excel').trigger();
         }
 
-        function exportToCSV() {
-            const table = $('#example1').DataTable();
-            table.button('.buttons-csv').trigger();
-        }
-
         function printTable() {
             const table = $('#example1').DataTable();
             table.button('.buttons-print').trigger();
@@ -698,11 +693,6 @@
                 hideLoadingButton(button);
                 showSuccessToast('Export failed. Please try again.');
             }
-        }
-
-        // Export DS to CSV Function
-        function exportDSToCSV() {
-            exportDSToExcel(); // Same functionality
         }
 
         // Helper Functions

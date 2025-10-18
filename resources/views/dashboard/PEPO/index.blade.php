@@ -166,9 +166,9 @@
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                     <i class="fas fa-file-csv"></i> CSV
-                                </button>
+                                </button> --}}
                                 <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
@@ -415,36 +415,6 @@
 
             XLSX.utils.book_append_sheet(wb, ws, 'Epo Data');
             XLSX.writeFile(wb, 'Epo_Report_' + new Date().toISOString().slice(0,10) + '.xlsx');
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            const table = document.getElementById('example1');
-            let csv = [];
-
-            csv.push(['#', 'PR Number', 'Project Name', 'Category', 'Planned Cost', 'Selling Price', 'Margin (%)'].join(','));
-
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
-                const rowData = [
-                    index + 1,
-                    '"' + (cells[2]?.textContent.trim().replace(/"/g, '""') || '') + '"',
-                    '"' + (cells[3]?.textContent.trim().replace(/"/g, '""') || '') + '"',
-                    '"' + (cells[4]?.textContent.trim().replace(/"/g, '""') || '') + '"',
-                    cells[5]?.textContent.trim() || '',
-                    cells[6]?.textContent.trim() || '',
-                    cells[7]?.textContent.trim() || ''
-                ];
-                csv.push(rowData.join(','));
-            });
-
-            const csvContent = csv.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'Epo_Report_' + new Date().toISOString().slice(0,10) + '.csv';
-            link.click();
         }
 
         // Print Table

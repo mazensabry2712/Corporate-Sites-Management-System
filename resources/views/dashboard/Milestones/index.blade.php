@@ -199,9 +199,9 @@
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                     <i class="fas fa-file-csv"></i> CSV
-                                </button>
+                                </button> --}}
                                 <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
@@ -549,34 +549,6 @@
             }
 
             XLSX.writeFile(wb, 'milestones-report.xlsx');
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            let csv = [];
-            const rows = document.querySelectorAll('#milestonesTable tr');
-
-            for (let i = 0; i < rows.length; i++) {
-                const row = [];
-                const cols = rows[i].querySelectorAll('td, th');
-
-                for (let j = 0; j < cols.length; j++) {
-                    if (j !== 1 || i === 0) { // Skip Operations column except header
-                        let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/"/g, '""');
-                        row.push('"' + data + '"');
-                    }
-                }
-                csv.push(row.join(','));
-            }
-
-            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const downloadLink = document.createElement('a');
-            downloadLink.download = 'milestones-report.csv';
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
         }
 
         // Print Table

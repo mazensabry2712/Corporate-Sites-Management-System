@@ -111,9 +111,9 @@
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
-                            <button onclick="exportToCSV()" class="btn btn-sm btn-info mr-1">
+                            {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info mr-1">
                                 <i class="fas fa-file-csv"></i> CSV
-                            </button>
+                            </button> --}}
                             <button onclick="printTable()" class="btn btn-sm btn-secondary mr-2">
                                 <i class="fas fa-print"></i> Print
                             </button>
@@ -320,13 +320,6 @@
             const table = document.getElementById('risksTable');
             const wb = XLSX.utils.table_to_book(table, { sheet: "Risks" });
             XLSX.writeFile(wb, 'risks_report_' + new Date().getTime() + '.xlsx');
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            const table = document.getElementById('risksTable');
-            const wb = XLSX.utils.table_to_book(table, { sheet: "Risks" });
-            XLSX.writeFile(wb, 'risks_report_' + new Date().getTime() + '.csv');
         }
 
         // Print Table

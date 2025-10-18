@@ -242,9 +242,9 @@
                         <button class="btn btn-success" onclick="exportToExcel()">
                             <i class="fas fa-file-excel mr-2"></i>Export Excel
                         </button>
-                        <button class="btn btn-info" onclick="exportToCSV()">
+                        {{-- <button class="btn btn-info" onclick="exportToCSV()">
                             <i class="fas fa-file-csv mr-2"></i>Export CSV
-                        </button>
+                        </button> --}}
                         <button class="btn btn-secondary" onclick="window.print()">
                             <i class="fas fa-print mr-2"></i>Print
                         </button>
@@ -399,23 +399,6 @@
             const ws = XLSX.utils.aoa_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, 'CoC Details');
             XLSX.writeFile(wb, 'CoC_{{ $coc->id }}_{{ date("Y-m-d") }}.xlsx');
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            const csv = [
-                ['Field', 'Value'],
-                ['PR Number', '{{ $coc->project->pr_number ?? "N/A" }}'],
-                ['Project Name', '{{ $coc->project->name ?? "N/A" }}'],
-                ['Created Date', '{{ $coc->created_at->format("Y-m-d H:i") }}'],
-                ['Updated Date', '{{ $coc->updated_at->format("Y-m-d H:i") }}']
-            ].map(row => row.join(',')).join('\n');
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'CoC_{{ $coc->id }}_{{ date("Y-m-d") }}.csv';
-            link.click();
         }
 
         // Share Content

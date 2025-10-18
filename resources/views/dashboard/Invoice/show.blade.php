@@ -248,9 +248,9 @@
                 <button type="button" class="btn btn-primary btn-sm" onclick="exportToExcel()" title="Export to Excel">
                     <i class="fas fa-file-excel"></i> Excel
                 </button>
-                <button type="button" class="btn btn-info btn-sm" onclick="exportToCSV()" title="Export to CSV">
+                {{-- <button type="button" class="btn btn-info btn-sm" onclick="exportToCSV()" title="Export to CSV">
                     <i class="fas fa-file-csv"></i> CSV
-                </button>
+                </button> --}}
                 <button type="button" class="btn btn-warning btn-sm" onclick="printInvoice()" title="Print">
                     <i class="fas fa-print"></i> Print
                 </button>
@@ -624,30 +624,30 @@
         }
 
         // Export to CSV
-        function exportToCSV() {
-            const data = [
-                ['Field', 'Value'],
-                ['Invoice Number', '{{ $invoice->invoice_number }}'],
-                ['Project Number', '{{ $invoice->project->pr_number ?? "N/A" }}'],
-                ['Project Name', '{{ $invoice->project->name ?? "N/A" }}'],
-                ['Invoice Value', '{{ number_format($invoice->value, 2) }} SAR'],
-                @if($invoice->project && $invoice->project->value)
-                ['Project Total Value', '{{ number_format($invoice->project->value, 2) }} SAR'],
-                ['Invoice Percentage', '{{ number_format(($invoice->value / $invoice->project->value) * 100, 2) }}%'],
-                @endif
-                ['Status', '{{ $invoice->status }}'],
-                ['Created At', '{{ $invoice->created_at->format("Y-m-d H:i:s") }}'],
-                ['Updated At', '{{ $invoice->updated_at->format("Y-m-d H:i:s") }}']
-            ];
+        // function exportToCSV() {
+        //     const data = [
+        //         ['Field', 'Value'],
+        //         ['Invoice Number', '{{ $invoice->invoice_number }}'],
+        //         ['Project Number', '{{ $invoice->project->pr_number ?? "N/A" }}'],
+        //         ['Project Name', '{{ $invoice->project->name ?? "N/A" }}'],
+        //         ['Invoice Value', '{{ number_format($invoice->value, 2) }} SAR'],
+        //         @if($invoice->project && $invoice->project->value)
+        //         ['Project Total Value', '{{ number_format($invoice->project->value, 2) }} SAR'],
+        //         ['Invoice Percentage', '{{ number_format(($invoice->value / $invoice->project->value) * 100, 2) }}%'],
+        //         @endif
+        //         ['Status', '{{ $invoice->status }}'],
+        //         ['Created At', '{{ $invoice->created_at->format("Y-m-d H:i:s") }}'],
+        //         ['Updated At', '{{ $invoice->updated_at->format("Y-m-d H:i:s") }}']
+        //     ];
 
-            const csv = data.map(row => row.join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'invoice-{{ $invoice->invoice_number }}.csv';
-            a.click();
-        }
+        //     const csv = data.map(row => row.join(',')).join('\n');
+        //     const blob = new Blob([csv], { type: 'text/csv' });
+        //     const url = window.URL.createObjectURL(blob);
+        //     const a = document.createElement('a');
+        //     a.href = url;
+        //     a.download = 'invoice-{{ $invoice->invoice_number }}.csv';
+        //     a.click();
+        // }
 
         // Print Invoice
         function printInvoice() {

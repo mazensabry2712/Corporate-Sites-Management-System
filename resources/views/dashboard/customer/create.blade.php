@@ -208,20 +208,21 @@
 
 
                                 <div class="col-sm-12 col-md-12">
-                                    <div class="drag-drop-area" id="dragDropArea" onclick="if(!event.target.closest('.file-preview') && !event.target.classList.contains('remove-file')) { document.getElementById('logoInput').click(); }">
-                                        <input type="file" name="logo" id="logoInput" class="d-none {{ $errors->has('logo') ? 'is-invalid' : '' }}"
-                                            accept=".jpg,.jpeg,.png,.gif,.webp" />
+                                    <div class="drag-drop-area" id="dragDropArea">
+                                        <input type="file" name="logo" id="logoInput"
+                                            accept=".jpg,.jpeg,.png,.gif,.webp"
+                                            style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;" />
 
-                                        <div class="drag-drop-content">
+                                        <div class="drag-drop-content" style="pointer-events: none;">
                                             <div class="drag-drop-icon">
                                                 <i class="fas fa-cloud-upload-alt fa-3x text-primary"></i>
                                             </div>
                                             <h4 class="drag-drop-title">Drag & Drop Logo Here</h4>
-                                            <p class="drag-drop-subtitle">or <span class="browse-link" onclick="document.getElementById('logoInput').click();">click to browse</span></p>
+                                            <p class="drag-drop-subtitle">or <span class="browse-link" style="color: #007bff; text-decoration: underline; cursor: pointer;">click to browse</span></p>
                                             <small class="text-muted">Supported formats: JPG, JPEG, PNG, GIF, WEBP (Max: 2MB)</small>
                                         </div>
 
-                                        <div class="file-preview d-none">
+                                        <div class="file-preview d-none" style="pointer-events: all; position: relative; z-index: 20;">
                                             <div class="preview-content">
                                                 <img class="preview-image" src="" alt="Preview">
                                                 <div class="preview-info">
@@ -329,33 +330,14 @@
             const filePreview = dragDropArea.find('.file-preview');
             const dragDropContent = dragDropArea.find('.drag-drop-content');
 
-            console.log('Drag drop initialized');
-            console.log('DragDropArea:', dragDropArea.length);
-            console.log('FileInput:', fileInput.length);
+            console.log('Drag & Drop Initialized');
 
-            // Click to browse functionality - General area click
-            dragDropArea.on('click', function(e) {
-                console.log('Area clicked:', e.target);
-                if (!$(e.target).hasClass('remove-file') && !$(e.target).closest('.file-preview').length) {
-                    console.log('Opening file dialog');
-                    fileInput.click();
+            // File input change event
+            fileInput.on('change', function() {
+                console.log('File selected:', this.files.length);
+                if (this.files.length > 0) {
+                    handleFiles(this.files);
                 }
-            });
-
-            // Specific click handler for browse link
-            $(document).on('click', '.browse-link', function(e) {
-                console.log('Browse link clicked');
-                e.preventDefault();
-                e.stopPropagation();
-                fileInput.click();
-            });
-
-            // Alternative click handler with more specific targeting
-            dragDropArea.on('click', '.browse-link', function(e) {
-                console.log('Browse link clicked (alternative)');
-                e.preventDefault();
-                e.stopPropagation();
-                fileInput[0].click();
             });
 
             // Drag and drop events
@@ -380,14 +362,6 @@
                 if (files.length > 0) {
                     handleFiles(files);
                 }
-            });
-
-            // File input change event
-            fileInput.on('change', function() {
-                if (this.files.length > 0) {
-                    handleFiles(this.files);
-                }
-                $('.previous-file-info').fadeOut();
             });
 
             // Remove file button

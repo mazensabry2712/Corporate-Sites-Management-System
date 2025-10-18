@@ -95,9 +95,9 @@
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
-                            <button onclick="exportToCSV()" class="btn btn-sm btn-info mr-1">
+                            {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info mr-1">
                                 <i class="fas fa-file-csv"></i> CSV
-                            </button>
+                            </button> --}}
                             <button onclick="printTable()" class="btn btn-sm btn-secondary mr-2">
                                 <i class="fas fa-print"></i> Print
                             </button>
@@ -307,37 +307,6 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Project Status');
             XLSX.writeFile(wb, 'project_status_' + new Date().getTime() + '.xlsx');
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            const data = [];
-
-            // إضافة العناوين
-            const headerRow = ['#', 'PR Number', 'Project Name', 'Date & Time', 'PM Name', 'Status', 'Actual %', 'Expected Date', 'Pending Cost', 'Notes'];
-            data.push(headerRow);
-
-            // إضافة البيانات
-            $('#pstatusTable tbody tr').each(function() {
-                const row = [];
-                $(this).find('td').each(function(i) {
-                    // استبعاد عمود العمليات (Index 1)
-                    if (i === 0 || i > 1) {
-                        // إضافة علامات اقتباس للتعامل مع الفواصل في النصوص الطويلة
-                        row.push('"' + $(this).text().trim().replace(/\s+/g, ' ').replace(/"/g, '""') + '"');
-                    }
-                });
-                if (row.length > 1) {
-                    data.push(row.join(','));
-                }
-            });
-
-            const csvContent = data.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'project_status_' + new Date().getTime() + '.csv';
-            link.click();
         }
 
         // Print Table

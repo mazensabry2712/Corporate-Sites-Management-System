@@ -688,9 +688,6 @@
                     <a href="{{ route('reports.index') }}" class="btn btn-secondary btn-reset">
                         <i class="fas fa-redo"></i> Reset All
                     </a>
-                    <a href="{{ route('reports.export', request()->all()) }}" class="btn btn-success btn-filter mt-2">
-                        <i class="fas fa-file-excel"></i> Export to CSV
-                    </a>
                 </div>
             </form>
         </div>
@@ -1030,40 +1027,6 @@
 
     function exportToExcel() {
         alert('Excel Export functionality - integrate with library');
-    }
-
-    function exportToCSV() {
-        // Export all visible tables (filtered data only)
-        var csv = [];
-        var tables = document.querySelectorAll('.reports-content table');
-
-        tables.forEach(function(table, index) {
-            // Add table name
-            var tableName = table.closest('.reports-content').querySelector('h5:nth-of-type(' + (index + 1) + ')');
-            if (tableName) {
-                csv.push([tableName.innerText]);
-                csv.push([]); // Empty line
-            }
-
-            var rows = table.querySelectorAll('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var row = [], cols = rows[i].querySelectorAll('td, th');
-                for (var j = 0; j < cols.length; j++) {
-                    row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
-                }
-                csv.push(row.join(','));
-            }
-            csv.push([]); // Empty line between tables
-        });
-
-        var csvFile = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        var downloadLink = document.createElement('a');
-        downloadLink.download = 'filtered_reports_' + new Date().toISOString().slice(0,10) + '.csv';
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
     }
 
     function printTable() {

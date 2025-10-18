@@ -258,9 +258,9 @@
             <button type="button" class="btn btn-primary btn-sm" id="export-excel">
                 <i class="fas fa-file-excel mr-1"></i> Excel
             </button>
-            <button type="button" class="btn btn-info btn-sm" id="export-csv">
+            {{-- <button type="button" class="btn btn-info btn-sm" id="export-csv">
                 <i class="fas fa-file-csv mr-1"></i> CSV
-            </button>
+            </button> --}}
             <button type="button" class="btn btn-warning btn-sm" id="export-print">
                 <i class="fas fa-print mr-1"></i> Print
             </button>
@@ -771,10 +771,10 @@
                 alert('Excel export functionality to be implemented');
             });
 
-            $('#export-csv').click(function() {
-                // CSV export logic would go here
-                alert('CSV export functionality to be implemented');
-            });
+            // $('#export-csv').click(function() {
+            //     // CSV export logic would go here
+            //     alert('CSV export functionality to be implemented');
+            // });
 
             $('#export-print').click(function() {
                 window.print();

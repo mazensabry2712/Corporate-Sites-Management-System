@@ -275,9 +275,9 @@
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                     <i class="fas fa-file-csv"></i> CSV
-                                </button>
+                                </button> --}}
                                 <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
@@ -513,15 +513,15 @@
                         columns: [0, 2, 3, 4, 6, 7, 8]
                     }
                 },
-                {
-                    extend: 'csvHtml5',
-                    text: '<i class="fas fa-file-csv"></i> CSV',
-                    className: 'btn btn-info btn-sm',
-                    title: 'Invoices List',
-                    exportOptions: {
-                        columns: [0, 2, 3, 4, 6, 7, 8]
-                    }
-                },
+                // {
+                //     extend: 'csvHtml5',
+                //     text: '<i class="fas fa-file-csv"></i> CSV',
+                //     className: 'btn btn-info btn-sm',
+                //     title: 'Invoices List',
+                //     exportOptions: {
+                //         columns: [0, 2, 3, 4, 6, 7, 8]
+                //     }
+                // },
                 {
                     extend: 'print',
                     text: '<i class="fas fa-print"></i> Print',
@@ -549,9 +549,9 @@
             table.button('.buttons-excel').trigger();
         }
 
-        function exportToCSV() {
-            table.button('.buttons-csv').trigger();
-        }
+        // function exportToCSV() {
+        //     table.button('.buttons-csv').trigger();
+        // }
 
         function printTable() {
             table.button('.buttons-print').trigger();

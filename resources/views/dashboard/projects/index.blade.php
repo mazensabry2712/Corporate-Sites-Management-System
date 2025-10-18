@@ -240,9 +240,9 @@
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
-                            <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                            {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                 <i class="fas fa-file-csv"></i> CSV
-                            </button>
+                            </button> --}}
                             <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                 <i class="fas fa-print"></i> Print
                             </button>
@@ -637,15 +637,15 @@
                             columns: ':not(:first-child):not(:nth-child(2))'
                         }
                     },
-                    {
-                        extend: 'csvHtml5',
-                        text: '<i class="fas fa-file-csv"></i> CSV',
-                        className: 'btn btn-info btn-sm d-none',
-                        title: 'Projects Report',
-                        exportOptions: {
-                            columns: ':not(:first-child):not(:nth-child(2))'
-                        }
-                    },
+                    // {
+                    //     extend: 'csvHtml5',
+                    //     text: '<i class="fas fa-file-csv"></i> CSV',
+                    //     className: 'btn btn-info btn-sm d-none',
+                    //     title: 'Projects Report',
+                    //     exportOptions: {
+                    //         columns: ':not(:first-child):not(:nth-child(2))'
+                    //     }
+                    // },
                     {
                         extend: 'print',
                         text: '<i class="fas fa-print"></i> Print',
@@ -764,19 +764,6 @@
                 console.error('Excel export error:', error);
                 downloadTableAsCSV(); // Fallback to CSV
                 showSuccessMessage('CSV file downloaded as alternative!');
-            }
-            resetButton();
-        }
-
-        function exportToCSV() {
-            showLoadingButton('CSV');
-            try {
-                $('#example1').DataTable().button('.buttons-csv').trigger();
-                showSuccessMessage('CSV file is being generated!');
-            } catch (error) {
-                console.error('CSV export error:', error);
-                downloadTableAsCSV(); // Fallback to manual CSV
-                showSuccessMessage('CSV file downloaded successfully!');
             }
             resetButton();
         }

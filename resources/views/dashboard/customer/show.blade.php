@@ -248,9 +248,9 @@
                 <button type="button" class="btn btn-primary btn-sm" onclick="exportToExcel()" title="Export to Excel">
                     <i class="fas fa-file-excel"></i> Excel
                 </button>
-                <button type="button" class="btn btn-info btn-sm" onclick="exportToCSV()" title="Export to CSV">
+                {{-- <button type="button" class="btn btn-info btn-sm" onclick="exportToCSV()" title="Export to CSV">
                     <i class="fas fa-file-csv"></i> CSV
-                </button>
+                </button> --}}
                 <button type="button" class="btn btn-warning btn-sm" onclick="printCustomer()" title="Print">
                     <i class="fas fa-print"></i> Print
                 </button>
@@ -670,47 +670,6 @@
                 console.error('Excel export error:', error);
                 exportToCSV(); // Fallback to CSV
                 showSuccessMessage('CSV file exported as alternative!');
-            }
-
-            resetButton();
-        }
-
-        // Export to CSV Function
-        function exportToCSV() {
-            showLoadingButton('CSV');
-
-            try {
-                const customerData = [
-                    ['Field', 'Value'],
-                    ['Customer Name', '{{ $customer->name }}'],
-                    ['Abbreviation', '{{ $customer->abb ?? "N/A" }}'],
-                    ['Type', '{{ $customer->tybe ?? "N/A" }}'],
-                    ['Contact Name', '{{ $customer->customercontactname ?? "N/A" }}'],
-                    ['Contact Position', '{{ $customer->customercontactposition ?? "N/A" }}'],
-                    ['Email', '{{ $customer->email ?? "N/A" }}'],
-                    ['Phone', '{{ $customer->phone ?? "N/A" }}'],
-                    ['Generated On', new Date().toLocaleDateString()]
-                ];
-
-                let csvContent = "";
-                customerData.forEach(row => {
-                    csvContent += row.map(field => `"${field}"`).join(',') + '\n';
-                });
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', `customer_${slugify('{{ $customer->name }}')}_${new Date().toISOString().slice(0, 10)}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                showSuccessMessage('CSV file exported successfully!');
-            } catch (error) {
-                console.error('CSV export error:', error);
-                showSuccessMessage('Export failed. Please try again.');
             }
 
             resetButton();

@@ -192,9 +192,9 @@
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
-                            <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                            {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                 <i class="fas fa-file-csv"></i> CSV
-                            </button>
+                            </button> --}}
                             <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                 <i class="fas fa-print"></i> Print
                             </button>
@@ -446,19 +446,6 @@
             resetButton();
         }
 
-        function exportToCSV() {
-            showLoadingButton('CSV');
-            try {
-                $('#example1').DataTable().button('.buttons-csv').trigger();
-                showSuccessMessage('CSV file is being generated!');
-            } catch (error) {
-                console.error('CSV export error:', error);
-                downloadTableAsCSV(); // Fallback to manual CSV
-                showSuccessMessage('CSV file downloaded successfully!');
-            }
-            resetButton();
-        }
-
         function printTable() {
             showLoadingButton('Print');
             try {
@@ -521,31 +508,31 @@
         }
 
         // Alternative manual export functions as backup
-        function downloadTableAsCSV() {
-            const table = document.getElementById('example1');
-            let csv = [];
-            const rows = table.querySelectorAll('tr');
+        // function downloadTableAsCSV() {
+        //     const table = document.getElementById('example1');
+        //     let csv = [];
+        //     const rows = table.querySelectorAll('tr');
 
-            for (let i = 0; i < rows.length; i++) {
-                const row = [], cols = rows[i].querySelectorAll('td, th');
+        //     for (let i = 0; i < rows.length; i++) {
+        //         const row = [], cols = rows[i].querySelectorAll('td, th');
 
-                for (let j = 2; j < cols.length; j++) { // Skip first two columns (# and Actions)
-                    let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ');
-                    data = data.replace(/"/g, '""');
-                    row.push('"' + data + '"');
-                }
-                csv.push(row.join(','));
-            }
+        //         for (let j = 2; j < cols.length; j++) { // Skip first two columns (# and Actions)
+        //             let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ');
+        //             data = data.replace(/"/g, '""');
+        //             row.push('"' + data + '"');
+        //         }
+        //         csv.push(row.join(','));
+        //     }
 
-            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const downloadLink = document.createElement('a');
-            downloadLink.download = 'customers_' + new Date().toISOString().slice(0, 10) + '.csv';
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-        }
+        //     const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+        //     const downloadLink = document.createElement('a');
+        //     downloadLink.download = 'customers_' + new Date().toISOString().slice(0, 10) + '.csv';
+        //     downloadLink.href = window.URL.createObjectURL(csvFile);
+        //     downloadLink.style.display = 'none';
+        //     document.body.appendChild(downloadLink);
+        //     downloadLink.click();
+        //     document.body.removeChild(downloadLink);
+        // }
 
         function printCustomersTable() {
             const printWindow = window.open('', '_blank');

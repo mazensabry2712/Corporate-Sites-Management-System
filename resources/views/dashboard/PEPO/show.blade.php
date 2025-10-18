@@ -243,9 +243,9 @@
                         <button class="btn btn-success" onclick="exportToExcel()">
                             <i class="fas fa-file-excel mr-2"></i>Export Excel
                         </button>
-                        <button class="btn btn-info" onclick="exportToCSV()">
+                        {{-- <button class="btn btn-info" onclick="exportToCSV()">
                             <i class="fas fa-file-csv mr-2"></i>Export CSV
-                        </button>
+                        </button> --}}
                         <button class="btn btn-secondary" onclick="window.print()">
                             <i class="fas fa-print mr-2"></i>Print
                         </button>
@@ -410,28 +410,6 @@
 
             XLSX.utils.book_append_sheet(wb, ws, 'EPO Details');
             XLSX.writeFile(wb, 'EPO_{{ $pepo->id }}_' + new Date().toISOString().slice(0,10) + '.xlsx');
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            const data = [
-                ['Field', 'Value'],
-                ['PR Number', '{{ $pepo->project->pr_number ?? "N/A" }}'],
-                ['Project', '"{{ $pepo->project->name ?? "N/A" }}"'],
-                ['Category', '"{{ $pepo->category ?? "N/A" }}"'],
-                ['Planned Cost', '{{ number_format($pepo->planned_cost, 2) }}'],
-                ['Selling Price', '{{ number_format($pepo->selling_price, 2) }}'],
-                ['Margin', '{{ $pepo->margin !== null ? number_format($pepo->margin * 100, 2) . "%" : "N/A" }}'],
-                ['Created', '{{ $pepo->created_at->format("Y-m-d H:i A") }}'],
-                ['Updated', '{{ $pepo->updated_at->format("Y-m-d H:i A") }}']
-            ];
-
-            const csv = data.map(row => row.join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'EPO_{{ $pepo->id }}_' + new Date().toISOString().slice(0,10) + '.csv';
-            link.click();
         }
     </script>
 @endsection

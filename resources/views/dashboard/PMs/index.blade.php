@@ -163,9 +163,9 @@
         <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
             <i class="fas fa-file-excel"></i> Excel
         </button>
-        <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+        {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
             <i class="fas fa-file-csv"></i> CSV
-        </button>
+        </button> --}}
         <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
             <i class="fas fa-print"></i> Print
         </button>
@@ -578,10 +578,6 @@
             } finally {
                 hideLoadingButton(button);
             }
-        }
-
-        function exportPMToCSV() {
-            exportPMToExcel(); // They perform the same function of creating a CSV
         }
 
         // --- Helper Functions ---

@@ -299,9 +299,9 @@
                         <button class="btn btn-success" onclick="exportToExcel()">
                             <i class="fas fa-file-excel mr-2"></i>Export Excel
                         </button>
-                        <button class="btn btn-info" onclick="exportToCSV()">
+                        {{-- <button class="btn btn-info" onclick="exportToCSV()">
                             <i class="fas fa-file-csv mr-2"></i>Export CSV
-                        </button>
+                        </button> --}}
                         <button class="btn btn-secondary" onclick="window.print()">
                             <i class="fas fa-print mr-2"></i>Print
                         </button>
@@ -488,33 +488,6 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'PPO Details');
             XLSX.writeFile(wb, 'PPO_{{ $ppo->po_number }}_' + new Date().toISOString().slice(0,10) + '.xlsx');
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            let csv = 'Field,Value\n';
-            csv += 'PR Number,{{ $ppo->project->pr_number ?? "N/A" }}\n';
-            csv += 'Project,{{ $ppo->project->name ?? "N/A" }}\n';
-            csv += 'PO Number,{{ $ppo->po_number }}\n';
-            csv += 'Categories,"{{ str_replace('"', '""', $categoriesForExport ?: "N/A") }}"\n';
-            csv += 'Supplier,{{ $ppo->ds->dsname ?? "N/A" }}\n';
-            csv += 'Value,{{ $ppo->value ? number_format($ppo->value, 2) : "N/A" }}\n';
-            csv += 'Date,{{ $ppo->date ? $ppo->date->format("Y-m-d") : "N/A" }}\n';
-            csv += 'Status,"{{ str_replace(["\r", "\n"], " ", $ppo->status ?? "N/A") }}"\n';
-            csv += 'Updates,"{{ str_replace(["\r", "\n"], " ", $ppo->updates ?? "No updates") }}"\n';
-            csv += 'Notes,"{{ str_replace(["\r", "\n"], " ", $ppo->notes ?? "No notes") }}"\n';
-            csv += 'Created,{{ $ppo->created_at->format("Y-m-d H:i A") }}\n';
-            csv += 'Updated,{{ $ppo->updated_at->format("Y-m-d H:i A") }}\n';
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'PPO_{{ $ppo->po_number }}_' + new Date().toISOString().slice(0,10) + '.csv');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
         }
     </script>
 @endsection

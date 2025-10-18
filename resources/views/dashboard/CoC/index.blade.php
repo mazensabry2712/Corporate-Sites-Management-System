@@ -334,9 +334,9 @@
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
+                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                     <i class="fas fa-file-csv"></i> CSV
-                                </button>
+                                </button> --}}
                                 <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
@@ -610,36 +610,6 @@
 
             XLSX.utils.book_append_sheet(wb, ws, 'CoC List');
             XLSX.writeFile(wb, 'CoC_List_' + new Date().toISOString().slice(0,10) + '.xlsx');
-        }
-
-        // Export to CSV (بقي كما هو)
-        function exportToCSV() {
-            const table = document.getElementById('example1');
-            let csv = [];
-
-            csv.push(['#', 'PR Number', 'Project Name', 'Upload Date'].join(','));
-
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
-                const rowData = [
-                    index + 1,
-                    // cells[2] هو PR Number
-                    '"' + (cells[2]?.textContent.trim().replace(/\s+/g, ' ').replace(/"/g, '""') || '') + '"',
-                    // cells[3] هو Project Name
-                    '"' + (cells[3]?.textContent.trim().replace(/\s+/g, ' ').replace(/"/g, '""') || '') + '"',
-                    // cells[5] هو Upload Date
-                    cells[5]?.textContent.trim().replace(/\s+/g, ' ') || ''
-                ];
-                csv.push(rowData.join(','));
-            });
-
-            const csvContent = csv.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'CoC_List_' + new Date().toISOString().slice(0,10) + '.csv';
-            link.click();
         }
 
         // Print Table (تم تعديلها)

@@ -276,7 +276,7 @@
                                 @endif
 
                                 <div class="col-sm-12 col-md-12">
-                                    <div class="drag-drop-area" id="dragDropArea" onclick="if(!event.target.closest('.file-preview') && !event.target.classList.contains('remove-file')) { document.getElementById('logoInput').click(); }">
+                                    <div class="drag-drop-area" id="dragDropArea">
                                         <input type="file" name="logo" id="logoInput" class="d-none {{ $errors->has('logo') ? 'is-invalid' : '' }}"
                                             accept=".jpg,.jpeg,.png,.gif,.webp" />
 
@@ -285,7 +285,7 @@
                                                 <i class="fas fa-cloud-upload-alt fa-3x text-primary"></i>
                                             </div>
                                             <h4 class="drag-drop-title">Drag & Drop Logo Here</h4>
-                                            <p class="drag-drop-subtitle">or <span class="browse-link" onclick="document.getElementById('logoInput').click();">click to browse</span></p>
+                                            <p class="drag-drop-subtitle">or <span class="browse-link">click to browse</span></p>
                                             <small class="text-muted">Supported formats: JPG, JPEG, PNG, GIF, WEBP (Max: 2MB)</small>
                                         </div>
 
@@ -408,32 +408,21 @@
             const filePreview = dragDropArea.find('.file-preview');
             const dragDropContent = dragDropArea.find('.drag-drop-content');
 
+
             console.log('Drag drop initialized');
             console.log('DragDropArea:', dragDropArea.length);
             console.log('FileInput:', fileInput.length);
 
-            // Click to browse functionality - General area click
+            // Click to browse functionality - works for entire area including browse link
             dragDropArea.on('click', function(e) {
                 console.log('Area clicked:', e.target);
-                if (!$(e.target).hasClass('remove-file') && !$(e.target).closest('.file-preview').length) {
-                    console.log('Opening file dialog');
-                    fileInput.click();
+                // Don't open file dialog only if clicking on remove button or preview image
+                if ($(e.target).hasClass('remove-file') ||
+                    $(e.target).closest('.remove-file').length > 0 ||
+                    $(e.target).closest('.file-preview').length > 0) {
+                    return;
                 }
-            });
-
-            // Specific click handler for browse link
-            $(document).on('click', '.browse-link', function(e) {
-                console.log('Browse link clicked');
-                e.preventDefault();
-                e.stopPropagation();
-                fileInput.click();
-            });
-
-            // Alternative click handler with more specific targeting
-            dragDropArea.on('click', '.browse-link', function(e) {
-                console.log('Browse link clicked (alternative)');
-                e.preventDefault();
-                e.stopPropagation();
+                console.log('Opening file dialog');
                 fileInput[0].click();
             });
 
