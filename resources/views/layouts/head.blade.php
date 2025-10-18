@@ -19,7 +19,7 @@
 
 @if (App::getlocale() == 'en' || App::getlocale() == 'fr')
     <!-- Favicon -->
-    <link rel="icon" href="{{ URL::asset('assets/img/brand/favicon.png') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ URL::asset('assets/img/brand/favicon.png') }}?v={{ time() }}" type="image/x-icon" />
     <!-- Icons css -->
     <link href="{{ URL::asset('assets/css/icons.css') }}" rel="stylesheet">
     <!--  Custom Scroll bar-->
@@ -37,7 +37,7 @@
     <link href="{{ URL::asset('assets/css/skin-modes.css') }}" rel="stylesheet" />
 @else
     <!-- Favicon -->
-    <link rel="icon" href="{{ URL::asset('assets/img/brand/favicon.png') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ URL::asset('assets/img/brand/favicon.png') }}?v={{ time() }}" type="image/x-icon" />
     <!-- Icons css -->
     <link href="{{ URL::asset('assets/css/icons.css') }}" rel="stylesheet">
     <!--  Custom Scroll bar-->
