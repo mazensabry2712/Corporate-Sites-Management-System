@@ -53,3 +53,46 @@
     <!---Skinmodes css-->
     <link href="{{ URL::asset('assets/css-rtl/skin-modes.css') }}" rel="stylesheet">
 @endif
+
+<!-- Custom Logo Styling -->
+<style>
+    /* Logo in sidebar menu */
+    .sidebar-logo-container {
+        padding: 20px 15px !important;
+        text-align: center;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .sidebar-logo-link {
+        display: inline-block;
+    }
+
+    .sidebar-main-logo {
+        max-width: 130px;
+        height: auto;
+    }
+
+    /* Dark mode */
+    .dark-mode .sidebar-logo-container {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Remove default category styling from logo */
+    .sidebar-logo-container.side-item-category {
+        background: transparent !important;
+        color: inherit !important;
+        text-transform: none !important;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .sidebar-logo-container {
+            padding: 15px 10px !important;
+        }
+
+        .sidebar-main-logo {
+            max-width: 100px;
+        }
+    }
+</style>
