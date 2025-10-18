@@ -85,8 +85,7 @@
     <div class="breadcrumb-header justify-content-between">
         <div class="my-auto">
             <div class="d-flex">
-                <h4 class="content-title mb-0 my-auto">General</h4><span class="text-muted mt-1 tx-13 mr-2 mb-0">/
-                    PMs</span>
+                <h4 class="content-title mb-0 my-auto">Project Managers</h4><span class="text-muted mt-1 tx-13 mr-2 mb-0">/ All PMs</span>
             </div>
         </div>
         <div class="d-flex my-xl-auto right-content">
@@ -154,7 +153,7 @@
                             <small class="text-muted">Manage and view all PM information</small>
                         </div>
                    <div class="d-flex justify-content-between align-items-center flex-wrap">
-  
+
     <div class="d-flex align-items-center">
 
         <!-- Export Buttons -->

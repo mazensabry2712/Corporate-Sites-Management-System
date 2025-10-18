@@ -160,8 +160,8 @@
     <div class="breadcrumb-header justify-content-between">
         <div class="my-auto">
             <div class="d-flex">
-                <h4 class="content-title mb-0 my-auto">Dashboard</h4>
-                <span class="text-muted mt-1 tx-13 mr-2 mb-0">/ Projects / Add New Project</span>
+                <h4 class="content-title mb-0 my-auto">Projects</h4>
+                <span class="text-muted mt-1 tx-13 mr-2 mb-0">/ Add New Project</span>
             </div>
         </div>
         <div class="d-flex my-xl-auto right-content">
@@ -266,10 +266,10 @@
                         </div>
 
                         <div class="row">
-                            <!-- Delivery Specialists (Multiple Selection) -->
+                            <!-- Disti/Supplier(Multiple Selection) -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="delivery_specialists">Delivery Specialists <span class="text-info">*Multiple Selection</span></label>
+                                    <label for="delivery_specialists">Disti/Supplier <span class="text-info">*Multiple Selection</span></label>
                                     <select class="form-control select2-multiple @error('delivery_specialists') is-invalid @enderror"
                                             id="delivery_specialists" name="delivery_specialists[]" multiple>
                                         @foreach($ds as $dsItem)

@@ -198,8 +198,7 @@
     <div class="breadcrumb-header justify-content-between">
         <div class="my-auto">
             <div class="d-flex">
-                <h4 class="content-title mb-0 my-auto">General</h4><span class="text-muted mt-1 tx-13 mr-2 mb-0">/
-                    Disti/ Supplier </span>
+                <h4 class="content-title mb-0 my-auto">Distributors / Suppliers</h4><span class="text-muted mt-1 tx-13 mr-2 mb-0">/ All DS</span>
             </div>
         </div>
         <div class="d-flex my-xl-auto right-content">
@@ -249,7 +248,7 @@
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0">Delivery Specialists Management</h6>
+                            <h6 class="card-title mb-0">Disti/Supplier</h6>
                         </div>
                         <div>
                             <div class="d-flex align-items-center">
@@ -327,7 +326,7 @@
                                     <tr>
                                         <td colspan="4" class="text-center">
                                             <i class="las la-inbox" style="font-size: 48px; color: #ccc;"></i>
-                                            <p class="text-muted">No delivery specialists found</p>
+                                            <p class="text-muted">No Disti/Supplier found</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -375,7 +374,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary-gradient">
                     <h5 class="modal-title text-white" id="viewModalLabel">
-                        <i class="fas fa-eye"></i> View Delivery Specialist Details
+                        <i class="fas fa-eye"></i> View Disti/Supplier Details
                     </h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>

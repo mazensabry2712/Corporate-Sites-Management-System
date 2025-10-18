@@ -37,6 +37,117 @@
         .select2-container .select2-selection--multiple .select2-selection__choice__remove:hover {
             color: #dc3545;
         }
+
+        /* Drag and Drop Styles */
+        .drag-drop-area {
+            border: 3px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 30px 15px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 160px;
+        }
+
+        .drag-drop-area:hover {
+            border-color: #007bff;
+            background-color: #e7f3ff;
+        }
+
+        .drag-drop-area.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+            transform: scale(1.02);
+        }
+
+        .drag-drop-content {
+            pointer-events: auto;
+        }
+
+        .drag-drop-icon {
+            margin-bottom: 15px;
+        }
+
+        .drag-drop-title {
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+        }
+
+        .drag-drop-subtitle {
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .browse-link {
+            color: #007bff;
+            text-decoration: underline;
+            cursor: pointer;
+            pointer-events: auto !important;
+            z-index: 10;
+            position: relative;
+        }
+
+        .file-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-content {
+            text-align: center;
+            max-width: 90%;
+        }
+
+        .preview-image {
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+
+        .preview-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .file-size {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .remove-file {
+            margin-top: 8px;
+        }
+
+        .file-icon-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon-preview i {
+            color: #007bff;
+        }
     </style>
 @endsection
 
@@ -45,8 +156,8 @@
     <div class="breadcrumb-header justify-content-between">
         <div class="my-auto">
             <div class="d-flex">
-                <h4 class="content-title mb-0 my-auto">Dashboard</h4>
-                <span class="text-muted mt-1 tx-13 mr-2 mb-0">/ Projects / Edit Project</span>
+                <h4 class="content-title mb-0 my-auto">Projects</h4>
+                <span class="text-muted mt-1 tx-13 mr-2 mb-0">/ Edit Project</span>
             </div>
         </div>
         <div class="d-flex my-xl-auto right-content">
@@ -153,10 +264,10 @@
                         </div>
 
                         <div class="row">
-                            <!-- Delivery Specialists (Multiple Selection) -->
+                            <!-- Disti/Supplier(Multiple Selection) -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="delivery_specialists">Delivery Specialists <span class="text-info">*Multiple Selection</span></label>
+                                    <label for="delivery_specialists">Disti/Supplier<span class="text-info">*Multiple Selection</span></label>
                                     <select class="form-control select2-multiple @error('delivery_specialists') is-invalid @enderror"
                                             id="delivery_specialists" name="delivery_specialists[]" multiple>
                                         @foreach($ds as $dsItem)
@@ -337,11 +448,37 @@
                                             </small>
                                         </div>
                                     @endif
-                                    <input type="file" class="form-control-file @error('po_attachment') is-invalid @enderror"
-                                           id="po_attachment" name="po_attachment" accept=".pdf,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">Allowed formats: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
+                                    <div class="drag-drop-area" id="dragDropAreaPO" onclick="if(!event.target.closest('.file-preview') && !event.target.classList.contains('remove-file')) { document.getElementById('po_attachment').click(); }">
+                                        <input type="file" name="po_attachment" id="po_attachment" class="d-none @error('po_attachment') is-invalid @enderror"
+                                            accept=".pdf,.jpg,.jpeg,.png" />
+
+                                        <div class="drag-drop-content">
+                                            <div class="drag-drop-icon">
+                                                <i class="fas fa-cloud-upload-alt fa-2x text-primary"></i>
+                                            </div>
+                                            <h5 class="drag-drop-title">Drag & Drop PO File</h5>
+                                            <p class="drag-drop-subtitle">or <span class="browse-link">click to browse</span></p>
+                                            <small class="text-muted">PDF, JPG, JPEG, PNG (Max: 2MB)</small>
+                                        </div>
+
+                                        <div class="file-preview d-none">
+                                            <div class="preview-content">
+                                                <div class="file-icon-preview">
+                                                    <img class="preview-image d-none" src="" alt="Preview">
+                                                    <i class="fas fa-file-alt fa-3x d-none file-icon"></i>
+                                                    <div class="preview-info">
+                                                        <span class="file-name"></span>
+                                                        <span class="file-size"></span>
+                                                        <button type="button" class="btn btn-sm btn-danger remove-file">
+                                                            <i class="fas fa-times"></i> Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     @error('po_attachment')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
@@ -359,11 +496,37 @@
                                             </small>
                                         </div>
                                     @endif
-                                    <input type="file" class="form-control-file @error('epo_attachment') is-invalid @enderror"
-                                           id="epo_attachment" name="epo_attachment" accept=".pdf,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">Allowed formats: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
+                                    <div class="drag-drop-area" id="dragDropAreaEPO" onclick="if(!event.target.closest('.file-preview') && !event.target.classList.contains('remove-file')) { document.getElementById('epo_attachment').click(); }">
+                                        <input type="file" name="epo_attachment" id="epo_attachment" class="d-none @error('epo_attachment') is-invalid @enderror"
+                                            accept=".pdf,.jpg,.jpeg,.png" />
+
+                                        <div class="drag-drop-content">
+                                            <div class="drag-drop-icon">
+                                                <i class="fas fa-cloud-upload-alt fa-2x text-success"></i>
+                                            </div>
+                                            <h5 class="drag-drop-title">Drag & Drop EPO File</h5>
+                                            <p class="drag-drop-subtitle">or <span class="browse-link">click to browse</span></p>
+                                            <small class="text-muted">PDF, JPG, JPEG, PNG (Max: 2MB)</small>
+                                        </div>
+
+                                        <div class="file-preview d-none">
+                                            <div class="preview-content">
+                                                <div class="file-icon-preview">
+                                                    <img class="preview-image d-none" src="" alt="Preview">
+                                                    <i class="fas fa-file-alt fa-3x d-none file-icon"></i>
+                                                    <div class="preview-info">
+                                                        <span class="file-name"></span>
+                                                        <span class="file-size"></span>
+                                                        <button type="button" class="btn btn-sm btn-success remove-file">
+                                                            <i class="fas fa-times"></i> Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     @error('epo_attachment')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
@@ -471,6 +634,143 @@
                     $('#customer_po_deadline').val(deadline);
                 }
             });
+
+            // ========== Drag & Drop File Upload ==========
+            initializeDragDrop('po_attachment', 'dragDropAreaPO');
+            initializeDragDrop('epo_attachment', 'dragDropAreaEPO');
+
+            function initializeDragDrop(inputId, areaId) {
+                const dragDropArea = $('#' + areaId);
+                const fileInput = $('#' + inputId);
+
+                // Prevent default drag behaviors
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dragDropArea[0].addEventListener(eventName, preventDefaults, false);
+                    document.body.addEventListener(eventName, preventDefaults, false);
+                });
+
+                // Highlight drop area when item is dragged over it
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dragDropArea[0].addEventListener(eventName, () => {
+                        dragDropArea.addClass('dragover');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dragDropArea[0].addEventListener(eventName, () => {
+                        dragDropArea.removeClass('dragover');
+                    }, false);
+                });
+
+                // Handle dropped files
+                dragDropArea[0].addEventListener('drop', function(e) {
+                    const files = e.dataTransfer.files;
+                    handleFiles(files, inputId, areaId);
+                }, false);
+
+                // Handle file input change
+                fileInput.on('change', function() {
+                    if (this.files.length > 0) {
+                        handleFiles(this.files, inputId, areaId);
+                    }
+                });
+
+                // Remove file button
+                dragDropArea.on('click', '.remove-file', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    removeFile(inputId, areaId);
+                });
+            }
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function handleFiles(files, inputId, areaId) {
+                const file = files[0];
+                const dragDropArea = $('#' + areaId);
+                const fileInput = $('#' + inputId);
+
+                // Validate file type
+                const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Please select a valid file (PDF, JPG, JPEG, PNG)');
+                    return;
+                }
+
+                // Validate file size (2MB max)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size must be less than 2MB');
+                    return;
+                }
+
+                // Set file to input
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput[0].files = dt.files;
+
+                // Show preview
+                showPreview(file, areaId);
+            }
+
+            function showPreview(file, areaId) {
+                const dragDropArea = $('#' + areaId);
+                const dragDropContent = dragDropArea.find('.drag-drop-content');
+                const filePreview = dragDropArea.find('.file-preview');
+
+                // Check if it's an image
+                const isImage = file.type.startsWith('image/');
+
+                if (isImage) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        filePreview.find('.preview-image').attr('src', e.target.result).removeClass('d-none');
+                        filePreview.find('.file-icon').addClass('d-none');
+                        filePreview.find('.file-name').text(file.name);
+                        filePreview.find('.file-size').text(formatFileSize(file.size));
+
+                        dragDropContent.addClass('d-none');
+                        filePreview.removeClass('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // Show file icon for non-images (PDF)
+                    filePreview.find('.preview-image').addClass('d-none');
+                    filePreview.find('.file-icon').removeClass('d-none');
+                    filePreview.find('.file-name').text(file.name);
+                    filePreview.find('.file-size').text(formatFileSize(file.size));
+
+                    dragDropContent.addClass('d-none');
+                    filePreview.removeClass('d-none');
+                }
+            }
+
+            function removeFile(inputId, areaId) {
+                const dragDropArea = $('#' + areaId);
+                const fileInput = $('#' + inputId);
+                const dragDropContent = dragDropArea.find('.drag-drop-content');
+                const filePreview = dragDropArea.find('.file-preview');
+
+                fileInput.val('');
+                filePreview.addClass('d-none');
+                dragDropContent.removeClass('d-none');
+
+                // Reset preview elements
+                filePreview.find('.preview-image').attr('src', '').addClass('d-none');
+                filePreview.find('.file-icon').addClass('d-none');
+                filePreview.find('.file-name').text('');
+                filePreview.find('.file-size').text('');
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
         });
     </script>
 @endsection

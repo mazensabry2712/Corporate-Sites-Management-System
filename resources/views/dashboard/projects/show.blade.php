@@ -586,14 +586,14 @@
                                     </div>
                                 </div>
 
-                                <!-- All Delivery Specialists -->
+                                <!-- All Disti/Supplier-->
                                 @if($project->deliverySpecialists && $project->deliverySpecialists->count() > 0)
                                 <div class="info-item">
                                     <div class="info-icon icon-success">
                                         <i class="fas fa-users-cog"></i>
                                     </div>
                                     <div class="info-content">
-                                        <div class="info-label">All Delivery Specialists</div>
+                                        <div class="info-label">All Disti/Supplier</div>
                                         <div class="info-value">
                                             @foreach($project->deliverySpecialists as $ds)
                                                 <span class="badge badge-{{ $ds->pivot->is_primary ? 'success' : 'info' }} mr-1">
