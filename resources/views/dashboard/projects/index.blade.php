@@ -745,12 +745,14 @@
         function exportToPDF() {
             showLoadingButton('PDF');
             try {
-                $('#example1').DataTable().button('.buttons-pdf').trigger();
-                showSuccessMessage('PDF export started successfully!');
+                // Generate custom PDF with proper data
+                generateProjectsPDF();
+                showSuccessMessage('PDF generated successfully!');
             } catch (error) {
                 console.error('PDF export error:', error);
-                printProjectsTable(); // Fallback to manual print
-                showSuccessMessage('Alternative print method used!');
+                // Fallback to DataTables PDF
+                $('#example1').DataTable().button('.buttons-pdf').trigger();
+                showSuccessMessage('PDF export started!');
             }
             resetButton();
         }
@@ -771,14 +773,173 @@
         function printTable() {
             showLoadingButton('Print');
             try {
-                $('#example1').DataTable().button('.buttons-print').trigger();
+                // Custom print with proper formatting
+                printProjectsTable();
                 showSuccessMessage('Print dialog opened!');
             } catch (error) {
                 console.error('Print error:', error);
-                printProjectsTable(); // Fallback to manual print
-                showSuccessMessage('Print window opened!');
+                window.print();
+                showSuccessMessage('Browser print opened!');
             }
             resetButton();
+        }
+
+        // Generate Custom PDF with proper data
+        function generateProjectsPDF() {
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF('portrait', 'mm', 'a4'); // تغيير إلى portrait بدلاً من landscape
+
+            // Header
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Projects Management Report', 105, 15, {
+                align: 'center'
+            });
+
+            // Date
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated: ${new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })}`, 105, 22, {
+                align: 'center'
+            });
+
+            // Get table data
+            const table = document.getElementById('example1');
+            const rows = table.querySelectorAll('tbody tr');
+            const data = [];
+
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0) {
+                    data.push([
+                        (index + 1).toString(), // #
+                        cells[2]?.innerText.trim() || 'N/A', // PR Number
+                        cells[3]?.innerText.trim() || 'N/A', // Project Name
+                        cells[5]?.innerText.trim() || 'N/A', // Vendor
+                        cells[7]?.innerText.trim() || 'N/A', // DS
+                        cells[9]?.innerText.trim() || 'N/A', // Customer
+                        cells[12]?.innerText.trim() || 'N/A', // Value
+                        cells[13]?.innerText.trim() || 'N/A', // AC Manager
+                        cells[14]?.innerText.trim() || 'N/A' // PM
+                    ]);
+                }
+            });
+
+            // Table configuration for A4 portrait
+            doc.autoTable({
+                head: [
+                    ['#', 'PR No', 'Project', 'Vendor', 'DS', 'Customer', 'Value', 'AC Mgr', 'PM']
+                ],
+                body: data,
+                startY: 28,
+                theme: 'striped',
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    overflow: 'linebreak',
+                    halign: 'left',
+                    valign: 'middle',
+                    lineWidth: 0.1,
+                    lineColor: [200, 200, 200]
+                },
+                headStyles: {
+                    fillColor: [103, 126, 234], // لون أزرق جميل
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    fontSize: 8
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 249, 250]
+                },
+                columnStyles: {
+                    0: {
+                        cellWidth: 8,
+                        halign: 'center'
+                    }, // #
+                    1: {
+                        cellWidth: 20
+                    }, // PR Number
+                    2: {
+                        cellWidth: 35
+                    }, // Project Name
+                    3: {
+                        cellWidth: 25
+                    }, // Vendor
+                    4: {
+                        cellWidth: 20
+                    }, // DS
+                    5: {
+                        cellWidth: 25
+                    }, // Customer
+                    6: {
+                        cellWidth: 18,
+                        halign: 'right'
+                    }, // Value
+                    7: {
+                        cellWidth: 20
+                    }, // AC Manager
+                    8: {
+                        cellWidth: 20
+                    } // PM
+                },
+                margin: {
+                    top: 28,
+                    right: 10,
+                    bottom: 20,
+                    left: 10
+                },
+                showHead: 'everyPage', // إظهار العناوين في كل صفحة
+                rowPageBreak: 'auto', // السماح بتقسيم الصفوف تلقائياً
+                tableWidth: 'auto',
+                didDrawPage: function(data) {
+                    // Header في كل صفحة
+                    if (data.pageNumber > 1) {
+                        doc.setFontSize(12);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text('Projects Report (Continued)', 105, 15, {
+                            align: 'center'
+                        });
+                    }
+
+                    // Footer
+                    const pageCount = doc.internal.getNumberOfPages();
+                    doc.setFontSize(8);
+                    doc.setTextColor(150);
+
+                    // خط فاصل قبل الفوتر
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(10, doc.internal.pageSize.height - 15, 200, doc.internal.pageSize.height - 15);
+
+                    // رقم الصفحة
+                    doc.text(
+                        `Page ${data.pageNumber} of ${pageCount}`,
+                        105,
+                        doc.internal.pageSize.height - 10,
+                        {
+                            align: 'center'
+                        }
+                    );
+
+                    // معلومات إضافية
+                    doc.setFontSize(7);
+                    doc.text('Corporate Sites Management System', 10, doc.internal.pageSize.height - 10);
+                    doc.text(new Date().toLocaleDateString(), 200, doc.internal.pageSize.height - 10, {
+                        align: 'right'
+                    });
+                }
+            });
+
+            // Save PDF
+            doc.save(`Projects_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
         }
 
         // Helper functions for user feedback
@@ -860,43 +1021,194 @@
         }
 
         function printProjectsTable() {
-            const printWindow = window.open('', '_blank');
-            const table = document.getElementById('example1').cloneNode(true);
+            const printWindow = window.open('', '_blank', 'width=1200,height=800');
+            const table = document.getElementById('example1');
+            const rows = table.querySelectorAll('tbody tr');
 
-            // Remove action columns
-            const actionCells = table.querySelectorAll('td:first-child, th:first-child, td:nth-child(2), th:nth-child(2)');
-            actionCells.forEach(cell => cell.remove());
+            let tableRows = '';
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0) {
+                    tableRows += `
+                        <tr>
+                            <td style="text-align: center;">${index + 1}</td>
+                            <td>${cells[2]?.innerText.trim() || 'N/A'}</td>
+                            <td style="font-weight: bold;">${cells[3]?.innerText.trim() || 'N/A'}</td>
+                            <td>${cells[4]?.innerText.trim() || 'N/A'}</td>
+                            <td>${cells[5]?.innerText.trim() || 'N/A'}</td>
+                            <td>${cells[7]?.innerText.trim() || 'N/A'}</td>
+                            <td>${cells[9]?.innerText.trim() || 'N/A'}</td>
+                            <td>${cells[11]?.innerText.trim() || 'N/A'}</td>
+                            <td style="text-align: right;">${cells[12]?.innerText.trim() || 'N/A'}</td>
+                            <td>${cells[13]?.innerText.trim() || 'N/A'}</td>
+                            <td>${cells[14]?.innerText.trim() || 'N/A'}</td>
+                            <td style="text-align: center;">${cells[18]?.innerText.trim() || 'N/A'}</td>
+                            <td style="text-align: center;">${cells[19]?.innerText.trim() || 'N/A'}</td>
+                            <td style="text-align: center;">${cells[20]?.innerText.trim() || 'N/A'}</td>
+                        </tr>
+                    `;
+                }
+            });
 
             const printContent = `
-            <html>
-            <head>
-                <title>Projects Report</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    table { border-collapse: collapse; width: 100%; font-size: 12px; }
-                    th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-                    th { background-color: #f2f2f2; font-weight: bold; }
-                    .header { text-align: center; margin-bottom: 20px; }
-                    @media print {
-                        body { margin: 0; }
-                        table { page-break-inside: auto; }
-                        tr { page-break-inside: avoid; page-break-after: auto; }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h2>Projects Report</h2>
-                    <p>Generated on: ${new Date().toLocaleDateString()}</p>
-                </div>
-                ${table.outerHTML}
-            </body>
-            </html>
-        `;
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Projects Management Report</title>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            padding: 20px;
+                            background: #fff;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            padding-bottom: 15px;
+                            border-bottom: 3px solid #2980b9;
+                        }
+                        .header h1 {
+                            color: #2c3e50;
+                            font-size: 28px;
+                            margin-bottom: 10px;
+                        }
+                        .header .meta {
+                            color: #7f8c8d;
+                            font-size: 14px;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 20px;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        }
+                        thead {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                        }
+                        th {
+                            padding: 12px 8px;
+                            text-align: left;
+                            font-weight: 600;
+                            font-size: 11px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            border: 1px solid rgba(255,255,255,0.3);
+                        }
+                        td {
+                            padding: 10px 8px;
+                            border: 1px solid #e0e0e0;
+                            font-size: 11px;
+                            color: #2c3e50;
+                        }
+                        tbody tr:nth-child(even) {
+                            background-color: #f8f9fa;
+                        }
+                        tbody tr:hover {
+                            background-color: #e3f2fd;
+                        }
+                        .footer {
+                            margin-top: 30px;
+                            text-align: center;
+                            color: #95a5a6;
+                            font-size: 12px;
+                            padding-top: 15px;
+                            border-top: 2px solid #ecf0f1;
+                        }
+                        @media print {
+                            body {
+                                padding: 10px;
+                            }
+                            .header h1 {
+                                font-size: 24px;
+                            }
+                            table {
+                                page-break-inside: auto;
+                                font-size: 9px;
+                            }
+                            tr {
+                                page-break-inside: avoid;
+                                page-break-after: auto;
+                            }
+                            thead {
+                                display: table-header-group;
+                            }
+                            th, td {
+                                padding: 6px 4px;
+                            }
+                            .no-print {
+                                display: none;
+                            }
+                        }
+                        @page {
+                            margin: 1cm;
+                            size: landscape;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>📊 Projects Management Report</h1>
+                        <div class="meta">
+                            <strong>Generated:</strong> ${new Date().toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 4%;">#</th>
+                                <th style="width: 8%;">PR Number</th>
+                                <th style="width: 12%;">Project Name</th>
+                                <th style="width: 8%;">Technologies</th>
+                                <th style="width: 10%;">Vendor</th>
+                                <th style="width: 8%;">DS</th>
+                                <th style="width: 10%;">Customer</th>
+                                <th style="width: 8%;">Customer PO</th>
+                                <th style="width: 8%;">Value</th>
+                                <th style="width: 8%;">AC Manager</th>
+                                <th style="width: 8%;">PM</th>
+                                <th style="width: 7%;">PO Date</th>
+                                <th style="width: 6%;">Duration</th>
+                                <th style="width: 7%;">Deadline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+
+                    <div class="footer">
+                        <p>Corporate Sites Management System - Projects Report</p>
+                        <p>This document contains confidential information</p>
+                    </div>
+
+                    <script>
+                        window.onload = function() {
+                            setTimeout(function() {
+                                window.print();
+                            }, 500);
+                        };
+                    </script>
+                </body>
+                </html>
+            `;
 
             printWindow.document.write(printContent);
             printWindow.document.close();
-            printWindow.print();
         }
     </script>
 
