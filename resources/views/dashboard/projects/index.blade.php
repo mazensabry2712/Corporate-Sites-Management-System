@@ -234,18 +234,18 @@
                         </div>
                         <div class="d-flex align-items-center">
                             <!-- Export Buttons -->
-                            <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                            <a href="{{ route('projects.export.pdf') }}" class="btn btn-sm btn-danger btn-export-pdf mr-1" target="_blank">
                                 <i class="fas fa-file-pdf"></i> PDF
-                            </button>
+                            </a>
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
                             {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                 <i class="fas fa-file-csv"></i> CSV
                             </button> --}}
-                            <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                            <a href="{{ route('projects.export.pdf') }}" class="btn btn-sm btn-secondary btn-export-print mr-2" target="_blank" onclick="setTimeout(() => window.print(), 1000);">
                                 <i class="fas fa-print"></i> Print
-                            </button>
+                            </a>
 
                             <!-- Add New Project Button -->
                             <a class="btn btn-primary" href="{{ route('projects.create') }}">
@@ -587,6 +587,10 @@
     <!-- Lightbox JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 
+    <!-- jsPDF and autoTable for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
     <script>
         $('#modaldemo9').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget)
@@ -770,19 +774,7 @@
             resetButton();
         }
 
-        function printTable() {
-            showLoadingButton('Print');
-            try {
-                // Custom print with proper formatting
-                printProjectsTable();
-                showSuccessMessage('Print dialog opened!');
-            } catch (error) {
-                console.error('Print error:', error);
-                window.print();
-                showSuccessMessage('Browser print opened!');
-            }
-            resetButton();
-        }
+        // Print function removed - now using TCPDF PDF export with auto-print
 
         // Generate Custom PDF with proper data
         function generateProjectsPDF() {
@@ -812,26 +804,40 @@
             });
 
             // Get table data
-            const table = document.getElementById('example1');
-            const rows = table.querySelectorAll('tbody tr');
+            const table = $('#example1').DataTable();
             const data = [];
 
-            rows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
+            // Get filtered/searched data from DataTable
+            table.rows({
+                search: 'applied'
+            }).every(function(rowIdx, tableLoop, rowLoop) {
+                const rowData = this.data();
+                const row = this.node();
+                const cells = $(row).find('td');
+
                 if (cells.length > 0) {
                     data.push([
-                        (index + 1).toString(), // #
-                        cells[2]?.innerText.trim() || 'N/A', // PR Number
-                        cells[3]?.innerText.trim() || 'N/A', // Project Name
-                        cells[5]?.innerText.trim() || 'N/A', // Vendor
-                        cells[7]?.innerText.trim() || 'N/A', // DS
-                        cells[9]?.innerText.trim() || 'N/A', // Customer
-                        cells[12]?.innerText.trim() || 'N/A', // Value
-                        cells[13]?.innerText.trim() || 'N/A', // AC Manager
-                        cells[14]?.innerText.trim() || 'N/A' // PM
+                        (rowLoop + 1).toString(), // #
+                        $(cells[2]).text().trim() || 'N/A', // PR Number
+                        $(cells[3]).text().trim() || 'N/A', // Project Name
+                        $(cells[5]).text().trim() || 'N/A', // Vendor
+                        $(cells[7]).text().trim() || 'N/A', // DS
+                        $(cells[9]).text().trim() || 'N/A', // Customer
+                        $(cells[12]).text().trim() || 'N/A', // Value
+                        $(cells[13]).text().trim() || 'N/A', // AC Manager
+                        $(cells[14]).text().trim() || 'N/A' // PM
                     ]);
                 }
             });
+
+            // Check if data exists
+            if (data.length === 0) {
+                alert('No data available to export!');
+                console.error('No data extracted from table');
+                return false;
+            }
+
+            console.log('Extracted rows:', data.length);
 
             // Table configuration for A4 portrait
             doc.autoTable({
@@ -942,6 +948,8 @@
             doc.save(`Projects_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
         }
 
+        // printProjectsTable() function removed - now using TCPDF server-side generation
+
         // Helper functions for user feedback
         function showLoadingButton(type) {
             const buttons = document.querySelectorAll('.btn-group .btn');
@@ -1020,196 +1028,6 @@
             document.body.removeChild(downloadLink);
         }
 
-        function printProjectsTable() {
-            const printWindow = window.open('', '_blank', 'width=1200,height=800');
-            const table = document.getElementById('example1');
-            const rows = table.querySelectorAll('tbody tr');
-
-            let tableRows = '';
-            rows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length > 0) {
-                    tableRows += `
-                        <tr>
-                            <td style="text-align: center;">${index + 1}</td>
-                            <td>${cells[2]?.innerText.trim() || 'N/A'}</td>
-                            <td style="font-weight: bold;">${cells[3]?.innerText.trim() || 'N/A'}</td>
-                            <td>${cells[4]?.innerText.trim() || 'N/A'}</td>
-                            <td>${cells[5]?.innerText.trim() || 'N/A'}</td>
-                            <td>${cells[7]?.innerText.trim() || 'N/A'}</td>
-                            <td>${cells[9]?.innerText.trim() || 'N/A'}</td>
-                            <td>${cells[11]?.innerText.trim() || 'N/A'}</td>
-                            <td style="text-align: right;">${cells[12]?.innerText.trim() || 'N/A'}</td>
-                            <td>${cells[13]?.innerText.trim() || 'N/A'}</td>
-                            <td>${cells[14]?.innerText.trim() || 'N/A'}</td>
-                            <td style="text-align: center;">${cells[18]?.innerText.trim() || 'N/A'}</td>
-                            <td style="text-align: center;">${cells[19]?.innerText.trim() || 'N/A'}</td>
-                            <td style="text-align: center;">${cells[20]?.innerText.trim() || 'N/A'}</td>
-                        </tr>
-                    `;
-                }
-            });
-
-            const printContent = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Projects Management Report</title>
-                    <style>
-                        * {
-                            margin: 0;
-                            padding: 0;
-                            box-sizing: border-box;
-                        }
-                        body {
-                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                            padding: 20px;
-                            background: #fff;
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 30px;
-                            padding-bottom: 15px;
-                            border-bottom: 3px solid #2980b9;
-                        }
-                        .header h1 {
-                            color: #2c3e50;
-                            font-size: 28px;
-                            margin-bottom: 10px;
-                        }
-                        .header .meta {
-                            color: #7f8c8d;
-                            font-size: 14px;
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin-top: 20px;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        }
-                        thead {
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            color: white;
-                        }
-                        th {
-                            padding: 12px 8px;
-                            text-align: left;
-                            font-weight: 600;
-                            font-size: 11px;
-                            text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                            border: 1px solid rgba(255,255,255,0.3);
-                        }
-                        td {
-                            padding: 10px 8px;
-                            border: 1px solid #e0e0e0;
-                            font-size: 11px;
-                            color: #2c3e50;
-                        }
-                        tbody tr:nth-child(even) {
-                            background-color: #f8f9fa;
-                        }
-                        tbody tr:hover {
-                            background-color: #e3f2fd;
-                        }
-                        .footer {
-                            margin-top: 30px;
-                            text-align: center;
-                            color: #95a5a6;
-                            font-size: 12px;
-                            padding-top: 15px;
-                            border-top: 2px solid #ecf0f1;
-                        }
-                        @media print {
-                            body {
-                                padding: 10px;
-                            }
-                            .header h1 {
-                                font-size: 24px;
-                            }
-                            table {
-                                page-break-inside: auto;
-                                font-size: 9px;
-                            }
-                            tr {
-                                page-break-inside: avoid;
-                                page-break-after: auto;
-                            }
-                            thead {
-                                display: table-header-group;
-                            }
-                            th, td {
-                                padding: 6px 4px;
-                            }
-                            .no-print {
-                                display: none;
-                            }
-                        }
-                        @page {
-                            margin: 1cm;
-                            size: landscape;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>📊 Projects Management Report</h1>
-                        <div class="meta">
-                            <strong>Generated:</strong> ${new Date().toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
-                        </div>
-                    </div>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 4%;">#</th>
-                                <th style="width: 8%;">PR Number</th>
-                                <th style="width: 12%;">Project Name</th>
-                                <th style="width: 8%;">Technologies</th>
-                                <th style="width: 10%;">Vendor</th>
-                                <th style="width: 8%;">DS</th>
-                                <th style="width: 10%;">Customer</th>
-                                <th style="width: 8%;">Customer PO</th>
-                                <th style="width: 8%;">Value</th>
-                                <th style="width: 8%;">AC Manager</th>
-                                <th style="width: 8%;">PM</th>
-                                <th style="width: 7%;">PO Date</th>
-                                <th style="width: 6%;">Duration</th>
-                                <th style="width: 7%;">Deadline</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                        </tbody>
-                    </table>
-
-                    <div class="footer">
-                        <p>Corporate Sites Management System - Projects Report</p>
-                        <p>This document contains confidential information</p>
-                    </div>
-
-                    <script>
-                        window.onload = function() {
-                            setTimeout(function() {
-                                window.print();
-                            }, 500);
-                        };
-                    </script>
-                </body>
-                </html>
-            `;
-
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-        }
     </script>
 
     <!-- Export Functions -->

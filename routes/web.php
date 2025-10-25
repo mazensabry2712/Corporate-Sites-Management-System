@@ -50,6 +50,8 @@ Route::group(['middleware' => ['auth']], function() {
               'update' => 'projects.update',
               'destroy' => 'projects.destroy',
           ]);
+          // Projects PDF Export
+          Route::get('project/export/pdf', [ProjectsController::class, 'exportPDF'])->name('projects.export.pdf');
         // Route::resource('/project/{id}', 'ProjectsController@getprojects');
         /*Customer*/
         Route::resource('customer', CustController::class);

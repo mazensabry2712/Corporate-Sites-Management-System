@@ -383,4 +383,263 @@ class ProjectsController extends Controller
             ]);
         }
     }
+
+    /**
+     * Export Projects to PDF using TCPDF - Card Layout
+     */
+    public function exportPDF()
+    {
+        try {
+            // Get all projects with relationships
+            $projects = Project::with([
+                'vendor', 'cust', 'ds', 'aams', 'ppms',
+                'vendors', 'customers', 'deliverySpecialists'
+            ])->get();
+
+            // Create new PDF document - A4 Portrait for card layout
+            $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+
+            // Set document information
+            $pdf->SetCreator('MDS JED Project System');
+            $pdf->SetAuthor('Corporate Sites Management System');
+            $pdf->SetTitle('Projects Cards Report');
+            $pdf->SetSubject('Projects Export - Card View');
+
+            // Remove default header/footer
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+
+            // Set margins for A4
+            $pdf->SetMargins(10, 10, 10);
+            $pdf->SetAutoPageBreak(false); // Disable auto page break for better control
+
+            // Set font
+            $pdf->SetFont('helvetica', '', 9);
+
+            $cardCount = 0;
+            $cardsPerPage = 5; // 5 cards per page
+
+            foreach ($projects as $index => $project) {
+                // Add new page for every set of cards
+                if ($cardCount % $cardsPerPage == 0) {
+                    $pdf->AddPage('P');
+
+                    // Page Header
+                    $pdf->SetFont('helvetica', 'B', 14);
+                    $pdf->SetTextColor(103, 126, 234);
+                    $pdf->Cell(0, 8, 'Projects Report', 0, 1, 'C');
+
+                    $pdf->SetFont('helvetica', '', 8);
+                    $pdf->SetTextColor(120, 120, 120);
+                    $pdf->Cell(0, 5, 'Generated: ' . date('d/m/Y g:i A'), 0, 1, 'C');
+                    $pdf->Ln(1); // Minimal spacing
+
+                    // Add footer for each page
+                    $pdf->SetY(-10);
+                    $pdf->SetFont('helvetica', 'B', 9);
+                    $pdf->SetTextColor(103, 126, 234);
+                    $pdf->Cell(0, 8, 'MDSJEDPR', 0, 0, 'C');
+
+                    // Reset Y position for content
+                    $pdf->SetY(27);
+                }                // Get related data
+                $allVendors = $project->vendors()->pluck('vendors')->implode(', ') ?: 'N/A';
+                $allCustomers = $project->customers()->pluck('name')->implode(', ') ?: 'N/A';
+                $allDS = $project->deliverySpecialists()->pluck('dsname')->implode(', ') ?: 'N/A';
+
+                // Card container with compact spacing for 5 cards
+                $cardY = $pdf->GetY();
+
+                // Card border and background - reduced height for 5 cards per page
+                $pdf->SetFillColor(255, 255, 255);
+                $pdf->SetDrawColor(103, 126, 234);
+                $pdf->SetLineWidth(0.5);
+                $pdf->RoundedRect(10, $cardY, 190, 52, 3, '1111', 'DF'); // Reduced from 90 to 52
+
+                // Card header with project number - compact
+                $pdf->SetFillColor(103, 126, 234);
+                $pdf->SetTextColor(255, 255, 255);
+                $pdf->RoundedRect(10, $cardY, 190, 8, 3, '1100', 'F'); // Reduced from 10 to 8
+
+                $pdf->SetXY(12, $cardY + 1.5);
+                $pdf->SetFont('helvetica', 'B', 9);
+                $pdf->Cell(90, 5, 'PR: ' . ($project->pr_number ?? 'N/A'), 0, 0, 'L');
+
+                $pdf->SetFont('helvetica', '', 7);
+                $pdf->Cell(96, 5, 'Project #' . ($index + 1), 0, 1, 'R');
+
+                // Card content
+                $pdf->SetTextColor(0, 0, 0);
+                $contentY = $cardY + 9.5; // Adjusted for smaller header
+
+                // Project Name (smaller)
+                $pdf->SetXY(15, $contentY);
+                $pdf->SetFont('helvetica', 'B', 9);
+                $pdf->SetTextColor(50, 50, 50);
+                $pdf->MultiCell(180, 4, $project->name ?? 'N/A', 0, 'L', false, 1);
+
+                $contentY = $pdf->GetY() + 0.5;
+
+                // Three-column layout - more compact
+                $leftX = 15;
+                $middleX = 75;
+                $rightX = 135;
+                $labelWidth = 32;
+                $valueWidth = 25;
+                $lineHeight = 3.5; // Reduced from 4.5
+
+                // Left column
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+
+                // Technologies
+                $pdf->SetXY($leftX, $contentY);
+                $pdf->Cell($labelWidth, $lineHeight, 'Technologies:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, $project->technologies ?? 'N/A', 0, 'L', false, 1);
+
+                // Primary Vendor
+                $pdf->SetXY($leftX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'Primary Vendor:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, optional($project->vendor)->vendors ?? 'N/A', 0, 'L', false, 1);
+
+                // All Vendors
+                $pdf->SetXY($leftX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'All Vendors:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, $allVendors, 0, 'L', false, 1);
+
+                // Primary Customer
+                $pdf->SetXY($leftX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'Primary Customer:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, optional($project->cust)->name ?? 'N/A', 0, 'L', false, 1);
+
+                // All Customers
+                $pdf->SetXY($leftX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'All Customers:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, $allCustomers, 0, 'L', false, 1);
+
+                // Middle column
+                $currentLeftY = $pdf->GetY();
+
+                // Value
+                $pdf->SetXY($middleX, $contentY);
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'Value:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 128, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, $project->value ? number_format($project->value, 2) . ' SAR' : 'N/A', 0, 'L', false, 1);
+
+                // AC Manager
+                $pdf->SetXY($middleX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'AC Manager:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, optional($project->aams)->name ?? 'N/A', 0, 'L', false, 1);
+
+                // Project Manager
+                $pdf->SetXY($middleX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'Project Manager:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, optional($project->ppms)->name ?? 'N/A', 0, 'L', false, 1);
+
+                // Primary DS
+                $pdf->SetXY($middleX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'Primary DS:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, optional($project->ds)->dsname ?? 'N/A', 0, 'L', false, 1);
+
+                // All DS
+                $pdf->SetXY($middleX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'All DS:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, $allDS, 0, 'L', false, 1);
+
+                // Right column
+                // PO Date
+                $pdf->SetXY($rightX, $contentY);
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'PO Date:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, $project->customer_po_date ? date('d/m/Y', strtotime($project->customer_po_date)) : 'N/A', 0, 'L', false, 1);
+
+                // Duration
+                $pdf->SetXY($rightX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'Duration:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, ($project->customer_po_duration ?? 'N/A') . ' days', 0, 'L', false, 1);
+
+                // Customer Contact
+                $pdf->SetXY($rightX, $pdf->GetY());
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell($labelWidth, $lineHeight, 'Contact:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell($valueWidth, $lineHeight, $project->customer_contact_details ?? 'N/A', 0, 'L', false, 1);
+
+                // Description (full width at bottom) - more compact
+                $descY = max($pdf->GetY(), $currentLeftY) + 0.5;
+                $pdf->SetXY(15, $descY);
+                $pdf->SetFont('helvetica', 'B', 6);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Cell(30, $lineHeight, 'Description:', 0, 0, 'L');
+                $pdf->SetFont('helvetica', '', 6);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->MultiCell(160, $lineHeight, substr($project->description ?? 'N/A', 0, 100), 0, 'L', false, 1);
+
+                // Move to next card position - 5 cards per page
+                $pdf->SetY($cardY + 53.5); // Tight spacing for 5 cards
+                $cardCount++;
+            }
+
+            // No footer needed - MDSJEDPR already added to each page
+
+            // Output PDF
+            $filename = 'Projects_Cards_' . date('Y-m-d_His') . '.pdf';
+
+            return response()->streamDownload(function() use ($pdf) {
+                echo $pdf->Output('', 'S');
+            }, $filename, [
+                'Content-Type' => 'application/pdf',
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('Projects PDF export error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error generating PDF: ' . $e->getMessage());
+        }
+    }
 }
