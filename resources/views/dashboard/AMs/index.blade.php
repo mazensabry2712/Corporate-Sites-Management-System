@@ -258,18 +258,19 @@
                         <div>
                             <div class="d-flex align-items-center">
                                 <!-- Export Buttons - Matching PStatus Style -->
-                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                                <a href="{{ route('am.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
                                     <i class="fas fa-file-pdf"></i> PDF
-                                </button>
+                                </a>
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
+                                <a href="{{ route('am.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1">
+                                    <i class="fas fa-print"></i> Print
+                                </a>
                                 {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                     <i class="fas fa-file-csv"></i> CSV
                                 </button> --}}
-                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
-                                    <i class="fas fa-print"></i> Print
-                                </button>
+
 
                                 @can('Add')
                                     <a class="btn btn-primary" data-effect="effect-scale" data-toggle="modal"
@@ -559,7 +560,6 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.bootstrap4.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/pdfmake.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/vfs_fonts.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
@@ -867,7 +867,85 @@ function showErrorToast(message) {
             }
         }
 
-        // Export AM to CSV Function
+        // Export AM to Excel Function
+        function exportToExcel() {
+            const button = event.target.closest('button');
+            showLoadingButton(button);
+            try {
+                const table = document.getElementById('example1');
+                const rows = table.querySelectorAll('tbody tr');
+
+                // Create workbook data in Excel XML format
+                let excelData = [];
+                excelData.push(['#', 'Name', 'Email', 'Phone']); // Headers
+
+                rows.forEach((row) => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        excelData.push([
+                            cells[0]?.textContent.trim() || '',
+                            cells[2]?.textContent.trim() || '',
+                            cells[3]?.textContent.trim() || '',
+                            cells[4]?.textContent.trim() || ''
+                        ]);
+                    }
+                });
+
+                // Convert to Excel worksheet
+                let worksheet = '<ss:Worksheet ss:Name="Account Managers"><ss:Table>';
+
+                excelData.forEach((row, rowIndex) => {
+                    worksheet += '<ss:Row>';
+                    row.forEach((cell) => {
+                        if (rowIndex === 0) {
+                            // Header row
+                            worksheet += '<ss:Cell ss:StyleID="header"><ss:Data ss:Type="String">' + cell + '</ss:Data></ss:Cell>';
+                        } else {
+                            worksheet += '<ss:Cell><ss:Data ss:Type="String">' + cell + '</ss:Data></ss:Cell>';
+                        }
+                    });
+                    worksheet += '</ss:Row>';
+                });
+
+                worksheet += '</ss:Table></ss:Worksheet>';
+
+                // Complete Excel XML
+                const excelXML = '<?xml version="1.0"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<ss:Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<ss:Styles>' +
+                    '<ss:Style ss:ID="header">' +
+                    '<ss:Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+                    '<ss:Interior ss:Color="#677EEA" ss:Pattern="Solid"/>' +
+                    '</ss:Style>' +
+                    '</ss:Styles>' +
+                    worksheet +
+                    '</ss:Workbook>';
+
+                // Create blob and download
+                const blob = new Blob([excelXML], {
+                    type: 'application/vnd.ms-excel'
+                });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+
+                link.setAttribute("href", url);
+                link.setAttribute("download", 'Account_Managers_' + new Date().toISOString().slice(0,10) + '.xls');
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showSuccessToast('Excel file exported successfully!');
+            } catch (error) {
+                console.error('Export error:', error);
+                showErrorToast('Export failed');
+            } finally {
+                hideLoadingButton(button);
+            }
+        }
+
         // Helper Functions
         function showLoadingButton(button) {
             button.classList.add('btn-loading');

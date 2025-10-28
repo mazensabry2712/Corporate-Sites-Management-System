@@ -256,18 +256,18 @@
                         <div>
                             <div class="d-flex align-items-center">
                                 <!-- Export buttons -->
-                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                                <a href="{{ route('vendors.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
                                     <i class="fas fa-file-pdf"></i> PDF
-                                </button>
+                                </a>
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
+                                <a href="{{ route('vendors.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1">
+                                    <i class="fas fa-print"></i> Print
+                                </a>
                                 {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                     <i class="fas fa-file-csv"></i> CSV
                                 </button> --}}
-                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
-                                    <i class="fas fa-print"></i> Print
-                                </button>
 
                                 @can('Add')
                                     <a class="modal-effect btn btn-primary" data-effect="effect-scale" data-toggle="modal"
@@ -797,5 +797,99 @@
                 }
             });
         });
+
+        // Export to Excel Function
+        function exportToExcel() {
+            const button = event.target.closest('button');
+            showLoadingButton(button);
+            try {
+                const table = document.getElementById('example1');
+                const rows = table.querySelectorAll('tbody tr');
+
+                // Create workbook data in Excel XML format
+                let excelData = [];
+                excelData.push(['#', 'Vendor Name', 'Vendor AM Details']); // Headers
+
+                rows.forEach((row) => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 4) {
+                        excelData.push([
+                            cells[0]?.textContent.trim() || '',
+                            cells[2]?.textContent.trim() || '',
+                            cells[3]?.textContent.trim() || ''
+                        ]);
+                    }
+                });
+
+                // Convert to Excel worksheet
+                let worksheet = '<ss:Worksheet ss:Name="Vendors"><ss:Table>';
+
+                excelData.forEach((row, rowIndex) => {
+                    worksheet += '<ss:Row>';
+                    row.forEach((cell) => {
+                        if (rowIndex === 0) {
+                            // Header row
+                            worksheet += '<ss:Cell ss:StyleID="header"><ss:Data ss:Type="String">' + cell + '</ss:Data></ss:Cell>';
+                        } else {
+                            worksheet += '<ss:Cell><ss:Data ss:Type="String">' + cell + '</ss:Data></ss:Cell>';
+                        }
+                    });
+                    worksheet += '</ss:Row>';
+                });
+
+                worksheet += '</ss:Table></ss:Worksheet>';
+
+                // Complete Excel XML
+                const excelXML = '<?xml version="1.0"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<ss:Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<ss:Styles>' +
+                    '<ss:Style ss:ID="header">' +
+                    '<ss:Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+                    '<ss:Interior ss:Color="#677EEA" ss:Pattern="Solid"/>' +
+                    '</ss:Style>' +
+                    '</ss:Styles>' +
+                    worksheet +
+                    '</ss:Workbook>';
+
+                // Create blob and download
+                const blob = new Blob([excelXML], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+
+                link.setAttribute("href", url);
+                link.setAttribute("download", 'Vendors_' + new Date().toISOString().slice(0,10) + '.xlsx');
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showSuccessToast('Excel file exported successfully!');
+                hideLoadingButton(button);
+            } catch (error) {
+                console.error('Export error:', error);
+                showSuccessToast('Export failed');
+                hideLoadingButton(button);
+            }
+        }
+
+        function showLoadingButton(button) {
+            if (button) {
+                button.classList.add('btn-loading');
+                const icon = button.querySelector('i');
+                if (icon) icon.classList.add('fa-spin');
+            }
+        }
+
+        function hideLoadingButton(button) {
+            if (button) {
+                button.classList.remove('btn-loading');
+                const icon = button.querySelector('i');
+                if (icon) icon.classList.remove('fa-spin');
+            }
+        }
     </script>
 @endsection

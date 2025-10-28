@@ -192,12 +192,13 @@
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
+                            <a href="{{ route('customer.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1">
+                                <i class="fas fa-print"></i> Print
+                            </a>
                             {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                 <i class="fas fa-file-csv"></i> CSV
                             </button> --}}
-                            <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
-                                <i class="fas fa-print"></i> Print
-                            </button>
+
 
                             @can('Add')
                             <a class="btn btn-primary" href="{{ route('customer.create') }}">
@@ -376,15 +377,6 @@
                         exportOptions: {
                             columns: ':not(:first-child):not(:nth-child(2))'
                         }
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print"></i> Print',
-                        className: 'btn btn-warning btn-sm d-none',
-                        title: 'Customers Report',
-                        exportOptions: {
-                            columns: ':not(:first-child):not(:nth-child(2))'
-                        }
                     }
                 ],
                 responsive: false, // Disable responsive to keep single row
@@ -422,10 +414,7 @@
             resetButton();
         }
 
-        function printTable() {
-            // Use our new print cards view
-            window.open('{{ route('customer.print') }}', '_blank');
-        }
+
 
         // Helper functions for user feedback
         function showLoadingButton(type) {
@@ -501,48 +490,7 @@
         //     downloadLink.click();
         //     document.body.removeChild(downloadLink);
         // }
-
-        function printCustomersTable() {
-            const printWindow = window.open('', '_blank');
-            const table = document.getElementById('example1').cloneNode(true);
-
-            // Remove action columns
-            const actionCells = table.querySelectorAll('td:first-child, th:first-child, td:nth-child(2), th:nth-child(2)');
-            actionCells.forEach(cell => cell.remove());
-
-            const printContent = `
-                <html>
-                <head>
-                    <title>Customers Report</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        table { border-collapse: collapse; width: 100%; font-size: 12px; }
-                        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-                        th { background-color: #f2f2f2; font-weight: bold; }
-                        .header { text-align: center; margin-bottom: 20px; }
-                        @media print {
-                            body { margin: 0; }
-                            table { page-break-inside: auto; }
-                            tr { page-break-inside: avoid; page-break-after: auto; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h2>Customers Report</h2>
-                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
-                    </div>
-                    ${table.outerHTML}
-                </body>
-                </html>
-            `;
-
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.print();
-        }
-    </script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
+ </script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>

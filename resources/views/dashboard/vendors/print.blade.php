@@ -3,55 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customers - Print</title>
+    <title>Vendors - Print</title>
     <style>
-        @media print {
-            body { margin: 0; }
-            .no-print { display: none; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
         }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
+            border-bottom: 3px solid #677EEA;
+            padding-bottom: 15px;
         }
+
         .system-name {
             font-size: 24px;
             font-weight: bold;
             color: #677EEA;
-            margin-bottom: 10px;
-        }
-        .title {
-            font-size: 20px;
-            font-weight: bold;
             margin-bottom: 5px;
         }
+
+        .title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
         .date {
             font-size: 12px;
             color: #666;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            font-size: 9px;
         }
+
         th {
             background-color: #677EEA;
             color: white;
-            padding: 8px;
-            text-align: center;
+            padding: 12px;
+            text-align: left;
             border: 1px solid #ddd;
+            font-weight: bold;
         }
+
         td {
-            padding: 6px;
+            padding: 10px 12px;
             border: 1px solid #ddd;
         }
+
         tr:nth-child(even) {
             background-color: #f5f5f5;
         }
+
+        tr:hover {
+            background-color: #e8f4f8;
+        }
+
         .print-btn {
             position: fixed;
             top: 20px;
@@ -62,6 +79,36 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .print-btn:hover {
+            background-color: #5668d3;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+                padding: 10px;
+            }
+
+            .print-btn {
+                display: none;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
         }
     </style>
 </head>
@@ -70,44 +117,32 @@
 
     <div class="header">
         <div class="system-name">MDSJEDPR</div>
-        <div class="title">Customers Management</div>
+        <div class="title">Vendors Management</div>
         <div class="date">Generated: {{ date('m/d/Y, g:i:s A') }}</div>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th style="width: 3%;">#</th>
-                <th style="width: 15%;">Customer Name</th>
-                <th style="width: 10%;">Customer Abb</th>
-                <th style="width: 10%;">Customer type</th>
-                <th style="width: 6%;">Logo</th>
-                <th style="width: 16%;">Customer Contact name</th>
-                <th style="width: 16%;">Customer contact position</th>
-                <th style="width: 16%;">Email</th>
-                <th style="width: 8%;">Phone</th>
+                <th>#</th>
+                <th>Vendor Name</th>
+                <th>Vendor AM Details</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($customers as $index => $customer)
-            <tr>
-                <td style="text-align: center;">{{ $index + 1 }}</td>
-                <td>{{ $customer->name ?? 'N/A' }}</td>
-                <td>{{ $customer->abb ?? 'N/A' }}</td>
-                <td>{{ $customer->tybe ?? 'N/A' }}</td>
-                <td style="text-align: center;">
-                    @if(!empty($customer->logo) && file_exists(public_path($customer->logo)))
-                        Yes
-                    @else
-                        No
-                    @endif
-                </td>
-                <td>{{ $customer->customercontactname ?? 'N/A' }}</td>
-                <td>{{ $customer->customercontactposition ?? 'N/A' }}</td>
-                <td>{{ $customer->email ?? 'N/A' }}</td>
-                <td style="text-align: center;">{{ $customer->phone ?? 'N/A' }}</td>
-            </tr>
-            @endforeach
+            @forelse($vendors as $index => $vendor)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $vendor->vendors }}</td>
+                    <td>{{ $vendor->vendor_am_details }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 20px; color: #999;">
+                        No vendors available
+                    </td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 

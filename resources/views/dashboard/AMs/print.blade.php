@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customers - Print</title>
+    <title>Account Managers - Print</title>
     <style>
         @media print {
             body { margin: 0; }
@@ -36,17 +36,16 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            font-size: 9px;
         }
         th {
             background-color: #677EEA;
             color: white;
-            padding: 8px;
-            text-align: center;
+            padding: 10px;
+            text-align: left;
             border: 1px solid #ddd;
         }
         td {
-            padding: 6px;
+            padding: 8px;
             border: 1px solid #ddd;
         }
         tr:nth-child(even) {
@@ -70,42 +69,26 @@
 
     <div class="header">
         <div class="system-name">MDSJEDPR</div>
-        <div class="title">Customers Management</div>
+        <div class="title">Account Managers Management</div>
         <div class="date">Generated: {{ date('m/d/Y, g:i:s A') }}</div>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th style="width: 3%;">#</th>
-                <th style="width: 15%;">Customer Name</th>
-                <th style="width: 10%;">Customer Abb</th>
-                <th style="width: 10%;">Customer type</th>
-                <th style="width: 6%;">Logo</th>
-                <th style="width: 16%;">Customer Contact name</th>
-                <th style="width: 16%;">Customer contact position</th>
-                <th style="width: 16%;">Email</th>
-                <th style="width: 8%;">Phone</th>
+                <th style="width: 5%;">#</th>
+                <th style="width: 30%;">Name</th>
+                <th style="width: 40%;">Email</th>
+                <th style="width: 25%;">Phone</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($customers as $index => $customer)
+            @foreach($aams as $index => $am)
             <tr>
                 <td style="text-align: center;">{{ $index + 1 }}</td>
-                <td>{{ $customer->name ?? 'N/A' }}</td>
-                <td>{{ $customer->abb ?? 'N/A' }}</td>
-                <td>{{ $customer->tybe ?? 'N/A' }}</td>
-                <td style="text-align: center;">
-                    @if(!empty($customer->logo) && file_exists(public_path($customer->logo)))
-                        Yes
-                    @else
-                        No
-                    @endif
-                </td>
-                <td>{{ $customer->customercontactname ?? 'N/A' }}</td>
-                <td>{{ $customer->customercontactposition ?? 'N/A' }}</td>
-                <td>{{ $customer->email ?? 'N/A' }}</td>
-                <td style="text-align: center;">{{ $customer->phone ?? 'N/A' }}</td>
+                <td>{{ $am->name }}</td>
+                <td>{{ $am->email }}</td>
+                <td style="text-align: center;">{{ $am->phone ?? 'N/A' }}</td>
             </tr>
             @endforeach
         </tbody>

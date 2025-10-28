@@ -71,13 +71,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Print styles */
-        @media print {
-            body * { visibility: hidden; }
-            #pm-details-content, #pm-details-content * { visibility: visible; }
-            #pm-details-content { position: absolute; left: 0; top: 0; width: 100%; }
-            .btn-group { display: none !important; }
-        }
+
     </style>
 @endsection
 @section('page-header')
@@ -163,12 +157,12 @@
         <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
             <i class="fas fa-file-excel"></i> Excel
         </button>
+        <a href="{{ route('pm.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1">
+            <i class="fas fa-print"></i> Print
+        </a>
         {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
             <i class="fas fa-file-csv"></i> CSV
         </button> --}}
-        <a href="{{ route('pm.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-2">
-            <i class="fas fa-print"></i> Print
-        </a>
 
         @can('Add')
         <a class="btn btn-primary modal-effect" data-effect="effect-scale" data-toggle="modal"
@@ -359,9 +353,7 @@
                 <div class="modal-body" id="pm-details-content">
                     <!-- Export Buttons -->
                     <div class="d-flex justify-content-end mb-3">
-                        <button type="button" class="btn btn-sm btn-secondary mr-1" onclick="printPM()" title="Print PM Details">
-                            <i class="fas fa-print"></i> Print
-                        </button>
+
                         <button type="button" class="btn btn-sm btn-success mr-1" onclick="exportPMToExcel()" title="Export to Excel">
                             <i class="fas fa-file-excel"></i> Excel
                         </button>
@@ -454,7 +446,6 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/pdfmake.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/vfs_fonts.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>
@@ -510,47 +501,84 @@
 
         // --- Functions for actions inside the View Modal ---
 
-        function printPM() {
+        function exportToExcel() {
             const button = event.target.closest('button');
             showLoadingButton(button);
             try {
-                const pmName = document.getElementById('view-name').value;
-                const pmEmail = document.getElementById('view-email').value;
-                const pmPhone = document.getElementById('view-phone').value;
-                const printWindow = window.open('', '_blank');
-                const printContent = `
-                    <!DOCTYPE html><html><head><title>PM Details - ${pmName}</title>
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-                    <style>
-                        body { font-family: 'Segoe UI', sans-serif; margin: 20px; background-color: #f4f7f6; }
-                        .container { max-width: 700px; margin: auto; background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-                        .header { text-align: center; border-bottom: 2px solid #667eea; padding-bottom: 20px; margin-bottom: 30px; }
-                        .header h1 { margin: 0; color: #667eea; font-size: 2.2em; }
-                        .detail-item { display: flex; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid #764ba2; margin-bottom: 15px; }
-                        .detail-item i { font-size: 24px; color: #764ba2; margin-right: 15px; width: 30px; text-align: center; }
-                        .detail-content .label { font-size: 0.9em; color: #888; margin-bottom: 3px; }
-                        .detail-content .value { font-size: 1.1em; color: #333; font-weight: 500; }
-                        .footer { margin-top: 40px; text-align: center; font-size: 0.8em; color: #aaa; border-top: 1px solid #eee; padding-top: 20px; }
-                        @media print { body { background-color: #fff; } .container { box-shadow: none; border: 1px solid #ccc; } }
-                    </style></head><body>
-                    <div class="container">
-                        <div class="header"><h1>Project Manager Details</h1></div>
-                        <div class="details-grid">
-                            <div class="detail-item"><i class="fas fa-user"></i><div class="detail-content"><div class="label">Name</div><div class="value">${pmName}</div></div></div>
-                            <div class="detail-item"><i class="fas fa-envelope"></i><div class="detail-content"><div class="label">Email</div><div class="value">${pmEmail}</div></div></div>
-                            <div class="detail-item"><i class="fas fa-phone"></i><div class="detail-content"><div class="label">Phone</div><div class="value">${pmPhone}</div></div></div>
-                        </div>
-                        <div class="footer"><p>Report generated on: ${new Date().toLocaleString()}</p><p>MDSJEDPR - Management System</p></div>
-                    </div></body></html>`;
-                printWindow.document.write(printContent);
-                printWindow.document.close();
-                setTimeout(() => { printWindow.print(); hideLoadingButton(button); }, 500);
-            } catch (e) {
-                console.error("Print Error:", e);
+                const table = document.getElementById('example1');
+                const rows = table.querySelectorAll('tbody tr');
+
+                // Create workbook data in Excel XML format
+                let excelData = [];
+                excelData.push(['#', 'Name', 'Email', 'Phone']); // Headers
+
+                rows.forEach((row) => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        excelData.push([
+                            cells[0]?.textContent.trim() || '',
+                            cells[2]?.textContent.trim() || '',
+                            cells[3]?.textContent.trim() || '',
+                            cells[4]?.textContent.trim() || ''
+                        ]);
+                    }
+                });
+
+                // Convert to Excel worksheet
+                let worksheet = '<ss:Worksheet ss:Name="Project Managers"><ss:Table>';
+
+                excelData.forEach((row, rowIndex) => {
+                    worksheet += '<ss:Row>';
+                    row.forEach((cell) => {
+                        if (rowIndex === 0) {
+                            // Header row
+                            worksheet += '<ss:Cell ss:StyleID="header"><ss:Data ss:Type="String">' + cell + '</ss:Data></ss:Cell>';
+                        } else {
+                            worksheet += '<ss:Cell><ss:Data ss:Type="String">' + cell + '</ss:Data></ss:Cell>';
+                        }
+                    });
+                    worksheet += '</ss:Row>';
+                });
+
+                worksheet += '</ss:Table></ss:Worksheet>';
+
+                // Complete Excel XML
+                const excelXML = '<?xml version="1.0"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<ss:Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<ss:Styles>' +
+                    '<ss:Style ss:ID="header">' +
+                    '<ss:Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+                    '<ss:Interior ss:Color="#677EEA" ss:Pattern="Solid"/>' +
+                    '</ss:Style>' +
+                    '</ss:Styles>' +
+                    worksheet +
+                    '</ss:Workbook>';
+
+                // Create blob and download
+                const blob = new Blob([excelXML], {
+                    type: 'application/vnd.ms-excel'
+                });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+
+                link.setAttribute("href", url);
+                link.setAttribute("download", 'Project_Managers_' + new Date().toISOString().slice(0,10) + '.xls');
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showSuccessToast('Excel file exported successfully!');
+            } catch (error) {
+                console.error('Export error:', error);
+                showErrorToast('Export failed');
+            } finally {
                 hideLoadingButton(button);
-                showErrorToast('Could not generate print view.');
             }
         }
+
 
         function exportPMToExcel() {
             const button = event.target.closest('button');

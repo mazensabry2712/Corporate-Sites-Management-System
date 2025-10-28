@@ -64,12 +64,16 @@ Route::group(['middleware' => ['auth']], function() {
         Route::resource('customer', CustController::class);
 
            /*AM*/
+        Route::get('am/export/pdf', [AamsController::class, 'exportPDF'])->name('am.export.pdf');
+        Route::get('am/print', [AamsController::class, 'printView'])->name('am.print');
         Route::resource('am', AamsController::class);
              /*PM*/
         Route::get('pm/export/pdf', [PpmsController::class, 'exportPDF'])->name('pm.export.pdf');
         Route::get('pm/print', [PpmsController::class, 'printView'])->name('pm.print');
         Route::resource('pm', PpmsController::class);
            /*Vendors */
+        Route::get('vendors/export/pdf', [VendorsController::class, 'exportPDF'])->name('vendors.export.pdf');
+        Route::get('vendors/print', [VendorsController::class, 'printView'])->name('vendors.print');
           Route::resource('vendors', VendorsController::class);
                  /*d/s */
         Route::resource('ds', DsController::class);
