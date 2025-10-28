@@ -80,8 +80,12 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('ds/print', [DsController::class, 'printView'])->name('ds.print');
         Route::resource('ds', DsController::class);
         // invoice
+        Route::get('invoices/export/pdf', [InvoicesController::class, 'exportPDF'])->name('invoices.export.pdf');
+        Route::get('invoices/print', [InvoicesController::class, 'printView'])->name('invoices.print');
          Route::resource('invoices', InvoicesController::class);
         // /*DN  */
+        Route::get('dn/export/pdf', [DnController::class, 'exportPDF'])->name('dn.export.pdf');
+        Route::get('dn/print', [DnController::class, 'printView'])->name('dn.print');
              Route::resource('dn', DnController::class);
         //         /*CoC */
                  Route::resource('coc', CocController::class);

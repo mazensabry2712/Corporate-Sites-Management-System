@@ -168,4 +168,95 @@ class DnController extends Controller
         session()->flash('delete', 'Delivery Note has been deleted successfully!');
         return redirect()->route('dn.index');
     }
+
+    /**
+     * Export DN to PDF
+     */
+    public function exportPDF()
+    {
+        $dn = Dn::with('project:id,pr_number,name')->get();
+
+        $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+
+        // Set document information
+        $pdf->SetCreator('MDSJEDPR');
+        $pdf->SetAuthor('MDSJEDPR');
+        $pdf->SetTitle('Delivery Notes');
+        $pdf->SetSubject('DN List');
+
+        // Remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // Set margins
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(TRUE, 10);
+
+        // Add a page
+        $pdf->AddPage();
+
+        // Add system name at top
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->SetTextColor(103, 126, 234); // #677EEA
+        $pdf->Cell(0, 10, 'MDSJEDPR', 0, 1, 'C');
+
+        // Add title
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(0, 10, 'Delivery Notes Management', 0, 1, 'C');
+
+        // Add date
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->Cell(0, 8, 'Generated: ' . date('m/d/Y, g:i:s A'), 0, 1, 'C');
+        $pdf->Ln(5);
+
+        // Table header
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->SetFillColor(103, 126, 234); // #677EEA
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetDrawColor(221, 221, 221);
+
+        // Column widths (total 190mm)
+        $widths = array(10, 35, 35, 50, 60);
+
+        $pdf->Cell($widths[0], 10, '#', 1, 0, 'C', true);
+        $pdf->Cell($widths[1], 10, 'DN Number', 1, 0, 'L', true);
+        $pdf->Cell($widths[2], 10, 'PR Number', 1, 0, 'L', true);
+        $pdf->Cell($widths[3], 10, 'Project Name', 1, 0, 'L', true);
+        $pdf->Cell($widths[4], 10, 'Status', 1, 1, 'L', true);
+
+        // Table content
+        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetTextColor(0, 0, 0);
+
+        $fill = false;
+        foreach ($dn as $index => $item) {
+            if ($fill) {
+                $pdf->SetFillColor(245, 245, 245);
+            } else {
+                $pdf->SetFillColor(255, 255, 255);
+            }
+
+            $pdf->Cell($widths[0], 10, ($index + 1), 1, 0, 'C', true);
+            $pdf->Cell($widths[1], 10, $item->dn_number, 1, 0, 'L', true);
+            $pdf->Cell($widths[2], 10, $item->project->pr_number ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[3], 10, $item->project->name ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[4], 10, $item->status, 1, 1, 'L', true);
+
+            $fill = !$fill;
+        }
+
+        // Output PDF
+        $pdf->Output('DN_' . date('Y-m-d') . '.pdf', 'I');
+    }
+
+    /**
+     * Print view for DN
+     */
+    public function printView()
+    {
+        $dn = Dn::with('project:id,pr_number,name')->get();
+        return view('dashboard.dn.print', compact('dn'));
+    }
 }

@@ -202,4 +202,101 @@ class InvoicesController extends Controller
 
         return redirect()->route('invoices.index');
     }
+
+    /**
+     * Export Invoices to PDF
+     */
+    public function exportPDF()
+    {
+        $invoices = invoices::with('project:id,pr_number,name,value')->get();
+
+        $pdf = new \TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+
+        // Set document information
+        $pdf->SetCreator('MDSJEDPR');
+        $pdf->SetAuthor('MDSJEDPR');
+        $pdf->SetTitle('Invoices');
+        $pdf->SetSubject('Invoices List');
+
+        // Remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // Set margins
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(TRUE, 10);
+
+        // Add a page
+        $pdf->AddPage();
+
+        // Add system name at top
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->SetTextColor(103, 126, 234); // #677EEA
+        $pdf->Cell(0, 10, 'MDSJEDPR', 0, 1, 'C');
+
+        // Add title
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(0, 10, 'Invoices Management', 0, 1, 'C');
+
+        // Add date
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->Cell(0, 8, 'Generated: ' . date('m/d/Y, g:i:s A'), 0, 1, 'C');
+        $pdf->Ln(5);
+
+        // Table header
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->SetFillColor(103, 126, 234); // #677EEA
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetDrawColor(221, 221, 221);
+
+        // Column widths (total 277mm for Landscape A4)
+        $widths = array(10, 30, 50, 35, 35, 40, 40, 37);
+
+        $pdf->Cell($widths[0], 10, '#', 1, 0, 'C', true);
+        $pdf->Cell($widths[1], 10, 'PR Number', 1, 0, 'L', true);
+        $pdf->Cell($widths[2], 10, 'Project Name', 1, 0, 'L', true);
+        $pdf->Cell($widths[3], 10, 'Invoice Number', 1, 0, 'L', true);
+        $pdf->Cell($widths[4], 10, 'Value', 1, 0, 'R', true);
+        $pdf->Cell($widths[5], 10, 'PR Total Value', 1, 0, 'R', true);
+        $pdf->Cell($widths[6], 10, 'Project Value', 1, 0, 'R', true);
+        $pdf->Cell($widths[7], 10, 'Status', 1, 1, 'C', true);
+
+        // Table content
+        $pdf->SetFont('helvetica', '', 8);
+        $pdf->SetTextColor(0, 0, 0);
+
+        $fill = false;
+        foreach ($invoices as $index => $invoice) {
+            if ($fill) {
+                $pdf->SetFillColor(245, 245, 245);
+            } else {
+                $pdf->SetFillColor(255, 255, 255);
+            }
+
+            $pdf->Cell($widths[0], 10, ($index + 1), 1, 0, 'C', true);
+            $pdf->Cell($widths[1], 10, $invoice->project->pr_number ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[2], 10, $invoice->project->name ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[3], 10, $invoice->invoice_number, 1, 0, 'L', true);
+            $pdf->Cell($widths[4], 10, number_format($invoice->value, 2) . ' SAR', 1, 0, 'R', true);
+            $pdf->Cell($widths[5], 10, number_format($invoice->pr_invoices_total_value, 2), 1, 0, 'R', true);
+            $pdf->Cell($widths[6], 10, number_format($invoice->project->value ?? 0, 2), 1, 0, 'R', true);
+            $pdf->Cell($widths[7], 10, $invoice->status, 1, 1, 'C', true);
+
+            $fill = !$fill;
+        }
+
+        // Output PDF
+        $pdf->Output('Invoices_' . date('Y-m-d') . '.pdf', 'I');
+    }
+
+    /**
+     * Print view for Invoices
+     */
+    public function printView()
+    {
+        $invoices = invoices::with('project:id,pr_number,name,value')->get();
+        return view('dashboard.invoice.print', compact('invoices'));
+    }
 }
