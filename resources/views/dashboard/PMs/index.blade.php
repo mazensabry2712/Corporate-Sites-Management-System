@@ -157,18 +157,18 @@
     <div class="d-flex align-items-center">
 
         <!-- Export Buttons -->
-        <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+        <a href="{{ route('pm.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
             <i class="fas fa-file-pdf"></i> PDF
-        </button>
+        </a>
         <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
             <i class="fas fa-file-excel"></i> Excel
         </button>
         {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
             <i class="fas fa-file-csv"></i> CSV
         </button> --}}
-        <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+        <a href="{{ route('pm.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-2">
             <i class="fas fa-print"></i> Print
-        </button>
+        </a>
 
         @can('Add')
         <a class="btn btn-primary modal-effect" data-effect="effect-scale" data-toggle="modal"

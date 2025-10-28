@@ -66,6 +66,8 @@ Route::group(['middleware' => ['auth']], function() {
            /*AM*/
         Route::resource('am', AamsController::class);
              /*PM*/
+        Route::get('pm/export/pdf', [PpmsController::class, 'exportPDF'])->name('pm.export.pdf');
+        Route::get('pm/print', [PpmsController::class, 'printView'])->name('pm.print');
         Route::resource('pm', PpmsController::class);
            /*Vendors */
           Route::resource('vendors', VendorsController::class);
