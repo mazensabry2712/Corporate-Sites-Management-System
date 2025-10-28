@@ -253,18 +253,15 @@
                         <div>
                             <div class="d-flex align-items-center">
                                 <!-- Export buttons -->
-                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                                <a href="{{ route('ds.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
                                     <i class="fas fa-file-pdf"></i> PDF
-                                </button>
+                                </a>
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
-                                    <i class="fas fa-file-csv"></i> CSV
-                                </button> --}}
-                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                                <a href="{{ route('ds.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1">
                                     <i class="fas fa-print"></i> Print
-                                </button>
+                                </a>
 
                                 @can('Add')
                                     <a class="modal-effect btn btn-primary" data-effect="effect-scale" data-toggle="modal"
@@ -577,8 +574,89 @@
         }
 
         function exportToExcel() {
-            const table = $('#example1').DataTable();
-            table.button('.buttons-excel').trigger();
+            const button = event.target.closest('button');
+            showLoadingButton(button);
+            try {
+                const dataTable = $('#example1').DataTable();
+
+                // Create workbook data in Excel XML format
+                let excelData = [];
+                excelData.push(['#', 'D/S Name', 'D/S Contact Details']); // Headers
+
+                // Get all data from DataTable (not just visible rows)
+                dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+                    const data = this.data();
+                    const rowNode = this.node();
+                    const cells = $(rowNode).find('td');
+
+                    excelData.push([
+                        cells.eq(0).text().trim(),
+                        cells.eq(2).text().trim(),
+                        cells.eq(3).text().trim()
+                    ]);
+                });
+
+                // Convert to Excel worksheet
+                let worksheet = '<ss:Worksheet ss:Name="Delivery Specialists"><ss:Table>';
+
+                excelData.forEach((row, rowIndex) => {
+                    worksheet += '<ss:Row>';
+                    row.forEach((cell) => {
+                        // Escape XML special characters
+                        const escapedCell = String(cell)
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&apos;');
+
+                        if (rowIndex === 0) {
+                            // Header row
+                            worksheet += '<ss:Cell ss:StyleID="header"><ss:Data ss:Type="String">' + escapedCell + '</ss:Data></ss:Cell>';
+                        } else {
+                            worksheet += '<ss:Cell><ss:Data ss:Type="String">' + escapedCell + '</ss:Data></ss:Cell>';
+                        }
+                    });
+                    worksheet += '</ss:Row>';
+                });
+
+                worksheet += '</ss:Table></ss:Worksheet>';
+
+                // Complete Excel XML
+                const excelXML = '<?xml version="1.0"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<ss:Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<ss:Styles>' +
+                    '<ss:Style ss:ID="header">' +
+                    '<ss:Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+                    '<ss:Interior ss:Color="#677EEA" ss:Pattern="Solid"/>' +
+                    '</ss:Style>' +
+                    '</ss:Styles>' +
+                    worksheet +
+                    '</ss:Workbook>';
+
+                // Create blob and download
+                const blob = new Blob([excelXML], {
+                    type: 'application/vnd.ms-excel'
+                });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+
+                link.setAttribute("href", url);
+                link.setAttribute("download", 'DS_' + new Date().toISOString().slice(0,10) + '.xls');
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showSuccessToast('Excel file exported successfully!');
+                hideLoadingButton(button);
+            } catch (error) {
+                console.error('Export error:', error);
+                showSuccessToast('Export failed');
+                hideLoadingButton(button);
+            }
         }
 
         function printTable() {

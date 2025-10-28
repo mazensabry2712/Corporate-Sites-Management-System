@@ -76,6 +76,8 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('vendors/print', [VendorsController::class, 'printView'])->name('vendors.print');
           Route::resource('vendors', VendorsController::class);
                  /*d/s */
+        Route::get('ds/export/pdf', [DsController::class, 'exportPDF'])->name('ds.export.pdf');
+        Route::get('ds/print', [DsController::class, 'printView'])->name('ds.print');
         Route::resource('ds', DsController::class);
         // invoice
          Route::resource('invoices', InvoicesController::class);
