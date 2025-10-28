@@ -186,9 +186,9 @@
                         <h5 class="card-title mb-0">Customers Management</h5>
                         <div class="d-flex align-items-center">
                             <!-- Export Buttons -->
-                            <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                            <a href="{{ route('customer.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
                                 <i class="fas fa-file-pdf"></i> PDF
-                            </button>
+                            </a>
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
@@ -336,7 +336,6 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.bootstrap4.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/pdfmake.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/vfs_fonts.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
 
@@ -365,17 +364,6 @@
                         text: '<i class="fas fa-file-excel"></i> Excel',
                         className: 'btn btn-success btn-sm d-none',
                         title: 'Customers Report',
-                        exportOptions: {
-                            columns: ':not(:first-child):not(:nth-child(2))'
-                        }
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        text: '<i class="fas fa-file-pdf"></i> PDF',
-                        className: 'btn btn-danger btn-sm d-none',
-                        title: 'Customers Report',
-                        orientation: 'landscape',
-                        pageSize: 'A4',
                         exportOptions: {
                             columns: ':not(:first-child):not(:nth-child(2))'
                         }
@@ -419,19 +407,7 @@
             });
         });
 
-        // Export Functions with loading feedback
-        function exportToPDF() {
-            showLoadingButton('PDF');
-            try {
-                $('#example1').DataTable().button('.buttons-pdf').trigger();
-                showSuccessMessage('PDF export started successfully!');
-            } catch (error) {
-                console.error('PDF export error:', error);
-                printCustomersTable(); // Fallback to manual print
-                showSuccessMessage('Alternative print method used!');
-            }
-            resetButton();
-        }
+
 
         function exportToExcel() {
             showLoadingButton('Excel');
@@ -447,16 +423,8 @@
         }
 
         function printTable() {
-            showLoadingButton('Print');
-            try {
-                $('#example1').DataTable().button('.buttons-print').trigger();
-                showSuccessMessage('Print dialog opened!');
-            } catch (error) {
-                console.error('Print error:', error);
-                printCustomersTable(); // Fallback to manual print
-                showSuccessMessage('Print window opened!');
-            }
-            resetButton();
+            // Use our new print cards view
+            window.open('{{ route('customer.print') }}', '_blank');
         }
 
         // Helper functions for user feedback

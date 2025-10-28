@@ -243,7 +243,7 @@
                             {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
                                 <i class="fas fa-file-csv"></i> CSV
                             </button> --}}
-                            <a href="{{ route('projects.export.pdf') }}" class="btn btn-sm btn-secondary btn-export-print mr-2" target="_blank" onclick="setTimeout(() => window.print(), 1000);">
+                            <a href="{{ route('projects.print') }}" class="btn btn-sm btn-secondary btn-export-print mr-2" target="_blank">
                                 <i class="fas fa-print"></i> Print
                             </a>
 

@@ -642,4 +642,24 @@ class ProjectsController extends Controller
             return redirect()->back()->with('error', 'Error generating PDF: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Print Projects View - Same design as PDF for direct printing
+     */
+    public function printView()
+    {
+        try {
+            // Get all projects with relationships
+            $projects = Project::with([
+                'vendor', 'cust', 'ds', 'aams', 'ppms',
+                'vendors', 'customers', 'deliverySpecialists'
+            ])->get();
+
+            return view('dashboard.projects.print', compact('projects'));
+
+        } catch (Exception $e) {
+            Log::error('Projects print view error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error loading print view: ' . $e->getMessage());
+        }
+    }
 }

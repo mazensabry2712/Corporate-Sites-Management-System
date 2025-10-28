@@ -41,6 +41,11 @@ Route::group(['middleware' => ['auth']], function() {
 
         Route::resource('dashboard', controller: DashboardController::class);
           /*Project*/
+          // Projects PDF Export (must be before resource route)
+          Route::get('project/export/pdf', [ProjectsController::class, 'exportPDF'])->name('projects.export.pdf');
+          // Projects Print View (must be before resource route)
+          Route::get('project/print', [ProjectsController::class, 'printView'])->name('projects.print');
+
           Route::resource('project', controller: ProjectsController::class)->names([
               'index' => 'projects.index',
               'create' => 'projects.create',
@@ -50,11 +55,14 @@ Route::group(['middleware' => ['auth']], function() {
               'update' => 'projects.update',
               'destroy' => 'projects.destroy',
           ]);
-          // Projects PDF Export
-          Route::get('project/export/pdf', [ProjectsController::class, 'exportPDF'])->name('projects.export.pdf');
         // Route::resource('/project/{id}', 'ProjectsController@getprojects');
+
         /*Customer*/
+        // Customer PDF Export & Print (must be before resource route)
+        Route::get('customer/export/pdf', [CustController::class, 'exportPDF'])->name('customer.export.pdf');
+        Route::get('customer/print', [CustController::class, 'printView'])->name('customer.print');
         Route::resource('customer', CustController::class);
+
            /*AM*/
         Route::resource('am', AamsController::class);
              /*PM*/
