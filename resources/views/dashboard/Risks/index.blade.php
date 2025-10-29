@@ -105,18 +105,17 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="card-title">Risks List</h4>
                         <div>
-                            <button onclick="exportToPDF()" class="btn btn-sm btn-danger mr-1">
+                            <!-- Export Buttons -->
+                            <a href="{{ route('risks.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
                                 <i class="fas fa-file-pdf"></i> PDF
-                            </button>
-                            <button onclick="exportToExcel()" class="btn btn-sm btn-success mr-1">
+                            </a>
+                            <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
-                            {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info mr-1">
-                                <i class="fas fa-file-csv"></i> CSV
-                            </button> --}}
-                            <button onclick="printTable()" class="btn btn-sm btn-secondary mr-2">
+                            <a href="{{ route('risks.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                 <i class="fas fa-print"></i> Print
-                            </button>
+                            </a>
+
                             @can('Add')
                             <a class="btn btn-primary" href="{{ route('risks.create') }}">
                                 <i class="fas fa-plus"></i> Add New Risk
@@ -315,25 +314,108 @@
             doc.save('risks_report_' + new Date().getTime() + '.pdf');
         }
 
-        // Export to Excel
+        // Export to Excel Function
         function exportToExcel() {
-            const table = document.getElementById('risksTable');
-            const wb = XLSX.utils.table_to_book(table, { sheet: "Risks" });
-            XLSX.writeFile(wb, 'risks_report_' + new Date().getTime() + '.xlsx');
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            button.disabled = true;
+
+            try {
+                const dataTable = $('#risksTable').DataTable();
+                let excelData = [];
+
+                // Headers
+                excelData.push([
+                    '#',
+                    'PR Number',
+                    'Project Name',
+                    'Risk/Issue',
+                    'Impact',
+                    'Mitigation',
+                    'Owner',
+                    'Status'
+                ]);
+
+                // Extract data from ALL rows (including paginated)
+                dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+                    const rowNode = this.node();
+                    const cells = $(rowNode).find('td');
+
+                    // Extract risk and mitigation from text-wrap divs
+                    const riskText = cells.eq(4).find('.text-wrap').text().trim() || cells.eq(4).text().trim();
+                    const impactText = cells.eq(5).find('.badge').text().trim() || cells.eq(5).text().trim();
+                    const mitigationText = cells.eq(6).find('.text-wrap').text().trim() || cells.eq(6).text().trim();
+                    const statusText = cells.eq(8).find('.badge').text().trim() || cells.eq(8).text().trim();
+
+                    excelData.push([
+                        cells.eq(0).text().trim(),
+                        cells.eq(2).text().trim(),
+                        cells.eq(3).text().trim(),
+                        riskText,
+                        impactText,
+                        mitigationText,
+                        cells.eq(7).text().trim(),
+                        statusText
+                    ]);
+                });
+
+                // Build SpreadsheetML XML
+                let excelXML = '<?xml version="1.0" encoding="UTF-8"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+                    'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<Worksheet ss:Name="Project Risks">' +
+                    '<Table>';
+
+                // Add header row with styling
+                excelXML += '<Row>';
+                excelData[0].forEach(header => {
+                    excelXML += '<Cell><Data ss:Type="String">' + escapeXML(header) + '</Data></Cell>';
+                });
+                excelXML += '</Row>';
+
+                // Add data rows
+                for (let i = 1; i < excelData.length; i++) {
+                    excelXML += '<Row>';
+                    excelData[i].forEach((cell, index) => {
+                        const cellValue = cell || '';
+                        excelXML += '<Cell><Data ss:Type="String">' + escapeXML(cellValue) + '</Data></Cell>';
+                    });
+                    excelXML += '</Row>';
+                }
+
+                excelXML += '</Table></Worksheet></Workbook>';
+
+                // Download
+                const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Risks_' + new Date().toISOString().split('T')[0] + '.xls';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting to Excel. Please try again.');
+            } finally {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }
         }
 
-        // Print Table
-        function printTable() {
-            const printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>Risks Report</title>');
-            printWindow.document.write('<style>table {width: 100%; border-collapse: collapse;} th, td {border: 1px solid #ddd; padding: 8px; text-align: left;} th {background-color: #007bff; color: white;}</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write('<h2>Risks Report</h2>');
-            printWindow.document.write('<p>Generated: ' + new Date().toLocaleString() + '</p>');
-            printWindow.document.write(document.getElementById('risksTable').outerHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
+        // Helper function to escape XML special characters
+        function escapeXML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
         }
 
         // Delete Modal

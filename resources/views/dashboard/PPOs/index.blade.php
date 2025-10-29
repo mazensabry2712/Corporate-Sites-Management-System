@@ -238,7 +238,7 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>
-                                            <a class="btn btn-sm btn-success" href="{{ route('ppos.show', $x->id) }}"
+                                            <a class="btn btn-sm btn-primary" href="{{ route('ppos.show', $x->id) }}"
                                                 title="Show"><i class="las la-eye"></i></a>
 
                                             @can('Edit')
@@ -274,7 +274,7 @@
                                         <td>{{ $x->po_number }}</td>
                                         <td>
                                             @if($x->value)
-                                                ${{ number_format($x->value, 2) }}
+                                               {{ number_format($x->value, 2) }} SAR
                                             @else
                                                 N/A
                                             @endif

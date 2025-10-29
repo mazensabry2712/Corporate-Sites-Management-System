@@ -193,18 +193,15 @@
                         <div>
                             <div class="d-flex align-items-center">
                                 <!-- Export buttons -->
-                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+                                <a href="{{ route('milestones.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
                                     <i class="fas fa-file-pdf"></i> PDF
-                                </button>
+                                </a>
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
-                                    <i class="fas fa-file-csv"></i> CSV
-                                </button> --}}
-                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                                <a href="{{ route('milestones.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-2">
                                     <i class="fas fa-print"></i> Print
-                                </button>
+                                </a>
                                 <a class="btn btn-primary" data-effect="effect-scale" href="{{ route('milestones.create') }}">
                                     Add Milestone
                                 </a>
@@ -526,68 +523,106 @@
             doc.save('milestones-report.pdf');
         }
 
-        // Export to Excel
+        // Export to Excel Function
         function exportToExcel() {
-            const table = document.getElementById('milestonesTable');
-            const wb = XLSX.utils.table_to_book(table, {sheet: "Milestones"});
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            button.disabled = true;
 
-            // Remove Operations column
-            const ws = wb.Sheets["Milestones"];
-            const range = XLSX.utils.decode_range(ws['!ref']);
+            try {
+                const dataTable = $('#milestonesTable').DataTable();
+                let excelData = [];
 
-            // Delete column B (Operations - index 1)
-            for (let R = range.s.r; R <= range.e.r; ++R) {
-                for (let C = range.e.c; C >= 1; --C) {
-                    const cell_address = XLSX.utils.encode_cell({r: R, c: C});
-                    const next_cell_address = XLSX.utils.encode_cell({r: R, c: C + 1});
-                    if (ws[next_cell_address]) {
-                        ws[cell_address] = ws[next_cell_address];
-                    } else {
-                        delete ws[cell_address];
-                    }
+                // Headers
+                excelData.push([
+                    '#',
+                    'PR Number',
+                    'Project Name',
+                    'Milestone',
+                    'Planned Completion',
+                    'Actual Completion',
+                    'Status',
+                    'Comments'
+                ]);
+
+                // Extract data from ALL rows (including paginated)
+                dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+                    const rowNode = this.node();
+                    const cells = $(rowNode).find('td');
+
+                    // Extract status from badge and comments from text-wrap
+                    const statusText = cells.eq(7).find('.badge').text().trim() || cells.eq(7).text().trim();
+                    const commentsText = cells.eq(8).find('.text-wrap').text().trim() || cells.eq(8).text().trim();
+
+                    excelData.push([
+                        cells.eq(0).text().trim(),
+                        cells.eq(2).text().trim(),
+                        cells.eq(3).text().trim(),
+                        cells.eq(4).text().trim(),
+                        cells.eq(5).text().trim(),
+                        cells.eq(6).text().trim(),
+                        statusText,
+                        commentsText
+                    ]);
+                });
+
+                // Build SpreadsheetML XML
+                let excelXML = '<?xml version="1.0" encoding="UTF-8"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+                    'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<Worksheet ss:Name="Project Milestones">' +
+                    '<Table>';
+
+                // Add header row with styling
+                excelXML += '<Row>';
+                excelData[0].forEach(header => {
+                    excelXML += '<Cell><Data ss:Type="String">' + escapeXML(header) + '</Data></Cell>';
+                });
+                excelXML += '</Row>';
+
+                // Add data rows
+                for (let i = 1; i < excelData.length; i++) {
+                    excelXML += '<Row>';
+                    excelData[i].forEach((cell, index) => {
+                        const cellValue = cell || '';
+                        excelXML += '<Cell><Data ss:Type="String">' + escapeXML(cellValue) + '</Data></Cell>';
+                    });
+                    excelXML += '</Row>';
                 }
-            }
 
-            XLSX.writeFile(wb, 'milestones-report.xlsx');
+                excelXML += '</Table></Worksheet></Workbook>';
+
+                // Download
+                const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Milestones_' + new Date().toISOString().split('T')[0] + '.xls';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting to Excel. Please try again.');
+            } finally {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }
         }
 
-        // Print Table
-        function printTable() {
-            const printWindow = window.open('', '', 'height=600,width=800');
-            const table = document.getElementById('milestonesTable').cloneNode(true);
-
-            // Remove Operations column
-            const headers = table.querySelectorAll('thead th');
-            const rows = table.querySelectorAll('tbody tr');
-
-            headers[1].remove(); // Remove Operations header
-
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells[1]) {
-                    cells[1].remove(); // Remove Operations cell
-                }
-            });
-
-            printWindow.document.write('<html><head><title>Milestones Report</title>');
-            printWindow.document.write('<style>');
-            printWindow.document.write('body { font-family: Arial, sans-serif; }');
-            printWindow.document.write('h1 { color: #667eea; text-align: center; }');
-            printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
-            printWindow.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
-            printWindow.document.write('th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }');
-            printWindow.document.write('tr:nth-child(even) { background-color: #f9f9f9; }');
-            printWindow.document.write('.badge-success { background-color: #28a745; color: white; padding: 3px 8px; border-radius: 3px; }');
-            printWindow.document.write('.badge-warning { background-color: #ffc107; color: #212529; padding: 3px 8px; border-radius: 3px; }');
-            printWindow.document.write('@media print { body { margin: 0; } }');
-            printWindow.document.write('</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write('<h1>Milestones Report</h1>');
-            printWindow.document.write('<p style="text-align: center; color: #666;">Generated on ' + new Date().toLocaleDateString() + '</p>');
-            printWindow.document.write(table.outerHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
+        // Helper function to escape XML special characters
+        function escapeXML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
         }
     </script>
 @endsection

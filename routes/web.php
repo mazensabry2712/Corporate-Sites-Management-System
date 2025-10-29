@@ -104,16 +104,24 @@ Route::get('ppos/categories/{pr_number}', [PposController::class, 'getCategories
                 Route::resource('pstatus', PstatusController::class);
                 Route::delete('pstatus/destroy', [PstatusController::class, 'destroy']);
         // /*Project Tasks */
+        Route::get('ptasks/export/pdf', [PtasksController::class, 'exportPDF'])->name('ptasks.export.pdf');
+        Route::get('ptasks/print', [PtasksController::class, 'printView'])->name('ptasks.print');
                 Route::resource('ptasks', PtasksController::class);
                 Route::delete('ptasks/destroy', [PtasksController::class, 'destroy']);
         // /*Project EPO */
+                Route::get('epo/export/pdf', [PepoController::class, 'exportPDF'])->name('epo.export.pdf');
+                Route::get('epo/print', [PepoController::class, 'printView'])->name('epo.print');
                  Route::resource('epo', PepoController::class);
 
         // /*Risks  */
+                Route::get('risks/export/pdf', [RisksController::class, 'exportPDF'])->name('risks.export.pdf');
+                Route::get('risks/print', [RisksController::class, 'printView'])->name('risks.print');
                 Route::resource('risks', RisksController::class);
                 Route::delete('risks/destroy', [RisksController::class, 'destroy']);
 
         // /*Milestones  */
+                Route::get('milestones/export/pdf', [MilestonesController::class, 'exportPDF'])->name('milestones.export.pdf');
+                Route::get('milestones/print', [MilestonesController::class, 'printView'])->name('milestones.print');
                 Route::resource('milestones', MilestonesController::class);
 
 

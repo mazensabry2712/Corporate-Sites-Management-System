@@ -160,18 +160,18 @@
                         <div>
                             <div class="d-flex align-items-center">
                                 <!-- Export buttons -->
-                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+
+
+                                <!-- Export Buttons -->
+                                <a href="{{ route('epo.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
                                     <i class="fas fa-file-pdf"></i> PDF
-                                </button>
+                                </a>
                                 <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
-                                    <i class="fas fa-file-csv"></i> CSV
-                                </button> --}}
-                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                                <a href="{{ route('epo.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1">
                                     <i class="fas fa-print"></i> Print
-                                </button>
+                                </a>
 
                                 @can('Add')
                                     <a class="btn btn-primary" data-effect="effect-scale" href="{{ route('epo.create') }}">
@@ -301,7 +301,6 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.bootstrap4.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/pdfmake.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/vfs_fonts.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
@@ -312,9 +311,6 @@
     <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
     <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
 
-    <!-- jsPDF with autoTable -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <!-- SheetJS for Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -330,101 +326,108 @@
             modal.find('.modal-body #name').val(name);
         })
 
-        // Export to PDF
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.setFontSize(16);
-            doc.text('Epo Report', 14, 15);
-            doc.setFontSize(10);
-            doc.text('Generated on: ' + new Date().toLocaleDateString(), 14, 22);
-
-            const table = document.getElementById('example1');
-            const rows = [];
-
-            rows.push(['#', 'PR Number', 'Project Name', 'Category', 'Planned Cost', 'Selling Price', 'Margin (%)']);
-
-            const tableRows = table.querySelectorAll('tbody tr');
-            tableRows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
-                const rowData = [
-                    index + 1,
-                    cells[2]?.textContent.trim() || '',
-                    cells[3]?.textContent.trim() || '',
-                    cells[4]?.textContent.trim() || '',
-                    cells[5]?.textContent.trim() || '',
-                    cells[6]?.textContent.trim() || '',
-                    cells[7]?.textContent.trim() || ''
-                ];
-                rows.push(rowData);
-            });
-
-            doc.autoTable({
-                head: [rows[0]],
-                body: rows.slice(1),
-                startY: 30,
-                theme: 'grid',
-                styles: {
-                    fontSize: 9,
-                    cellPadding: 3
-                },
-                headStyles: {
-                    fillColor: [41, 128, 185],
-                    textColor: 255,
-                    fontStyle: 'bold'
-                }
-            });
-
-            doc.save('Epo_Report_' + new Date().toISOString().slice(0,10) + '.pdf');
-        }
-
-        // Export to Excel
-        function exportToExcel() {
-            const table = document.getElementById('example1');
-            const wb = XLSX.utils.book_new();
-
-            const data = [];
-            data.push(['#', 'PR Number', 'Project Name', 'Category', 'Planned Cost', 'Selling Price', 'Margin (%)']);
-
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
-                data.push([
-                    index + 1,
-                    cells[2]?.textContent.trim() || '',
-                    cells[3]?.textContent.trim() || '',
-                    cells[4]?.textContent.trim() || '',
-                    cells[5]?.textContent.trim() || '',
-                    cells[6]?.textContent.trim() || '',
-                    cells[7]?.textContent.trim() || ''
-                ]);
-            });
-
-            const ws = XLSX.utils.aoa_to_sheet(data);
-
-            ws['!cols'] = [
-                { wch: 5 },
-                { wch: 15 },
-                { wch: 25 },
-                { wch: 20 },
-                { wch: 15 },
-                { wch: 15 },
-                { wch: 15 }
-            ];
-
-            XLSX.utils.book_append_sheet(wb, ws, 'Epo Data');
-            XLSX.writeFile(wb, 'Epo_Report_' + new Date().toISOString().slice(0,10) + '.xlsx');
-        }
-
-        // Print Table
-        function printTable() {
-            window.print();
-        }
-
-        // Auto-hide alerts after 5 seconds
+    // Auto-hide alerts after 5 seconds
         setTimeout(function() {
             $('.alert').fadeOut('slow');
         }, 5000);
+
+        // Export to Excel Function
+        function exportToExcel() {
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            button.disabled = true;
+
+            try {
+                const dataTable = $('#example').DataTable();
+                let excelData = [];
+
+                // Headers
+                excelData.push([
+                    '#',
+                    'PR Number',
+                    'Project Name',
+                    'Category',
+                    'Planned Cost',
+                    'Selling Price',
+                    'Margin (%)'
+                ]);
+
+                // Extract data from ALL rows (including paginated)
+                dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+                    const rowNode = this.node();
+                    const cells = $(rowNode).find('td');
+
+                    // Extract margin from badge
+                    const marginText = cells.eq(7).find('.badge').text().trim() || cells.eq(7).text().trim();
+
+                    excelData.push([
+                        cells.eq(0).text().trim(),
+                        cells.eq(2).text().trim(),
+                        cells.eq(3).text().trim(),
+                        cells.eq(4).text().trim(),
+                        cells.eq(5).text().trim(),
+                        cells.eq(6).text().trim(),
+                        marginText
+                    ]);
+                });
+
+                // Build SpreadsheetML XML
+                let excelXML = '<?xml version="1.0" encoding="UTF-8"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+                    'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<Worksheet ss:Name="Project EPO">' +
+                    '<Table>';
+
+                // Add header row with styling
+                excelXML += '<Row>';
+                excelData[0].forEach(header => {
+                    excelXML += '<Cell><Data ss:Type="String">' + escapeXML(header) + '</Data></Cell>';
+                });
+                excelXML += '</Row>';
+
+                // Add data rows
+                for (let i = 1; i < excelData.length; i++) {
+                    excelXML += '<Row>';
+                    excelData[i].forEach((cell, index) => {
+                        const cellValue = cell || '';
+                        excelXML += '<Cell><Data ss:Type="String">' + escapeXML(cellValue) + '</Data></Cell>';
+                    });
+                    excelXML += '</Row>';
+                }
+
+                excelXML += '</Table></Worksheet></Workbook>';
+
+                // Download
+                const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'PEPO_' + new Date().toISOString().split('T')[0] + '.xls';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting to Excel. Please try again.');
+            } finally {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }
+        }
+
+        // Helper function to escape XML special characters
+        function escapeXML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
     </script>
 @endsection
