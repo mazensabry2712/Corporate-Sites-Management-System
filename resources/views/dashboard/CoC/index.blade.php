@@ -328,18 +328,17 @@
                         </div>
                         <div>
                             <div class="d-flex align-items-center">
-                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+
+                                <!-- Export Buttons -->
+                                <a href="{{ route('coc.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1" title="Export to PDF">
                                     <i class="fas fa-file-pdf"></i> PDF
-                                </button>
-                                <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
+                                </a>
+                                <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1" title="Export to Excel">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
-                                    <i class="fas fa-file-csv"></i> CSV
-                                </button> --}}
-                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                                <a href="{{ route('coc.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1" title="Print">
                                     <i class="fas fa-print"></i> Print
-                                </button>
+                                </a>
 
                                 @can('Add')
                                     <a class="btn btn-primary" data-effect="effect-scale" href="{{ route('coc.create') }}">
@@ -508,8 +507,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -525,102 +522,9 @@
             modal.find('.modal-body #project_name').val(project_name);
         });
 
-        // Export to PDF (بقي كما هو - ولكن تم تحديث طريقة الحصول على البيانات لتناسب شكل الجدول)
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
-
-            doc.setFontSize(18);
-            doc.text('Certificate of Compliance List', 15, 15);
-            doc.setFontSize(10);
-            doc.text('Generated on: ' + new Date().toLocaleDateString(), 15, 22);
-
-            const table = document.getElementById('example1');
-            const rows = [];
-
-            // الأعمدة المراد تصديرها: #, PR Number, Project Name, Upload Date
-            const headers = ['#', 'PR Number', 'Project Name', 'Upload Date'];
-            rows.push(headers);
-
-            const dataRows = table.querySelectorAll('tbody tr');
-            dataRows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
-                const rowData = [
-                    index + 1,
-                    // cells[2] هو PR Number
-                    cells[2]?.textContent.trim().replace(/\s+/g, ' ') || '',
-                    // cells[3] هو Project Name
-                    cells[3]?.textContent.trim().replace(/\s+/g, ' ') || '',
-                    // cells[5] هو Upload Date
-                    cells[5]?.textContent.trim().replace(/\s+/g, ' ') || ''
-                ];
-                rows.push(rowData);
-            });
-
-            doc.autoTable({
-                head: [rows[0]],
-                body: rows.slice(1),
-                startY: 30,
-                theme: 'grid',
-                styles: {
-                    fontSize: 9,
-                    cellPadding: 3
-                },
-                headStyles: {
-                    fillColor: [41, 128, 185],
-                    textColor: 255,
-                    fontStyle: 'bold'
-                }
-            });
-
-            doc.save('CoC_List_' + new Date().toISOString().slice(0,10) + '.pdf');
-        }
-
-        // Export to Excel (بقي كما هو)
-        function exportToExcel() {
-            const table = document.getElementById('example1');
-            const wb = XLSX.utils.book_new();
-
-            const data = [];
-            data.push(['#', 'PR Number', 'Project Name', 'Upload Date']);
-
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
-                data.push([
-                    index + 1,
-                    // cells[2] هو PR Number
-                    cells[2]?.textContent.trim().replace(/\s+/g, ' ') || '',
-                    // cells[3] هو Project Name
-                    cells[3]?.textContent.trim().replace(/\s+/g, ' ') || '',
-                    // cells[5] هو Upload Date
-                    cells[5]?.textContent.trim().replace(/\s+/g, ' ') || ''
-                ]);
-            });
-
-            const ws = XLSX.utils.aoa_to_sheet(data);
-
-            // Set column widths
-            ws['!cols'] = [
-                { wch: 5 },
-                { wch: 15 },
-                { wch: 30 },
-                { wch: 20 }
-            ];
-
-            XLSX.utils.book_append_sheet(wb, ws, 'CoC List');
-            XLSX.writeFile(wb, 'CoC_List_' + new Date().toISOString().slice(0,10) + '.xlsx');
-        }
+          // Export to Excel (بقي كما هو)
 
         // Print Table (تم تعديلها)
-        function printTable() {
-            // إضافة تاريخ الطباعة كـ Attribute في الـ body ليتم استخدامه في CSS
-            document.body.setAttribute('data-print-date', new Date().toLocaleDateString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-            }));
-
-            window.print();
-        }
 
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {
@@ -657,5 +561,93 @@
                 }
             });
         });
+
+        // Export to Excel Function
+        function exportToExcel() {
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            button.disabled = true;
+
+            try {
+                const dataTable = $('#example1').DataTable();
+                let excelData = [];
+
+                // Add headers
+                excelData.push(['#', 'PR Number', 'Project Name', 'Upload Date', 'Upload Time']);
+
+                // Get ALL data from DataTable (including paginated rows)
+                dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+                    const rowNode = this.node();
+                    const cells = $(rowNode).find('td');
+
+                    excelData.push([
+                        cells.eq(0).text().trim(), // #
+                        cells.eq(2).text().trim(), // PR Number
+                        cells.eq(3).text().trim(), // Project Name
+                        cells.eq(5).text().trim().split(' ')[0], // Upload Date (first part before space)
+                        cells.eq(5).text().trim().split(' ').slice(1).join(' ') // Upload Time (after date)
+                    ]);
+                });
+
+                // Build Excel XML content with escaped characters
+                let worksheet = '<ss:Worksheet ss:Name="Certificate of Compliance"><ss:Table>';
+
+                excelData.forEach((row, rowIndex) => {
+                    worksheet += '<ss:Row>';
+                    row.forEach((cell) => {
+                        // Escape special XML characters
+                        const escapedCell = String(cell)
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&apos;');
+
+                        if (rowIndex === 0) {
+                            // Header row with style
+                            worksheet += `<ss:Cell ss:StyleID="header"><ss:Data ss:Type="String">${escapedCell}</ss:Data></ss:Cell>`;
+                        } else {
+                            // Data rows
+                            worksheet += `<ss:Cell><ss:Data ss:Type="String">${escapedCell}</ss:Data></ss:Cell>`;
+                        }
+                    });
+                    worksheet += '</ss:Row>';
+                });
+
+                worksheet += '</ss:Table></ss:Worksheet>';
+
+                // Build complete Excel XML with styles
+                const excelXML = '<?xml version="1.0"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<ss:Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<ss:Styles>' +
+                    '<ss:Style ss:ID="header">' +
+                    '<ss:Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+                    '<ss:Interior ss:Color="#677EEA" ss:Pattern="Solid"/>' +
+                    '</ss:Style>' +
+                    '</ss:Styles>' +
+                    worksheet +
+                    '</ss:Workbook>';
+
+                // Create blob and trigger download
+                const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'CoC_' + new Date().toISOString().split('T')[0] + '.xls';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting to Excel. Please try again.');
+            } finally {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }
+        }
     </script>
 @endsection

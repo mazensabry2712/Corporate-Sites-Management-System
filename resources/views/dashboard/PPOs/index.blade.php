@@ -193,19 +193,17 @@
                         </div>
                         <div>
                             <div class="d-flex align-items-center">
-                                <!-- Export buttons -->
-                                <button onclick="exportToPDF()" class="btn btn-sm btn-danger btn-export-pdf mr-1">
+
+                                <!-- Export Buttons -->
+                                <a href="{{ route('ppos.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1" title="Export to PDF">
                                     <i class="fas fa-file-pdf"></i> PDF
-                                </button>
-                                <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
+                                </a>
+                                <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1" title="Export to Excel">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
-                                {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
-                                    <i class="fas fa-file-csv"></i> CSV
-                                </button> --}}
-                                <button onclick="printTable()" class="btn btn-sm btn-secondary btn-export-print mr-2">
+                                <a href="{{ route('ppos.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1" title="Print">
                                     <i class="fas fa-print"></i> Print
-                                </button>
+                                </a>
 
                                 @can('Add')
                                     <a class="btn btn-primary" href="{{ route('ppos.create') }}">
@@ -351,7 +349,6 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.bootstrap4.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/pdfmake.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/vfs_fonts.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
@@ -362,8 +359,6 @@
     <script src="{{ URL::asset('assets/js/table-data.js') }}"></script>
     <script src="{{ URL::asset('assets/js/modal.js') }}"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
@@ -376,104 +371,97 @@
             modal.find('.modal-body #name').val(name);
         })
 
-        // Export to PDF
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape for more space
-
-            doc.setFontSize(16);
-            doc.text('PPOs Report', 14, 15);
-
-            const tableData = [];
-            const table = document.getElementById('example1');
-            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-
-            for (let i = 0; i < rows.length; i++) {
-                const cells = rows[i].getElementsByTagName('td');
-                tableData.push([
-                    cells[0].innerText, // #
-                    cells[2].innerText, // PR Number
-                    cells[3].innerText, // Project Name
-                    cells[4].innerText, // Category
-                    cells[5].innerText, // Supplier Name
-                    cells[7].innerText, // Value
-                    cells[8].innerText, // Date
-                    cells[9].innerText  // Status
-                ]);
-            }
-
-            doc.autoTable({
-                head: [['#', 'PR', 'Project', 'Category', 'Supplier', 'Value', 'Date', 'Status']],
-                body: tableData,
-                startY: 20,
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 2,
-                    overflow: 'linebreak',
-                    halign: 'left'
-                },
-                headStyles: {
-                    fillColor: [41, 128, 185],
-                    textColor: 255,
-                    fontSize: 9,
-                    fontStyle: 'bold',
-                    halign: 'center'
-                },
-                columnStyles: {
-                    0: { cellWidth: 12, halign: 'center' },  // #
-                    1: { cellWidth: 18, halign: 'center' },  // PR
-                    2: { cellWidth: 45 },                     // Project
-                    3: { cellWidth: 60 },                     // Category (wider for multiple)
-                    4: { cellWidth: 45 },                     // Supplier
-                    5: { cellWidth: 30, halign: 'right' },   // Value
-                    6: { cellWidth: 28, halign: 'center' },  // Date
-                    7: { cellWidth: 28, halign: 'center' }   // Status
-                },
-                alternateRowStyles: {
-                    fillColor: [245, 245, 245]
-                },
-                margin: { top: 20, right: 10, bottom: 10, left: 10 }
-            });
-
-            doc.save('ppos_report.pdf');
-        }
-
-        // Export to Excel
+        // Export to Excel Function
         function exportToExcel() {
-            const table = document.getElementById('example1');
-            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-            const data = [];
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            button.disabled = true;
 
-            // Add headers
-            data.push(['#', 'PR Number', 'Project Name', 'Category', 'Supplier Name', 'PO Number', 'Value', 'Date', 'Status', 'Updates', 'Notes']);
+            try {
+                const dataTable = $('#example1').DataTable();
+                let excelData = [];
 
-            // Add data rows
-            for (let i = 0; i < rows.length; i++) {
-                const cells = rows[i].getElementsByTagName('td');
-                data.push([
-                    cells[0].innerText,  // #
-                    cells[2].innerText,  // PR Number
-                    cells[3].innerText,  // Project Name
-                    cells[4].innerText,  // Category
-                    cells[5].innerText,  // Supplier Name
-                    cells[6].innerText,  // PO Number
-                    cells[7].innerText,  // Value
-                    cells[8].innerText,  // Date
-                    cells[9].innerText,  // Status
-                    cells[10].innerText, // Updates
-                    cells[11].innerText  // Notes
-                ]);
+                // Add headers
+                excelData.push(['#', 'PR Number', 'Project Name', 'Category', 'Supplier Name', 'PO Number', 'Value', 'Date', 'Status', 'Updates']);
+
+                // Get ALL data from DataTable (including paginated rows)
+                dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+                    const rowNode = this.node();
+                    const cells = $(rowNode).find('td');
+
+                    excelData.push([
+                        cells.eq(0).text().trim(), // #
+                        cells.eq(2).text().trim(), // PR Number
+                        cells.eq(3).text().trim(), // Project Name
+                        cells.eq(4).text().trim(), // Category
+                        cells.eq(5).text().trim(), // Supplier Name
+                        cells.eq(6).text().trim(), // PO Number
+                        cells.eq(7).text().trim(), // Value
+                        cells.eq(8).text().trim(), // Date
+                        cells.eq(9).text().trim(), // Status
+                        cells.eq(10).text().trim() // Updates
+                    ]);
+                });
+
+                // Build Excel XML content with escaped characters
+                let worksheet = '<ss:Worksheet ss:Name="Project Purchase Orders"><ss:Table>';
+
+                excelData.forEach((row, rowIndex) => {
+                    worksheet += '<ss:Row>';
+                    row.forEach((cell) => {
+                        // Escape special XML characters
+                        const escapedCell = String(cell)
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&apos;');
+
+                        if (rowIndex === 0) {
+                            // Header row with style
+                            worksheet += `<ss:Cell ss:StyleID="header"><ss:Data ss:Type="String">${escapedCell}</ss:Data></ss:Cell>`;
+                        } else {
+                            // Data rows
+                            worksheet += `<ss:Cell><ss:Data ss:Type="String">${escapedCell}</ss:Data></ss:Cell>`;
+                        }
+                    });
+                    worksheet += '</ss:Row>';
+                });
+
+                worksheet += '</ss:Table></ss:Worksheet>';
+
+                // Build complete Excel XML with styles
+                const excelXML = '<?xml version="1.0"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<ss:Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<ss:Styles>' +
+                    '<ss:Style ss:ID="header">' +
+                    '<ss:Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+                    '<ss:Interior ss:Color="#677EEA" ss:Pattern="Solid"/>' +
+                    '</ss:Style>' +
+                    '</ss:Styles>' +
+                    worksheet +
+                    '</ss:Workbook>';
+
+                // Create blob and trigger download
+                const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'PPOs_' + new Date().toISOString().split('T')[0] + '.xls';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting to Excel. Please try again.');
+            } finally {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
             }
-
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'PPOs');
-            XLSX.writeFile(wb, 'ppos_report.xlsx');
         }
-
-        // Print table
-        function printTable() {
-            window.print();
-        }
-    </script>
+  </script>
 @endsection

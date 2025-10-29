@@ -140,4 +140,95 @@ class CocController extends Controller
 
         return redirect('/coc');
     }
+
+    /**
+     * Export CoC to PDF
+     */
+    public function exportPDF()
+    {
+        $coc = Coc::with('project:id,pr_number,name')->get();
+
+        $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+
+        // Set document information
+        $pdf->SetCreator('MDSJEDPR');
+        $pdf->SetAuthor('MDSJEDPR');
+        $pdf->SetTitle('Certificate of Compliance');
+        $pdf->SetSubject('CoC List');
+
+        // Remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // Set margins
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(TRUE, 10);
+
+        // Add a page
+        $pdf->AddPage();
+
+        // Add system name at top
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->SetTextColor(103, 126, 234); // #677EEA
+        $pdf->Cell(0, 10, 'MDSJEDPR', 0, 1, 'C');
+
+        // Add title
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(0, 10, 'Certificate of Compliance Management', 0, 1, 'C');
+
+        // Add date
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->Cell(0, 8, 'Generated: ' . date('m/d/Y, g:i:s A'), 0, 1, 'C');
+        $pdf->Ln(5);
+
+        // Table header
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->SetFillColor(103, 126, 234); // #677EEA
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetDrawColor(221, 221, 221);
+
+        // Column widths (total 190mm)
+        $widths = array(10, 35, 70, 40, 35);
+
+        $pdf->Cell($widths[0], 10, '#', 1, 0, 'C', true);
+        $pdf->Cell($widths[1], 10, 'PR Number', 1, 0, 'L', true);
+        $pdf->Cell($widths[2], 10, 'Project Name', 1, 0, 'L', true);
+        $pdf->Cell($widths[3], 10, 'Upload Date', 1, 0, 'C', true);
+        $pdf->Cell($widths[4], 10, 'Upload Time', 1, 1, 'C', true);
+
+        // Table content
+        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetTextColor(0, 0, 0);
+
+        $fill = false;
+        foreach ($coc as $index => $item) {
+            if ($fill) {
+                $pdf->SetFillColor(245, 245, 245);
+            } else {
+                $pdf->SetFillColor(255, 255, 255);
+            }
+
+            $pdf->Cell($widths[0], 10, ($index + 1), 1, 0, 'C', true);
+            $pdf->Cell($widths[1], 10, $item->project->pr_number ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[2], 10, $item->project->name ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[3], 10, $item->created_at->format('Y-m-d'), 1, 0, 'C', true);
+            $pdf->Cell($widths[4], 10, $item->created_at->format('h:i A'), 1, 1, 'C', true);
+
+            $fill = !$fill;
+        }
+
+        // Output PDF
+        $pdf->Output('CoC_' . date('Y-m-d') . '.pdf', 'I');
+    }
+
+    /**
+     * Print view for CoC
+     */
+    public function printView()
+    {
+        $coc = Coc::with('project:id,pr_number,name')->get();
+        return view('dashboard.coc.print', compact('coc'));
+    }
 }

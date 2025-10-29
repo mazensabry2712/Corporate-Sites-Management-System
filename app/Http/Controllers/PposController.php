@@ -231,4 +231,116 @@ class PposController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Export PPOs to PDF
+     */
+    public function exportPDF()
+    {
+        $ppos = Ppos::with(['project:id,pr_number,name', 'pepo:id,category', 'ds:id,dsname'])
+            ->get();
+
+        $pdf = new \TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+
+        // Set document information
+        $pdf->SetCreator('MDSJEDPR');
+        $pdf->SetAuthor('MDSJEDPR');
+        $pdf->SetTitle('Project Purchase Orders');
+        $pdf->SetSubject('PPOs List');
+
+        // Remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // Set margins
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(TRUE, 10);
+
+        // Add a page
+        $pdf->AddPage();
+
+        // Add system name at top
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->SetTextColor(103, 126, 234); // #677EEA
+        $pdf->Cell(0, 10, 'MDSJEDPR', 0, 1, 'C');
+
+        // Add title
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(0, 10, 'Project Purchase Orders Management', 0, 1, 'C');
+
+        // Add date
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->Cell(0, 8, 'Generated: ' . date('m/d/Y, g:i:s A'), 0, 1, 'C');
+        $pdf->Ln(5);
+
+        // Table header
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->SetFillColor(103, 126, 234); // #677EEA
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetDrawColor(221, 221, 221);
+
+        // Column widths (total 277mm for Landscape)
+        $widths = array(10, 25, 45, 30, 30, 27, 25, 25, 30, 30);
+
+        $pdf->Cell($widths[0], 10, '#', 1, 0, 'C', true);
+        $pdf->Cell($widths[1], 10, 'PR Number', 1, 0, 'L', true);
+        $pdf->Cell($widths[2], 10, 'Project Name', 1, 0, 'L', true);
+        $pdf->Cell($widths[3], 10, 'Category', 1, 0, 'L', true);
+        $pdf->Cell($widths[4], 10, 'Supplier', 1, 0, 'L', true);
+        $pdf->Cell($widths[5], 10, 'PO Number', 1, 0, 'L', true);
+        $pdf->Cell($widths[6], 10, 'Value', 1, 0, 'R', true);
+        $pdf->Cell($widths[7], 10, 'Date', 1, 0, 'C', true);
+        $pdf->Cell($widths[8], 10, 'Status', 1, 0, 'L', true);
+        $pdf->Cell($widths[9], 10, 'Updates', 1, 1, 'L', true);
+
+        // Table content
+        $pdf->SetFont('helvetica', '', 8);
+        $pdf->SetTextColor(0, 0, 0);
+
+        $fill = false;
+        foreach ($ppos as $index => $item) {
+            if ($fill) {
+                $pdf->SetFillColor(245, 245, 245);
+            } else {
+                $pdf->SetFillColor(255, 255, 255);
+            }
+
+            // Get all categories for this PO Number
+            $allCategories = Ppos::where('po_number', $item->po_number)
+                ->with('pepo:id,category')
+                ->get()
+                ->pluck('pepo.category')
+                ->filter()
+                ->unique()
+                ->implode(', ');
+
+            $pdf->Cell($widths[0], 10, ($index + 1), 1, 0, 'C', true);
+            $pdf->Cell($widths[1], 10, $item->project->pr_number ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[2], 10, $item->project->name ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[3], 10, $allCategories ?: 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[4], 10, $item->ds->dsname ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[5], 10, $item->po_number ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[6], 10, $item->value ? '$' . number_format($item->value, 2) : 'N/A', 1, 0, 'R', true);
+            $pdf->Cell($widths[7], 10, $item->date ? $item->date->format('Y-m-d') : 'N/A', 1, 0, 'C', true);
+            $pdf->Cell($widths[8], 10, $item->status ?? 'N/A', 1, 0, 'L', true);
+            $pdf->Cell($widths[9], 10, $item->updates ?? 'N/A', 1, 1, 'L', true);
+
+            $fill = !$fill;
+        }
+
+        // Output PDF
+        $pdf->Output('PPOs_' . date('Y-m-d') . '.pdf', 'I');
+    }
+
+    /**
+     * Print view for PPOs
+     */
+    public function printView()
+    {
+        $ppos = Ppos::with(['project:id,pr_number,name', 'pepo:id,category', 'ds:id,dsname'])
+            ->get();
+        return view('dashboard.PPOs.print', compact('ppos'));
+    }
 }

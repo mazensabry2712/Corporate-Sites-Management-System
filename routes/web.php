@@ -88,13 +88,19 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('dn/print', [DnController::class, 'printView'])->name('dn.print');
              Route::resource('dn', DnController::class);
         //         /*CoC */
+        Route::get('coc/export/pdf', [CocController::class, 'exportPDF'])->name('coc.export.pdf');
+        Route::get('coc/print', [CocController::class, 'printView'])->name('coc.print');
                  Route::resource('coc', CocController::class);
         // /*Project POs Form */
+        Route::get('ppos/export/pdf', [PposController::class, 'exportPDF'])->name('ppos.export.pdf');
+        Route::get('ppos/print', [PposController::class, 'printView'])->name('ppos.print');
 Route::resource('ppos', PposController::class);
 Route::delete('ppos/destroy', [PposController::class, 'destroy']);
 Route::get('ppos/categories/{pr_number}', [PposController::class, 'getCategoriesByProject'])->name('ppos.categories');
 
         // /*Project Status  */
+        Route::get('pstatus/export/pdf', [PstatusController::class, 'exportPDF'])->name('pstatus.export.pdf');
+        Route::get('pstatus/print', [PstatusController::class, 'printView'])->name('pstatus.print');
                 Route::resource('pstatus', PstatusController::class);
                 Route::delete('pstatus/destroy', [PstatusController::class, 'destroy']);
         // /*Project Tasks */

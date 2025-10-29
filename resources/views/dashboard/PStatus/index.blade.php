@@ -89,18 +89,18 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="card-title">Project Status List</h4>
                         <div>
-                            <button onclick="exportToPDF()" class="btn btn-sm btn-danger mr-1">
+
+                            <!-- Export Buttons -->
+                            <a href="{{ route('pstatus.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1" title="Export to PDF">
                                 <i class="fas fa-file-pdf"></i> PDF
-                            </button>
-                            <button onclick="exportToExcel()" class="btn btn-sm btn-success mr-1">
+                            </a>
+                            <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1" title="Export to Excel">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
-                            {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info mr-1">
-                                <i class="fas fa-file-csv"></i> CSV
-                            </button> --}}
-                            <button onclick="printTable()" class="btn btn-sm btn-secondary mr-2">
+                            <a href="{{ route('pstatus.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1" title="Print">
                                 <i class="fas fa-print"></i> Print
-                            </button>
+                            </a>
+
                             @can('Add')
                             <a class="btn btn-primary" href="{{ route('pstatus.create') }}">
                                 <i class="fas fa-plus"></i> Add New Status
@@ -217,8 +217,6 @@
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.bootstrap4.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('assets/plugins/datatable/js/responsive.bootstrap4.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
@@ -234,85 +232,8 @@
             });
         });
 
-        // Export to PDF
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
 
-            doc.setFontSize(18);
-            doc.text('Project Status Report', 14, 15);
-            doc.setFontSize(10);
-            doc.text('Generated: ' + new Date().toLocaleString(), 14, 22);
 
-            const headers = [['#', 'PR Number', 'Project Name', 'Date & Time', 'PM Name', 'Status', 'Actual %', 'Expected', 'Pending', 'Notes']];
-            const data = [];
-
-            $('#pstatusTable tbody tr').each(function(index) {
-                if ($(this).find('td').length > 1) {
-                    const row = [];
-                    // يتم استبعاد العمود 1 (Operations)
-                    $(this).find('td').each(function(i) {
-                        if (i === 0 || i > 1) {
-                            row.push($(this).text().trim().replace(/\s+/g, ' '));
-                        }
-                    });
-                    data.push(row);
-                }
-            });
-
-            doc.autoTable({
-                head: headers,
-                body: data,
-                startY: 28,
-                theme: 'grid',
-                headStyles: { fillColor: [0, 123, 255], textColor: 255 },
-                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-                columnStyles: {
-                    0: { cellWidth: 8 },
-                    4: { cellWidth: 20 }, // Date & Time
-                    5: { cellWidth: 20 }, // PM Name
-                    6: { cellWidth: 40 }, // Status
-                    8: { cellWidth: 20 }, // Expected
-                    9: { cellWidth: 35 }, // Pending Cost
-                    10: { cellWidth: 35 } // Notes
-                }
-            });
-
-            doc.save('project_status_' + new Date().getTime() + '.pdf');
-        }
-
-        // Export to Excel (تم تعديلها لاستبعاد عمود العمليات)
-        function exportToExcel() {
-            const data = [];
-
-            // إضافة العناوين
-            const headerRow = ['#', 'PR Number', 'Project Name', 'Date & Time', 'PM Name', 'Status', 'Actual %', 'Expected Date', 'Pending Cost', 'Notes'];
-            data.push(headerRow);
-
-            // إضافة البيانات
-            $('#pstatusTable tbody tr').each(function() {
-                const row = [];
-                $(this).find('td').each(function(i) {
-                    // استبعاد عمود العمليات (Index 1)
-                    if (i === 0 || i > 1) {
-                        row.push($(this).text().trim().replace(/\s+/g, ' '));
-                    }
-                });
-                if (row.length > 1) { // التأكد من أنها ليست صف "No records found"
-                    data.push(row);
-                }
-            });
-
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Project Status');
-            XLSX.writeFile(wb, 'project_status_' + new Date().getTime() + '.xlsx');
-        }
-
-        // Print Table
-        function printTable() {
-            window.print();
-        }
 
         // Delete Modal
         $('#modaldemo9').on('show.bs.modal', function(event) {
@@ -323,5 +244,107 @@
             modal.find('.modal-body #id').val(id);
             modal.find('.modal-body #name').val(name);
         });
+
+        // Export to Excel Function
+        function exportToExcel() {
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            button.disabled = true;
+
+            try {
+                const dataTable = $('#pstatusTable').DataTable();
+                let excelData = [];
+
+                // Add headers
+                excelData.push(['#', 'PR Number', 'Project Name', 'Date & Time', 'PM Name', 'Status', 'Actual %', 'Expected Date', 'Pending Cost', 'Notes']);
+
+                // Get ALL data from DataTable (including paginated rows)
+                dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+                    const rowNode = this.node();
+                    const cells = $(rowNode).find('td');
+
+                    // Extract Status (from div inside td)
+                    const statusText = cells.eq(6).find('.text-wrap').text().trim() || cells.eq(6).text().trim();
+
+                    // Extract Pending Cost (from div inside td)
+                    const pendingCostText = cells.eq(9).find('.text-wrap').text().trim() || cells.eq(9).text().trim();
+
+                    // Extract Notes (from div inside td)
+                    const notesText = cells.eq(10).find('.text-wrap').text().trim() || cells.eq(10).text().trim();
+
+                    excelData.push([
+                        cells.eq(0).text().trim(), // #
+                        cells.eq(2).text().trim(), // PR Number
+                        cells.eq(3).text().trim(), // Project Name
+                        cells.eq(4).text().trim(), // Date & Time
+                        cells.eq(5).text().trim(), // PM Name
+                        statusText,                // Status
+                        cells.eq(7).text().trim(), // Actual %
+                        cells.eq(8).text().trim(), // Expected Date
+                        pendingCostText,           // Pending Cost
+                        notesText                  // Notes
+                    ]);
+                });
+
+                // Build Excel XML content with escaped characters
+                let worksheet = '<ss:Worksheet ss:Name="Project Status"><ss:Table>';
+
+                excelData.forEach((row, rowIndex) => {
+                    worksheet += '<ss:Row>';
+                    row.forEach((cell) => {
+                        // Escape special XML characters
+                        const escapedCell = String(cell)
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&apos;');
+
+                        if (rowIndex === 0) {
+                            // Header row with style
+                            worksheet += `<ss:Cell ss:StyleID="header"><ss:Data ss:Type="String">${escapedCell}</ss:Data></ss:Cell>`;
+                        } else {
+                            // Data rows
+                            worksheet += `<ss:Cell><ss:Data ss:Type="String">${escapedCell}</ss:Data></ss:Cell>`;
+                        }
+                    });
+                    worksheet += '</ss:Row>';
+                });
+
+                worksheet += '</ss:Table></ss:Worksheet>';
+
+                // Build complete Excel XML with styles
+                const excelXML = '<?xml version="1.0"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<ss:Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<ss:Styles>' +
+                    '<ss:Style ss:ID="header">' +
+                    '<ss:Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+                    '<ss:Interior ss:Color="#677EEA" ss:Pattern="Solid"/>' +
+                    '</ss:Style>' +
+                    '</ss:Styles>' +
+                    worksheet +
+                    '</ss:Workbook>';
+
+                // Create blob and trigger download
+                const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ProjectStatus_' + new Date().toISOString().split('T')[0] + '.xls';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting to Excel. Please try again.');
+            } finally {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }
+        }
     </script>
 @endsection
