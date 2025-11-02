@@ -189,16 +189,14 @@
                             <a href="{{ route('customer.export.pdf') }}" target="_blank" class="btn btn-sm btn-danger btn-export-pdf mr-1">
                                 <i class="fas fa-file-pdf"></i> PDF
                             </a>
+
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
+
                             <a href="{{ route('customer.print') }}" target="_blank" class="btn btn-sm btn-secondary btn-export-print mr-1">
                                 <i class="fas fa-print"></i> Print
                             </a>
-                            {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
-                                <i class="fas fa-file-csv"></i> CSV
-                            </button> --}}
-
 
                             @can('Add')
                             <a class="btn btn-primary" href="{{ route('customer.create') }}">
@@ -357,64 +355,21 @@
                 $('#example1').DataTable().destroy();
             }
 
-            $('#example1').DataTable({
-                dom: 'Bfrtip',
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        text: '<i class="fas fa-file-excel"></i> Excel',
-                        className: 'btn btn-success btn-sm d-none',
-                        title: 'Customers Report',
-                        exportOptions: {
-                            columns: ':not(:first-child):not(:nth-child(2))'
-                        }
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: '<i class="fas fa-file-csv"></i> CSV',
-                        className: 'btn btn-info btn-sm d-none',
-                        title: 'Customers Report',
-                        exportOptions: {
-                            columns: ':not(:first-child):not(:nth-child(2))'
-                        }
-                    }
-                ],
-                responsive: false, // Disable responsive to keep single row
-                lengthChange: false,
-                autoWidth: false,
-                scrollX: true, // Enable horizontal scrolling
-                scrollCollapse: true,
-                columnDefs: [
-                    { width: "5%", targets: 0 }, // #
-                    { width: "15%", targets: 1 }, // Actions
-                    { width: "20%", targets: 2 }, // Name
-                    { width: "10%", targets: 3 }, // Abbreviation
-                    { width: "10%", targets: 4 }, // Type
-                    { width: "10%", targets: 5 }, // Logo
-                    { width: "15%", targets: 6 }, // Contact Name
-                    { width: "15%", targets: 7 }, // Contact Position
-                    { width: "15%", targets: 8 }, // Email
-                    { width: "10%", targets: 9 }  // Phone
-                ]
-            });
-        });
 
 
 
-        function exportToExcel() {
-            showLoadingButton('Excel');
-            try {
-                $('#example1').DataTable().button('.buttons-excel').trigger();
-                showSuccessMessage('Excel file is being generated!');
-            } catch (error) {
-                console.error('Excel export error:', error);
-                downloadTableAsCSV(); // Fallback to CSV
-                showSuccessMessage('CSV file downloaded as alternative!');
-            }
-            resetButton();
+
+
+        // Helper function to escape XML special characters
+        function escapeXML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
         }
-
-
 
         // Helper functions for user feedback
         function showLoadingButton(type) {
@@ -541,5 +496,102 @@
     </script>
 
     <!-- Export Functions -->
-    <script src="{{ URL::asset('assets/js/export-functions.js') }}"></script>
+    <script>
+        function exportToExcel() {
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            button.disabled = true;
+
+            try {
+                const dataTable = $('#example1').DataTable();
+                let excelData = [];
+
+                // Headers
+                excelData.push([
+                    '#',
+                    'Customer Name',
+                    'Customer Abb',
+                    'Customer Type',
+                    'Contact Name',
+                    'Contact Position',
+                    'Email',
+                    'Phone'
+                ]);
+
+                // Extract data from ALL rows (including paginated)
+                dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+                    const rowNode = this.node();
+                    const cells = $(rowNode).find('td');
+
+                    excelData.push([
+                        cells.eq(0).text().trim(),
+                        cells.eq(2).text().trim(),
+                        cells.eq(3).text().trim(),
+                        cells.eq(4).text().trim(),
+                        cells.eq(6).text().trim(),
+                        cells.eq(7).text().trim(),
+                        cells.eq(8).text().trim(),
+                        cells.eq(9).text().trim()
+                    ]);
+                });
+
+                // Build SpreadsheetML XML
+                let excelXML = '<?xml version="1.0" encoding="UTF-8"?>' +
+                    '<?mso-application progid="Excel.Sheet"?>' +
+                    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+                    'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<Worksheet ss:Name="Customers">' +
+                    '<Table>';
+
+                // Add header row with styling
+                excelXML += '<Row>';
+                excelData[0].forEach(header => {
+                    excelXML += '<Cell><Data ss:Type="String">' + escapeXML(header) + '</Data></Cell>';
+                });
+                excelXML += '</Row>';
+
+                // Add data rows
+                for (let i = 1; i < excelData.length; i++) {
+                    excelXML += '<Row>';
+                    excelData[i].forEach((cell, index) => {
+                        const cellValue = cell || '';
+                        excelXML += '<Cell><Data ss:Type="String">' + escapeXML(cellValue) + '</Data></Cell>';
+                    });
+                    excelXML += '</Row>';
+                }
+
+                excelXML += '</Table></Worksheet></Workbook>';
+
+                // Download
+                const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Customers_' + new Date().toISOString().split('T')[0] + '.xls';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                showSuccessMessage('Excel file downloaded successfully!');
+            } catch (error) {
+                console.error('Export error:', error);
+            } finally {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }
+        }
+
+        // Helper function to escape XML special characters
+        function escapeXML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+    </script>
 @endsection

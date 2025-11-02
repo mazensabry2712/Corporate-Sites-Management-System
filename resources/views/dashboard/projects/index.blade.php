@@ -237,12 +237,11 @@
                             <a href="{{ route('projects.export.pdf') }}" class="btn btn-sm btn-danger btn-export-pdf mr-1" target="_blank">
                                 <i class="fas fa-file-pdf"></i> PDF
                             </a>
+
                             <button onclick="exportToExcel()" class="btn btn-sm btn-success btn-export-excel mr-1">
                                 <i class="fas fa-file-excel"></i> Excel
                             </button>
-                            {{-- <button onclick="exportToCSV()" class="btn btn-sm btn-info btn-export-csv mr-1">
-                                <i class="fas fa-file-csv"></i> CSV
-                            </button> --}}
+
                             <a href="{{ route('projects.print') }}" class="btn btn-sm btn-secondary btn-export-print mr-2" target="_blank">
                                 <i class="fas fa-print"></i> Print
                             </a>
@@ -619,131 +618,7 @@
                 $('#example1').DataTable().destroy();
             }
 
-            $('#example1').DataTable({
-                dom: 'Bfrtip',
-                buttons: [{
-                        extend: 'excelHtml5',
-                        text: '<i class="fas fa-file-excel"></i> Excel',
-                        className: 'btn btn-success btn-sm d-none',
-                        title: 'Projects Report',
-                        exportOptions: {
-                            columns: ':not(:first-child):not(:nth-child(2))'
-                        }
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        text: '<i class="fas fa-file-pdf"></i> PDF',
-                        className: 'btn btn-danger btn-sm d-none',
-                        title: 'Projects Report',
-                        orientation: 'landscape',
-                        pageSize: 'A4',
-                        exportOptions: {
-                            columns: ':not(:first-child):not(:nth-child(2))'
-                        }
-                    },
-                    // {
-                    //     extend: 'csvHtml5',
-                    //     text: '<i class="fas fa-file-csv"></i> CSV',
-                    //     className: 'btn btn-info btn-sm d-none',
-                    //     title: 'Projects Report',
-                    //     exportOptions: {
-                    //         columns: ':not(:first-child):not(:nth-child(2))'
-                    //     }
-                    // },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print"></i> Print',
-                        className: 'btn btn-warning btn-sm d-none',
-                        title: 'Projects Report',
-                        exportOptions: {
-                            columns: ':not(:first-child):not(:nth-child(2))'
-                        }
-                    }
-                ],
-                responsive: false, // Disable responsive to keep single row
-                lengthChange: false,
-                autoWidth: false,
-                scrollX: true, // Enable horizontal scrolling
-                scrollCollapse: true,
-                columnDefs: [{
-                        width: "5%",
-                        targets: 0
-                    }, // #
-                    {
-                        width: "10%",
-                        targets: 1
-                    }, // Actions
-                    {
-                        width: "8%",
-                        targets: 2
-                    }, // PR Number
-                    {
-                        width: "12%",
-                        targets: 3
-                    }, // Project Name
-                    {
-                        width: "8%",
-                        targets: 4
-                    }, // Technologies
-                    {
-                        width: "8%",
-                        targets: 5
-                    }, // Vendor
-                    {
-                        width: "6%",
-                        targets: 6
-                    }, // DS
-                    {
-                        width: "10%",
-                        targets: 7
-                    }, // Customer
-                    {
-                        width: "8%",
-                        targets: 8
-                    }, // Customer PO
-                    {
-                        width: "8%",
-                        targets: 9
-                    }, // Value
-                    {
-                        width: "8%",
-                        targets: 10
-                    }, // AC Manager
-                    {
-                        width: "8%",
-                        targets: 11
-                    }, // Project Manager
-                    {
-                        width: "10%",
-                        targets: 12
-                    }, // Customer Contact
-                    {
-                        width: "6%",
-                        targets: 13
-                    }, // PO Attachment
-                    {
-                        width: "6%",
-                        targets: 14
-                    }, // EPO Attachment
-                    {
-                        width: "8%",
-                        targets: 15
-                    }, // PO Date
-                    {
-                        width: "6%",
-                        targets: 16
-                    }, // Duration
-                    {
-                        width: "8%",
-                        targets: 17
-                    }, // Deadline
-                    {
-                        width: "10%",
-                        targets: 18
-                    } // Description
-                ]
-            });
-        });
+
 
         // Export Functions with loading feedback
         function exportToPDF() {
@@ -761,17 +636,16 @@
             resetButton();
         }
 
-        function exportToExcel() {
-            showLoadingButton('Excel');
-            try {
-                $('#example1').DataTable().button('.buttons-excel').trigger();
-                showSuccessMessage('Excel file is being generated!');
-            } catch (error) {
-                console.error('Excel export error:', error);
-                downloadTableAsCSV(); // Fallback to CSV
-                showSuccessMessage('CSV file downloaded as alternative!');
-            }
-            resetButton();
+
+        // Helper function to escape XML special characters
+        function escapeXML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
         }
 
         // Print function removed - now using TCPDF PDF export with auto-print
