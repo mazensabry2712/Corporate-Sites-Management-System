@@ -32,29 +32,31 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 
 
-  Route::get('/', [AuthController::class, 'login']);
+Route::get('/', [AuthController::class, 'login']);
 
-Route::group(['middleware' => ['auth']], function() {
+Route::group(
+    ['middleware' => ['auth']],
+    function () {
 
 
 
 
         Route::resource('dashboard', controller: DashboardController::class);
-          /*Project*/
-          // Projects PDF Export (must be before resource route)
-          Route::get('project/export/pdf', [ProjectsController::class, 'exportPDF'])->name('projects.export.pdf');
-          // Projects Print View (must be before resource route)
-          Route::get('project/print', [ProjectsController::class, 'printView'])->name('projects.print');
+        /*Project*/
+        // Projects PDF Export (must be before resource route)
+        Route::get('project/export/pdf', [ProjectsController::class, 'exportPDF'])->name('projects.export.pdf');
+        // Projects Print View (must be before resource route)
+        Route::get('project/print', [ProjectsController::class, 'printView'])->name('projects.print');
 
-          Route::resource('project', controller: ProjectsController::class)->names([
-              'index' => 'projects.index',
-              'create' => 'projects.create',
-              'store' => 'projects.store',
-              'show' => 'projects.show',
-              'edit' => 'projects.edit',
-              'update' => 'projects.update',
-              'destroy' => 'projects.destroy',
-          ]);
+        Route::resource('project', controller: ProjectsController::class)->names([
+            'index' => 'projects.index',
+            'create' => 'projects.create',
+            'store' => 'projects.store',
+            'show' => 'projects.show',
+            'edit' => 'projects.edit',
+            'update' => 'projects.update',
+            'destroy' => 'projects.destroy',
+        ]);
         // Route::resource('/project/{id}', 'ProjectsController@getprojects');
 
         /*Customer*/
@@ -63,76 +65,74 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('customer/print', [CustController::class, 'printView'])->name('customer.print');
         Route::resource('customer', CustController::class);
 
-           /*AM*/
+        /*AM*/
         Route::get('am/export/pdf', [AamsController::class, 'exportPDF'])->name('am.export.pdf');
         Route::get('am/print', [AamsController::class, 'printView'])->name('am.print');
         Route::resource('am', AamsController::class);
-             /*PM*/
+        /*PM*/
         Route::get('pm/export/pdf', [PpmsController::class, 'exportPDF'])->name('pm.export.pdf');
         Route::get('pm/print', [PpmsController::class, 'printView'])->name('pm.print');
         Route::resource('pm', PpmsController::class);
-           /*Vendors */
+        /*Vendors */
         Route::get('vendors/export/pdf', [VendorsController::class, 'exportPDF'])->name('vendors.export.pdf');
         Route::get('vendors/print', [VendorsController::class, 'printView'])->name('vendors.print');
-          Route::resource('vendors', VendorsController::class);
-                 /*d/s */
+        Route::resource('vendors', VendorsController::class);
+        /*d/s */
         Route::get('ds/export/pdf', [DsController::class, 'exportPDF'])->name('ds.export.pdf');
         Route::get('ds/print', [DsController::class, 'printView'])->name('ds.print');
         Route::resource('ds', DsController::class);
         // invoice
         Route::get('invoices/export/pdf', [InvoicesController::class, 'exportPDF'])->name('invoices.export.pdf');
         Route::get('invoices/print', [InvoicesController::class, 'printView'])->name('invoices.print');
-         Route::resource('invoices', InvoicesController::class);
+        Route::resource('invoices', InvoicesController::class);
         // /*DN  */
         Route::get('dn/export/pdf', [DnController::class, 'exportPDF'])->name('dn.export.pdf');
         Route::get('dn/print', [DnController::class, 'printView'])->name('dn.print');
-             Route::resource('dn', DnController::class);
+        Route::resource('dn', DnController::class);
         //         /*CoC */
         Route::get('coc/export/pdf', [CocController::class, 'exportPDF'])->name('coc.export.pdf');
         Route::get('coc/print', [CocController::class, 'printView'])->name('coc.print');
-                 Route::resource('coc', CocController::class);
+        Route::resource('coc', CocController::class);
         // /*Project POs Form */
         Route::get('ppos/export/pdf', [PposController::class, 'exportPDF'])->name('ppos.export.pdf');
         Route::get('ppos/print', [PposController::class, 'printView'])->name('ppos.print');
-Route::resource('ppos', PposController::class);
-Route::delete('ppos/destroy', [PposController::class, 'destroy']);
-Route::get('ppos/categories/{pr_number}', [PposController::class, 'getCategoriesByProject'])->name('ppos.categories');
+        Route::resource('ppos', PposController::class);
+        Route::delete('ppos/destroy', [PposController::class, 'destroy']);
+        Route::get('ppos/categories/{pr_number}', [PposController::class, 'getCategoriesByProject'])->name('ppos.categories');
 
         // /*Project Status  */
         Route::get('pstatus/export/pdf', [PstatusController::class, 'exportPDF'])->name('pstatus.export.pdf');
         Route::get('pstatus/print', [PstatusController::class, 'printView'])->name('pstatus.print');
-                Route::resource('pstatus', PstatusController::class);
-                Route::delete('pstatus/destroy', [PstatusController::class, 'destroy']);
+        Route::resource('pstatus', PstatusController::class);
+        Route::delete('pstatus/destroy', [PstatusController::class, 'destroy']);
         // /*Project Tasks */
         Route::get('ptasks/export/pdf', [PtasksController::class, 'exportPDF'])->name('ptasks.export.pdf');
         Route::get('ptasks/print', [PtasksController::class, 'printView'])->name('ptasks.print');
-                Route::resource('ptasks', PtasksController::class);
-                Route::delete('ptasks/destroy', [PtasksController::class, 'destroy']);
+        Route::resource('ptasks', PtasksController::class);
+        Route::delete('ptasks/destroy', [PtasksController::class, 'destroy']);
         // /*Project EPO */
-                Route::get('epo/export/pdf', [PepoController::class, 'exportPDF'])->name('epo.export.pdf');
-                Route::get('epo/print', [PepoController::class, 'printView'])->name('epo.print');
-                 Route::resource('epo', PepoController::class);
+        Route::get('epo/export/pdf', [PepoController::class, 'exportPDF'])->name('epo.export.pdf');
+        Route::get('epo/print', [PepoController::class, 'printView'])->name('epo.print');
+        Route::resource('epo', PepoController::class);
 
         // /*Risks  */
-                Route::get('risks/export/pdf', [RisksController::class, 'exportPDF'])->name('risks.export.pdf');
-                Route::get('risks/print', [RisksController::class, 'printView'])->name('risks.print');
-                Route::resource('risks', RisksController::class);
-                Route::delete('risks/destroy', [RisksController::class, 'destroy']);
+        Route::get('risks/export/pdf', [RisksController::class, 'exportPDF'])->name('risks.export.pdf');
+        Route::get('risks/print', [RisksController::class, 'printView'])->name('risks.print');
+        Route::resource('risks', RisksController::class);
+        Route::delete('risks/destroy', [RisksController::class, 'destroy']);
 
         // /*Milestones  */
-                Route::get('milestones/export/pdf', [MilestonesController::class, 'exportPDF'])->name('milestones.export.pdf');
-                Route::get('milestones/print', [MilestonesController::class, 'printView'])->name('milestones.print');
-                Route::resource('milestones', MilestonesController::class);
+        Route::get('milestones/export/pdf', [MilestonesController::class, 'exportPDF'])->name('milestones.export.pdf');
+        Route::get('milestones/print', [MilestonesController::class, 'printView'])->name('milestones.print');
+        Route::resource('milestones', MilestonesController::class);
 
 
 
-    Route::resource('roles', RoleController::class);
-    Route::resource('users', UserController::class);
-    Route::resource('reports', ReportController::class);
-    Route::get('reports/export/csv', [ReportController::class, 'export'])->name('reports.export');
-    Route::post('reports/cache/clear', [ReportController::class, 'clearCache'])->name('reports.cache.clear');
-
-
+        Route::resource('roles', RoleController::class);
+        Route::resource('users', UserController::class);
+        Route::resource('reports', ReportController::class);
+        Route::get('reports/export/csv', [ReportController::class, 'export'])->name('reports.export');
+        Route::post('reports/cache/clear', [ReportController::class, 'clearCache'])->name('reports.cache.clear');
     }
 
 );
@@ -155,4 +155,4 @@ Route::get('storge/{path}', function ($path) {
     ]);
 })->where('path', '.*');
 
-Route::get('/{page}',[AdminController::class,'index']);
+Route::get('/{page}', [AdminController::class, 'index']);
