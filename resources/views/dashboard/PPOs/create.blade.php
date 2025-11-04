@@ -198,94 +198,142 @@
 
 @section('js')
     <script src="{{ URL::asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/js/select2.js') }}"></script>
+    <!-- Removed select2.js to prevent conflicts -->
 
     <script>
         $(document).ready(function() {
             console.log('✅ PPOS Create page loaded');
+            console.log('jQuery version:', $.fn.jquery);
+            console.log('Select2 available:', typeof $.fn.select2 !== 'undefined');
 
-            // Wait for Select2 to initialize, then attach event
-            setTimeout(function() {
-                console.log('🔵 Attaching PR Number change event');
+            // Initialize ALL Select2 elements on the page
+            $('.select2').select2({
+                placeholder: 'Choose one',
+                width: '100%'
+            });
 
-                // Auto-fill Project Name and Load Categories when PR Number is selected
-                // Use Select2's special event to ensure it fires after Select2 initialization
-                $('#pr_number').on('change select2:select', function() {
-                    console.log('🔔 PR Number changed!');
+            // Override specific Select2 configurations
+            $('#pr_number').select2({
+                placeholder: "Choose Project",
+                allowClear: true,
+                width: '100%'
+            });
 
-                    const selectedOption = $(this).find('option:selected');
-                    const projectName = selectedOption.data('project-name');
-                    const prNumber = $(this).val();
+            $('#category').select2({
+                placeholder: "Select PR Number first",
+                allowClear: true,
+                closeOnSelect: false,
+                width: '100%'
+            });
 
-                    console.log('Selected PR Number:', prNumber);
+            console.log('✅ Select2 initialized manually');
 
-                    // Fill Project Name
-                    if (projectName) {
-                        $('#project_name_display').val(projectName).css('color', '#495057');
-                    } else {
-                        $('#project_name_display').val('No project name available').css('color', '#6c757d');
-                    }
+            // Attach change event immediately
+            $('#pr_number').on('change', function() {
+                console.log('🔔 PR Number changed!');
 
-                    // Load Categories from EPO
-                    if (prNumber) {
-                        loadCategories(prNumber);
-                    } else {
-                        resetCategoryDropdown();
-                    }
-                });
+                const selectedOption = $(this).find('option:selected');
+                const projectName = selectedOption.data('project-name');
+                const prNumber = $(this).val();
 
-                // Initialize on page load if old value exists
-                if ($('#pr_number').val()) {
-                    $('#pr_number').trigger('change');
+                console.log('Selected PR Number ID:', prNumber);
+                console.log('Project Name:', projectName);
+
+                // Fill Project Name
+                if (projectName) {
+                    $('#project_name_display').val(projectName).css('color', '#495057');
+                } else {
+                    $('#project_name_display').val('No project name available').css('color', '#6c757d');
                 }
-            }, 500); // Wait 500ms for Select2 to initialize
+
+                // Load Categories from EPO
+                if (prNumber) {
+                    loadCategories(prNumber);
+                } else {
+                    resetCategoryDropdown();
+                }
+            });
+
+            // Initialize on page load if old value exists
+            if ($('#pr_number').val()) {
+                console.log('Old value exists, triggering change');
+                $('#pr_number').trigger('change');
+            }
 
             // Function to load categories based on PR Number
             function loadCategories(prNumber) {
-                console.log('📡 Loading categories for PR:', prNumber);
+                console.log('📡 Loading categories for Project ID:', prNumber);
 
                 // Show loading state
                 $('#category').prop('disabled', true);
-                $('#category').html('<option disabled>Loading...</option>');
+
+                // Destroy existing Select2 before updating
+                if ($('#category').data('select2')) {
+                    $('#category').select2('destroy');
+                }
+
+                $('#category').html('<option disabled selected>Loading...</option>');
 
                 $.ajax({
                     url: `/ppos/categories/${prNumber}`,
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
-                        console.log('✅ AJAX Success:', response);
+                        console.log('✅ AJAX Response:', response);
 
-                        if (response.success && response.categories.length > 0) {
+                        if (response.success && response.categories && response.categories.length > 0) {
                             let options = '';
+                            let categoryIds = [];
 
                             response.categories.forEach(function(category) {
                                 options += `<option value="${category.id}">${category.category || 'N/A'}</option>`;
-                                console.log('  ➕ Category:', category.category);
+                                categoryIds.push(category.id);
+                                console.log('  ➕ Category ID:', category.id, '- Name:', category.category);
                             });
 
                             $('#category').html(options);
                             $('#category').prop('disabled', false);
 
-                            // Re-initialize Select2 with multiple selection support
-                            if (typeof $.fn.select2 !== 'undefined') {
-                                $('#category').select2({
-                                    placeholder: 'Choose one or more categories',
-                                    allowClear: true,
-                                    closeOnSelect: false,
-                                    width: '100%'
-                                });
-                            }
+                            // Re-initialize Select2
+                            $('#category').select2({
+                                placeholder: 'Categories loaded',
+                                allowClear: true,
+                                closeOnSelect: false,
+                                width: '100%'
+                            });
 
-                            console.log(`✅ Loaded ${response.categories.length} categories for PR ${prNumber}`);
+                            // Auto-select ALL categories - Method 1: Direct val() then trigger
+                            console.log('📌 Selecting category IDs:', categoryIds);
+                            
+                            // Try multiple methods to ensure selection works
+                            $('#category').val(categoryIds);
+                            console.log('  Step 1: Set value with .val()');
+                            
+                            $('#category').trigger('change');
+                            console.log('  Step 2: Triggered change event');
+                            
+                            // Also trigger Select2's specific change event
+                            $('#category').trigger('change.select2');
+                            console.log('  Step 3: Triggered select2 change event');
+
+                            // Verify the selection
+                            setTimeout(function() {
+                                const currentVal = $('#category').val();
+                                console.log('  ✅ Final selected values:', currentVal);
+                                console.log('  ✅ Selection count:', currentVal ? currentVal.length : 0);
+                            }, 100);
+
+                            console.log(`✅ Loaded and auto-selected ${response.categories.length} categories`);
                         } else {
-                            console.log('⚠️ No categories found');
+                            console.warn('⚠️ No categories found for Project ID:', prNumber);
                             resetCategoryDropdown();
                         }
                     },
                     error: function(xhr, status, error) {
                         console.error('❌ AJAX Error:', error);
-                        console.error('Status:', status);
-                        console.error('Response:', xhr.responseText);
+                        console.error('❌ Status:', status);
+                        console.error('❌ Response Text:', xhr.responseText);
+                        console.error('❌ Status Code:', xhr.status);
                         resetCategoryDropdown();
                     }
                 });
@@ -293,8 +341,21 @@
 
             // Function to reset category dropdown
             function resetCategoryDropdown() {
+                console.log('🔄 Resetting category dropdown');
+
+                // Destroy existing Select2
+                if ($('#category').data('select2')) {
+                    $('#category').select2('destroy');
+                }
+
                 $('#category').html('<option value="">No categories available</option>');
                 $('#category').prop('disabled', true);
+
+                // Re-initialize Select2
+                $('#category').select2({
+                    placeholder: 'No categories available',
+                    allowClear: false
+                });
             }
         });
     </script>

@@ -155,4 +155,10 @@ Route::get('storge/{path}', function ($path) {
     ]);
 })->where('path', '.*');
 
+// Test route for PPO categories
+Route::middleware('auth')->get('/test-ppo-categories', function() {
+    $projects = App\Models\Project::all();
+    return view('test_ppo_categories', compact('projects'));
+});
+
 Route::get('/{page}', [AdminController::class, 'index']);

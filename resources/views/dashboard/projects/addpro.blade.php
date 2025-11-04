@@ -431,7 +431,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="po_attachment">PO Attachment</label>
-                                    <div class="drag-drop-area" id="dragDropAreaPO" onclick="if(!event.target.closest('.file-preview') && !event.target.classList.contains('remove-file')) { document.getElementById('po_attachment').click(); }">
+                                    <div class="drag-drop-area" id="dragDropAreaPO" onclick="if(!event.target.closest('.file-preview') && !event.target.classList.contains('remove-file') && !event.target.classList.contains('browse-link')) { document.getElementById('po_attachment').click(); }">
                                         <input type="file" name="po_attachment" id="po_attachment" class="d-none @error('po_attachment') is-invalid @enderror"
                                             accept=".pdf,.jpg,.jpeg,.png" />
 
@@ -440,7 +440,7 @@
                                                 <i class="fas fa-cloud-upload-alt fa-2x text-primary"></i>
                                             </div>
                                             <h5 class="drag-drop-title">Drag & Drop PO File</h5>
-                                            <p class="drag-drop-subtitle">or <span class="browse-link" onclick="document.getElementById('po_attachment').click();">click to browse</span></p>
+                                            <p class="drag-drop-subtitle">or <span class="browse-link" onclick="event.stopPropagation(); document.getElementById('po_attachment').click();">click to browse</span></p>
                                             <small class="text-muted">PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                         </div>
 
@@ -470,7 +470,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="epo_attachment">EPO Attachment</label>
-                                    <div class="drag-drop-area" id="dragDropAreaEPO" onclick="if(!event.target.closest('.file-preview') && !event.target.classList.contains('remove-file')) { document.getElementById('epo_attachment').click(); }">
+                                    <div class="drag-drop-area" id="dragDropAreaEPO" onclick="if(!event.target.closest('.file-preview') && !event.target.classList.contains('remove-file') && !event.target.classList.contains('browse-link')) { document.getElementById('epo_attachment').click(); }">
                                         <input type="file" name="epo_attachment" id="epo_attachment" class="d-none @error('epo_attachment') is-invalid @enderror"
                                             accept=".pdf,.jpg,.jpeg,.png" />
 
@@ -479,7 +479,7 @@
                                                 <i class="fas fa-cloud-upload-alt fa-2x text-success"></i>
                                             </div>
                                             <h5 class="drag-drop-title">Drag & Drop EPO File</h5>
-                                            <p class="drag-drop-subtitle">or <span class="browse-link" onclick="document.getElementById('epo_attachment').click();">click to browse</span></p>
+                                            <p class="drag-drop-subtitle">or <span class="browse-link" onclick="event.stopPropagation(); document.getElementById('epo_attachment').click();">click to browse</span></p>
                                             <small class="text-muted">PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                         </div>
 
