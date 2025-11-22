@@ -72,22 +72,22 @@ class Project extends Model
     // علاقات إضافية (Tasks, Milestones, Invoices, Risks)
     public function tasks()
     {
-        return $this->hasMany(Ptasks::class, 'pr_number', 'id');
+        return $this->hasMany(Ptasks::class, 'pr_number', 'pr_number');
     }
 
     public function milestones()
     {
-        return $this->hasMany(Milestones::class, 'pr_number', 'id');
+        return $this->hasMany(Milestones::class, 'pr_number', 'pr_number');
     }
 
     public function invoices()
     {
-        return $this->hasMany(invoices::class, 'pr_number', 'id');
+        return $this->hasMany(invoices::class, 'pr_number', 'pr_number');
     }
 
     public function risks()
     {
-        return $this->hasMany(Risks::class, 'pr_number', 'id');
+        return $this->hasMany(Risks::class, 'pr_number', 'pr_number');
     }
 
     // --------------------------------------------------------------------------------

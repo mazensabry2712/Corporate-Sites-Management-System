@@ -57,116 +57,38 @@ class DashboardController extends Controller
 
         // Initialize filtered data as empty collections
         $filteredProjects = collect();
-        $filteredTasks = collect();
-        $filteredMilestones = collect();
-        $filteredInvoices = collect();
-        $filteredRisks = collect();
         $hasFilters = false;
 
         // Check if any filters are applied
         if ($request->has('filter') && !empty(array_filter($request->filter))) {
             $hasFilters = true;
 
-            // Start with base query
-            $query = Project::query()->with(['ppms', 'aams', 'cust', 'latestStatus']);
+            // Start with base query - Load all relationships
+            $query = Project::query()->with([
+                'ppms',
+                'aams',
+                'cust',
+                'latestStatus',
+                'tasks',
+                'risks',
+                'milestones',
+                'invoices'
+            ]);
 
             // Apply manual filters
             $filters = $request->filter;
 
-            // Filter by project name
-            if (!empty($filters['project']) && $filters['project'] !== 'all') {
-                $query->where('name', 'LIKE', "%{$filters['project']}%");
+            // Filter by PR Number
+            if (!empty($filters['pr_number']) && $filters['pr_number'] !== 'all') {
+                $query->where('pr_number', $filters['pr_number']);
             }
 
-            // Filter by status
-            if (!empty($filters['status']) && $filters['status'] !== 'all') {
-                $query->whereHas('latestStatus', function ($q) use ($filters) {
-                    $q->where('status', 'LIKE', "%{$filters['status']}%");
-                });
-            }
-
-            // Filter by PM
-            if (!empty($filters['pm']) && $filters['pm'] !== 'all') {
-                $query->whereHas('ppms', function ($q) use ($filters) {
-                    $q->where('name', 'LIKE', "%{$filters['pm']}%");
-                });
-            }
-
-            // Filter by AM
-            if (!empty($filters['am']) && $filters['am'] !== 'all') {
-                $query->whereHas('aams', function ($q) use ($filters) {
-                    $q->where('name', 'LIKE', "%{$filters['am']}%");
-                });
-            }
-
-            // Filter by Customer
-            if (!empty($filters['customer']) && $filters['customer'] !== 'all') {
-                $query->whereHas('cust', function ($q) use ($filters) {
-                    $q->where('name', 'LIKE', "%{$filters['customer']}%");
-                });
+            // Filter by Project Name
+            if (!empty($filters['project_name']) && $filters['project_name'] !== 'all') {
+                $query->where('name', $filters['project_name']);
             }
 
             $filteredProjects = $query->get();
-
-            // Filter Tasks based on project filters
-            // Use pr_number field to match with project IDs
-            $projectIds = $filteredProjects->pluck('id')->toArray();
-
-            // Tasks Query
-            $tasksQuery = Ptasks::query();
-
-            if (!empty($projectIds)) {
-                $tasksQuery->whereIn('pr_number', $projectIds);
-            }
-
-            if (!empty($filters['task_status'])) {
-                $tasksQuery->where('status', $filters['task_status']);
-            }
-
-            $filteredTasks = $tasksQuery->get();
-
-            // Milestones Query
-            $milestonesQuery = Milestones::query();
-
-            if (!empty($projectIds)) {
-                $milestonesQuery->whereIn('pr_number', $projectIds);
-            }
-
-            if (!empty($filters['milestone'])) {
-                $milestonesQuery->where('status', $filters['milestone']);
-            }
-
-            $filteredMilestones = $milestonesQuery->get();
-
-            // Invoices Query
-            $invoicesQuery = invoices::query();
-
-            if (!empty($projectIds)) {
-                $invoicesQuery->whereIn('pr_number', $projectIds);
-            }
-
-            if (!empty($filters['invoice_status']) && $filters['invoice_status'] !== 'all') {
-                $invoicesQuery->where('status', 'LIKE', "%{$filters['invoice_status']}%");
-            }
-
-            $filteredInvoices = $invoicesQuery->get();
-
-            // Risks Query
-            $risksQuery = Risks::query();
-
-            if (!empty($projectIds)) {
-                $risksQuery->whereIn('pr_number', $projectIds);
-            }
-
-            if (!empty($filters['risk_level'])) {
-                $risksQuery->where('impact', $filters['risk_level']);
-            }
-
-            if (!empty($filters['risk_status'])) {
-                $risksQuery->where('status', $filters['risk_status']);
-            }
-
-            $filteredRisks = $risksQuery->get();
         }
 
         return view("admin.dashboard", compact(
@@ -194,10 +116,6 @@ class DashboardController extends Controller
             'projects',
             // Filtered results
             'filteredProjects',
-            'filteredTasks',
-            'filteredMilestones',
-            'filteredInvoices',
-            'filteredRisks',
             'hasFilters'
         ));
     }
