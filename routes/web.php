@@ -42,6 +42,9 @@ Route::group(
 
 
         Route::resource('dashboard', controller: DashboardController::class);
+        // Dashboard PDF Export
+        Route::get('dashboard/export/pdf/{prNumber}', [DashboardController::class, 'exportProjectPDF'])->name('dashboard.export.pdf');
+
         /*Project*/
         // Projects PDF Export (must be before resource route)
         Route::get('project/export/pdf', [ProjectsController::class, 'exportPDF'])->name('projects.export.pdf');

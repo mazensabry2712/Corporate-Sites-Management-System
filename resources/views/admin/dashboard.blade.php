@@ -777,7 +777,9 @@
                             </div>
                             <div id="projectInfo" class="collapse show">
                                 <div class="card-body">
+
                                     <!-- PR Number Filter -->
+
                                     <div class="form-group">
                                         <label><i class="fas fa-hashtag"></i> PR Number</label>
                                         <select name="filter[pr_number]" class="form-control select2"
@@ -796,7 +798,7 @@
                                     </div>
 
                                     <!-- Project Name Filter -->
-                                    <div class="form-group">
+                                    {{-- <div class="form-group">
                                         <label><i class="fas fa-briefcase"></i> Project Name</label>
                                         <select name="filter[project_name]" class="form-control select2"
                                             data-placeholder="-- Select Project Name --">
@@ -811,7 +813,10 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                    </div>
+                                    </div> --}}
+
+
+
                                 </div>
                             </div>
                         </div>
@@ -888,6 +893,11 @@
                                                 $milestonesDone = $project->milestones->whereIn('status', ['Completed', 'completed', 'on track'])->count();
                                                 $totalInvoices = $project->invoices->count();
                                                 $invoicesPaid = $project->invoices->whereIn('status', ['paid', 'Paid'])->count();
+                                                $assignedNames = $project->tasks->pluck('assigned')->filter()->unique()->implode('|');
+                                                $riskNames = $project->risks->pluck('risk')->filter()->unique()->implode('|');
+                                                $closedRisks = $project->risks->whereIn('status', ['closed'])->count();
+                                                $milestoneNames = $project->milestones->pluck('milestone')->filter()->unique()->implode('|');
+                                                $invoiceNumbers = $project->invoices->pluck('invoice_number')->filter()->unique()->implode('|');
                                             @endphp
 
                                             <div id="progress-section-{{ $project->id }}" class="mb-4" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 25px; border-radius: 15px; box-shadow: 0 3px 20px rgba(0,0,0,0.1); border: 1px solid #e9ecef;">
@@ -899,7 +909,7 @@
                                                         <small class="text-muted">Task completion status</small>
                                                     </div>
                                                     <div class="text-right d-flex align-items-center" style="gap: 10px;">
-                                                        <button onclick="printProgress('{{ addslashes($project->name) }}', '{{ $project->pr_number }}', '{{ $project->cust->name ?? 'N/A' }}', '{{ $project->ppms->name ?? 'N/A' }}', '{{ number_format($project->value ?? 0, 2) }}', '{{ $project->customer_po_date ?? 'N/A' }}', {{ $completedTasks }}, {{ $totalTasks }}, {{ $progress }}, {{ $totalTasksCount }}, {{ $tasksCompleted }}, {{ $totalRisks }}, {{ $highRisks }}, {{ $totalMilestones }}, {{ $milestonesDone }}, {{ $totalInvoices }}, {{ $invoicesPaid }})"
+                                                        <button onclick="printProgress('{{ addslashes($project->name) }}', '{{ $project->pr_number }}', '{{ $project->cust->name ?? 'N/A' }}', '{{ $project->ppms->name ?? 'N/A' }}', '{{ number_format($project->value ?? 0, 2) }}', '{{ $project->customer_po_date ?? 'N/A' }}', {{ $completedTasks }}, {{ $totalTasks }}, {{ $progress }}, {{ $totalTasksCount }}, {{ $tasksCompleted }}, {{ $totalRisks }}, {{ $highRisks }}, {{ $totalMilestones }}, {{ $milestonesDone }}, {{ $totalInvoices }}, {{ $invoicesPaid }}, '{{ $assignedNames }}', '{{ $riskNames }}', {{ $closedRisks }}, '{{ $milestoneNames }}', '{{ $invoiceNumbers }}')"
                                                                 class="btn btn-sm no-print"
                                                                 style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
                                                                        color: white;
@@ -913,7 +923,7 @@
                                                                        transition: all 0.3s ease;">
                                                             <i class="fas fa-print mr-1"></i> Print
                                                         </button>
-                                                        <button onclick="exportToPDF('{{ addslashes($project->name) }}', '{{ $project->pr_number }}', '{{ $project->cust->name ?? 'N/A' }}', '{{ $project->ppms->name ?? 'N/A' }}', '{{ number_format($project->value ?? 0, 2) }}', '{{ $project->customer_po_date ?? 'N/A' }}', {{ $completedTasks }}, {{ $totalTasks }}, {{ $progress }}, {{ $totalTasksCount }}, {{ $tasksCompleted }}, {{ $totalRisks }}, {{ $highRisks }}, {{ $totalMilestones }}, {{ $milestonesDone }}, {{ $totalInvoices }}, {{ $invoicesPaid }})"
+                                                        <a href="{{ route('dashboard.export.pdf', $project->pr_number) }}"
                                                                 class="btn btn-sm no-print"
                                                                 style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
                                                                        color: white;
@@ -924,9 +934,11 @@
                                                                        font-size: 14px;
                                                                        box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
                                                                        cursor: pointer;
-                                                                       transition: all 0.3s ease;">
+                                                                       transition: all 0.3s ease;
+                                                                       text-decoration: none;
+                                                                       display: inline-block;">
                                                             <i class="fas fa-file-pdf mr-1"></i> PDF
-                                                        </button>
+                                                        </a>
                                                         <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
                                                                     color: white;
                                                                     font-size: 24px;
@@ -1007,12 +1019,22 @@
                                                 <div class="col-md-3 col-sm-6 mb-3">
                                                     <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <div>
-                                                                <small style="opacity: 0.9;">Tasks</small>
-                                                                <h3 class="mb-0">{{ $project->tasks->count() }}</h3>
-                                                                <small style="opacity: 0.8;">{{ $project->tasks->whereIn('status', ['Completed', 'completed'])->count() }} Completed</small>
+                                                            <div style="width: 100%;">
+                                                                <small style="opacity: 0.9;">Tasks Assigned To</small>
+                                                                <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
+                                                                    @php
+                                                                        $assignedNames = $project->tasks->pluck('assigned')->filter()->unique();
+                                                                    @endphp
+                                                                    @if($assignedNames->count() > 0)
+                                                                        @foreach($assignedNames as $name)
+                                                                            <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $name }}</div>
+                                                                        @endforeach
+                                                                    @else
+                                                                        <div style="opacity: 0.7;">No tasks</div>
+                                                                    @endif
+                                                                </div>
+                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->tasks->whereIn('status', ['Completed', 'completed'])->count() }}/{{ $project->tasks->count() }} Completed</small>
                                                             </div>
-                                                            <i class="fas fa-clipboard-list" style="font-size: 2.5rem; opacity: 0.3;"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1021,12 +1043,22 @@
                                                 <div class="col-md-3 col-sm-6 mb-3">
                                                     <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <div>
-                                                                <small style="opacity: 0.9;">Risks</small>
-                                                                <h3 class="mb-0">{{ $project->risks->count() }}</h3>
-                                                                <small style="opacity: 0.8;">{{ $project->risks->whereIn('impact', ['High', 'high'])->count() }} High</small>
+                                                            <div style="width: 100%;">
+                                                                <small style="opacity: 0.9;">Risk/Issue</small>
+                                                                <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
+                                                                    @php
+                                                                        $riskNames = $project->risks->pluck('risk')->filter()->unique();
+                                                                    @endphp
+                                                                    @if($riskNames->count() > 0)
+                                                                        @foreach($riskNames as $risk)
+                                                                            <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $risk }}</div>
+                                                                        @endforeach
+                                                                    @else
+                                                                        <div style="opacity: 0.7;">No risks</div>
+                                                                    @endif
+                                                                </div>
+                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->risks->whereIn('status', ['closed'])->count() }}/{{ $project->risks->count() }} Closed</small>
                                                             </div>
-                                                            <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; opacity: 0.3;"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1035,12 +1067,22 @@
                                                 <div class="col-md-3 col-sm-6 mb-3">
                                                     <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <div>
-                                                                <small style="opacity: 0.9;">Milestones</small>
-                                                                <h3 class="mb-0">{{ $project->milestones->count() }}</h3>
-                                                                <small style="opacity: 0.8;">{{ $project->milestones->whereIn('status', ['Completed', 'completed', 'on track'])->count() }} Done</small>
+                                                            <div style="width: 100%;">
+                                                                <small style="opacity: 0.9;">Milestone</small>
+                                                                <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
+                                                                    @php
+                                                                        $milestoneNames = $project->milestones->pluck('milestone')->filter()->unique();
+                                                                    @endphp
+                                                                    @if($milestoneNames->count() > 0)
+                                                                        @foreach($milestoneNames as $milestone)
+                                                                            <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $milestone }}</div>
+                                                                        @endforeach
+                                                                    @else
+                                                                        <div style="opacity: 0.7;">No milestones</div>
+                                                                    @endif
+                                                                </div>
+                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->milestones->whereIn('status', ['Completed', 'completed', 'on track'])->count() }}/{{ $project->milestones->count() }} Done</small>
                                                             </div>
-                                                            <i class="fas fa-flag-checkered" style="font-size: 2.5rem; opacity: 0.3;"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1049,12 +1091,22 @@
                                                 <div class="col-md-3 col-sm-6 mb-3">
                                                     <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <div>
-                                                                <small style="opacity: 0.9;">Invoices</small>
-                                                                <h3 class="mb-0">{{ $project->invoices->count() }}</h3>
-                                                                <small style="opacity: 0.8;">{{ $project->invoices->whereIn('status', ['paid', 'Paid'])->count() }} Paid</small>
+                                                            <div style="width: 100%;">
+                                                                <small style="opacity: 0.9;">Invoice Number</small>
+                                                                <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
+                                                                    @php
+                                                                        $invoiceNumbers = $project->invoices->pluck('invoice_number')->filter()->unique();
+                                                                    @endphp
+                                                                    @if($invoiceNumbers->count() > 0)
+                                                                        @foreach($invoiceNumbers as $invoice)
+                                                                            <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $invoice }}</div>
+                                                                        @endforeach
+                                                                    @else
+                                                                        <div style="opacity: 0.7;">No invoices</div>
+                                                                    @endif
+                                                                </div>
+                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->invoices->whereIn('status', ['paid', 'Paid'])->count() }}/{{ $project->invoices->count() }} Paid</small>
                                                             </div>
-                                                            <i class="fas fa-file-invoice-dollar" style="font-size: 2.5rem; opacity: 0.3;"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1190,7 +1242,7 @@
         }
 
         // Print Progress Function (للطباعة المباشرة)
-        function printProgress(projectName, prNumber, customer, pm, value, poDate, completed, total, progress, totalTasksCount, tasksCompleted, totalRisks, highRisks, totalMilestones, milestonesDone, totalInvoices, invoicesPaid) {
+        function printProgress(projectName, prNumber, customer, pm, value, poDate, completed, total, progress, totalTasksCount, tasksCompleted, totalRisks, highRisks, totalMilestones, milestonesDone, totalInvoices, invoicesPaid, assignedNames, riskNames, closedRisks, milestoneNames, invoiceNumbers) {
             const printWindow = window.open('', '_blank', 'width=1200,height=800');
 
             const now = new Date();
@@ -1204,7 +1256,7 @@
                 minute: '2-digit'
             });
 
-            printWindow.document.write(generateProgressHTML(projectName, prNumber, customer, pm, value, poDate, completed, total, progress, totalTasksCount, tasksCompleted, totalRisks, highRisks, totalMilestones, milestonesDone, totalInvoices, invoicesPaid, dateStr, timeStr, false));
+            printWindow.document.write(generateProgressHTML(projectName, prNumber, customer, pm, value, poDate, completed, total, progress, totalTasksCount, tasksCompleted, totalRisks, highRisks, totalMilestones, milestonesDone, totalInvoices, invoicesPaid, assignedNames, riskNames, closedRisks, milestoneNames, invoiceNumbers, dateStr, timeStr, false));
             printWindow.document.close();
 
             printWindow.onload = function() {
@@ -1218,13 +1270,19 @@
             };
         }
 
-        // Export to PDF Function (للحفظ كـ PDF مباشرة)
-        function exportToPDF(projectName, prNumber, customer, pm, value, poDate, completed, total, progress, totalTasksCount, tasksCompleted, totalRisks, highRisks, totalMilestones, milestonesDone, totalInvoices, invoicesPaid) {
-            // التحقق من وجود html2pdf
-            if (typeof html2pdf === 'undefined') {
-                alert('Loading PDF library... Please try again in a moment.');
+        // PDF export now handled by server-side TCPDF (see route: dashboard.export.pdf)
+        // Old exportToPDF function removed - using Laravel Controller instead
+
+        // Generate HTML for Progress Report (for Print functionality only)
+        function generateProgressHTML(projectName, prNumber, customer, pm, value, poDate, completed, total, progress, totalTasksCount, tasksCompleted, totalRisks, highRisks, totalMilestones, milestonesDone, totalInvoices, invoicesPaid, dateStr, timeStr, isPDF) {
+            // التحقق من وجود html2pdf (not used anymore)
+            if (false && typeof html2pdf === 'undefined') {
+                alert('جاري تحميل مكتبة PDF... الرجاء المحاولة مرة أخرى بعد لحظات.');
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+                script.onload = function() {
+                    alert('تم تحميل المكتبة. يمكنك الآن تصدير PDF.');
+                };
                 document.head.appendChild(script);
                 return;
             }
@@ -1240,147 +1298,170 @@
                 minute: '2-digit'
             });
 
-            // إنشاء عنصر مؤقت بمحتوى HTML كامل
+            // Create temporary element with full HTML content
             const tempDiv = document.createElement('div');
             tempDiv.style.position = 'absolute';
             tempDiv.style.left = '-9999px';
             tempDiv.style.width = '210mm';
             tempDiv.style.backgroundColor = 'white';
-            tempDiv.style.padding = '10mm';
-            tempDiv.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            tempDiv.style.padding = '0';
+            tempDiv.style.margin = '0';
 
             tempDiv.innerHTML = `
-                <div style="max-width: 210mm; background: white; padding: 10mm;">
-                    <div style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 3px solid #28a745;">
-                        <h1 style="color: #2c3e50; font-size: 20px; margin: 0 0 4px 0; font-weight: 700;">
+                <div style="width: 210mm; background: white; padding: 15mm; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                    <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #28a745;">
+                        <h1 style="color: #2c3e50; font-size: 22px; margin: 0 0 5px 0; font-weight: 700;">
                             📊 Project Progress Report
                         </h1>
-                        <div style="color: #6c757d; font-size: 11px;">Task Completion Analysis</div>
+                        <div style="color: #6c757d; font-size: 12px;">Task Completion Analysis</div>
                     </div>
 
-                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; border-left: 4px solid #007bff;">
-                        <h2 style="color: #2c3e50; font-size: 16px; margin: 0 0 4px 0; font-weight: 700;">${projectName}</h2>
-                        <span style="background: #007bff; color: white; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;">PR# ${prNumber}</span>
+                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #007bff;">
+                        <h2 style="color: #2c3e50; font-size: 18px; margin: 0 0 5px 0; font-weight: 700;">${projectName}</h2>
+                        <span style="background: #007bff; color: white; padding: 4px 12px; border-radius: 5px; font-size: 12px; font-weight: 600; display: inline-block;">PR# ${prNumber}</span>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-                        <div style="background: #f8f9fa; border-radius: 6px; padding: 8px 10px; border: 1px solid #e9ecef; display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">🏢</div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 9px; color: #6c757d; text-transform: uppercase; margin-bottom: 2px; font-weight: 600;">CUSTOMER</div>
-                                <div style="font-size: 11px; color: #2c3e50; font-weight: 700;">${customer}</div>
-                            </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 10px 12px; border: 1px solid #e9ecef;">
+                            <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 16px; margin-bottom: 8px;">🏢</div>
+                            <div style="font-size: 10px; color: #6c757d; text-transform: uppercase; margin-bottom: 3px; font-weight: 600;">CUSTOMER</div>
+                            <div style="font-size: 12px; color: #2c3e50; font-weight: 700;">${customer}</div>
                         </div>
-                        <div style="background: #f8f9fa; border-radius: 6px; padding: 8px 10px; border: 1px solid #e9ecef; display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">👔</div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 9px; color: #6c757d; text-transform: uppercase; margin-bottom: 2px; font-weight: 600;">PROJECT MANAGER</div>
-                                <div style="font-size: 11px; color: #2c3e50; font-weight: 700;">${pm}</div>
-                            </div>
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 10px 12px; border: 1px solid #e9ecef;">
+                            <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 16px; margin-bottom: 8px;">👔</div>
+                            <div style="font-size: 10px; color: #6c757d; text-transform: uppercase; margin-bottom: 3px; font-weight: 600;">PROJECT MANAGER</div>
+                            <div style="font-size: 12px; color: #2c3e50; font-weight: 700;">${pm}</div>
                         </div>
-                        <div style="background: #f8f9fa; border-radius: 6px; padding: 8px 10px; border: 1px solid #e9ecef; display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">💰</div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 9px; color: #6c757d; text-transform: uppercase; margin-bottom: 2px; font-weight: 600;">PROJECT VALUE</div>
-                                <div style="font-size: 11px; color: #2c3e50; font-weight: 700;">${value} SAR</div>
-                            </div>
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 10px 12px; border: 1px solid #e9ecef;">
+                            <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 16px; margin-bottom: 8px;">💰</div>
+                            <div style="font-size: 10px; color: #6c757d; text-transform: uppercase; margin-bottom: 3px; font-weight: 600;">PROJECT VALUE</div>
+                            <div style="font-size: 12px; color: #2c3e50; font-weight: 700;">${value} SAR</div>
                         </div>
-                        <div style="background: #f8f9fa; border-radius: 6px; padding: 8px 10px; border: 1px solid #e9ecef; display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">📅</div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 9px; color: #6c757d; text-transform: uppercase; margin-bottom: 2px; font-weight: 600;">PO DATE</div>
-                                <div style="font-size: 11px; color: #2c3e50; font-weight: 700;">${poDate}</div>
-                            </div>
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 10px 12px; border: 1px solid #e9ecef;">
+                            <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 16px; margin-bottom: 8px;">📅</div>
+                            <div style="font-size: 10px; color: #6c757d; text-transform: uppercase; margin-bottom: 3px; font-weight: 600;">PO DATE</div>
+                            <div style="font-size: 12px; color: #2c3e50; font-weight: 700;">${poDate}</div>
                         </div>
                     </div>
 
-                    <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e9ecef; margin-bottom: 10px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <div style="font-size: 14px; color: #2c3e50; font-weight: 700;">📋 Progress Overview</div>
-                            <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; font-size: 18px; font-weight: 700; padding: 6px 16px; border-radius: 8px;">${progress}%</div>
+                    <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #e9ecef; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div style="font-size: 16px; color: #2c3e50; font-weight: 700;">📋 Progress Overview</div>
+                            <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; font-size: 20px; font-weight: 700; padding: 8px 18px; border-radius: 10px;">${progress}%</div>
                         </div>
-                        <div style="background: #e9ecef; height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 12px;">
-                            <div style="background: linear-gradient(90deg, #28a745 0%, #34ce57 100%); height: 100%; width: ${progress}%; border-radius: 10px;"></div>
+                        <div style="background: #e9ecef; height: 24px; border-radius: 12px; overflow: hidden; margin-bottom: 15px;">
+                            <div style="background: linear-gradient(90deg, #28a745 0%, #34ce57 100%); height: 100%; width: ${progress}%; border-radius: 12px;"></div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 10px; border-radius: 6px; border-left: 3px solid #28a745;">
-                                <div style="font-size: 9px; font-weight: 600; color: #155724; margin-bottom: 4px; text-transform: uppercase;">✅ COMPLETED TASKS</div>
-                                <div style="font-size: 24px; font-weight: 700; color: #28a745;">${completed}</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 12px; border-radius: 8px; border-left: 4px solid #28a745;">
+                                <div style="font-size: 10px; font-weight: 600; color: #155724; margin-bottom: 5px; text-transform: uppercase;">✅ COMPLETED TASKS</div>
+                                <div style="font-size: 28px; font-weight: 700; color: #28a745;">${completed}</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, #e2e3e5 0%, #d6d8db 100%); padding: 10px; border-radius: 6px; border-left: 3px solid #6c757d;">
-                                <div style="font-size: 9px; font-weight: 600; color: #495057; margin-bottom: 4px; text-transform: uppercase;">📝 TOTAL TASKS</div>
-                                <div style="font-size: 24px; font-weight: 700; color: #495057;">${total}</div>
+                            <div style="background: linear-gradient(135deg, #e2e3e5 0%, #d6d8db 100%); padding: 12px; border-radius: 8px; border-left: 4px solid #6c757d;">
+                                <div style="font-size: 10px; font-weight: 600; color: #495057; margin-bottom: 5px; text-transform: uppercase;">📝 TOTAL TASKS</div>
+                                <div style="font-size: 28px; font-weight: 700; color: #495057;">${total}</div>
                             </div>
                         </div>
                     </div>
 
-                    <div style="margin-top: 10px;">
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px;">
-                            <h3 style="margin: 0; font-size: 13px;">📊 Project Statistics</h3>
+                    <div style="margin-bottom: 15px;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+                            <h3 style="margin: 0; font-size: 15px;">📊 Project Statistics</h3>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
-                            <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 10px; border-radius: 6px;">
-                                <div style="font-size: 9px; opacity: 0.9; margin-bottom: 3px;">Tasks</div>
-                                <div style="font-size: 20px; font-weight: 700;">${totalTasksCount}</div>
-                                <div style="font-size: 9px; opacity: 0.8; margin-top: 3px;">${tasksCompleted} Completed</div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                            <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 10px; opacity: 0.9; margin-bottom: 4px;">Tasks</div>
+                                <div style="font-size: 24px; font-weight: 700;">${totalTasksCount}</div>
+                                <div style="font-size: 10px; opacity: 0.8; margin-top: 4px;">${tasksCompleted} Completed</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 10px; border-radius: 6px;">
-                                <div style="font-size: 9px; opacity: 0.9; margin-bottom: 3px;">Risks</div>
-                                <div style="font-size: 20px; font-weight: 700;">${totalRisks}</div>
-                                <div style="font-size: 9px; opacity: 0.8; margin-top: 3px;">${highRisks} High</div>
+                            <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 10px; opacity: 0.9; margin-bottom: 4px;">Risks</div>
+                                <div style="font-size: 24px; font-weight: 700;">${totalRisks}</div>
+                                <div style="font-size: 10px; opacity: 0.8; margin-top: 4px;">${highRisks} High</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: white; padding: 10px; border-radius: 6px;">
-                                <div style="font-size: 9px; opacity: 0.9; margin-bottom: 3px;">Milestones</div>
-                                <div style="font-size: 20px; font-weight: 700;">${totalMilestones}</div>
-                                <div style="font-size: 9px; opacity: 0.8; margin-top: 3px;">${milestonesDone} Done</div>
+                            <div style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 10px; opacity: 0.9; margin-bottom: 4px;">Milestones</div>
+                                <div style="font-size: 24px; font-weight: 700;">${totalMilestones}</div>
+                                <div style="font-size: 10px; opacity: 0.8; margin-top: 4px;">${milestonesDone} Done</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 10px; border-radius: 6px;">
-                                <div style="font-size: 9px; opacity: 0.9; margin-bottom: 3px;">Invoices</div>
-                                <div style="font-size: 20px; font-weight: 700;">${totalInvoices}</div>
-                                <div style="font-size: 9px; opacity: 0.8; margin-top: 3px;">${invoicesPaid} Paid</div>
+                            <div style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 10px; opacity: 0.9; margin-bottom: 4px;">Invoices</div>
+                                <div style="font-size: 24px; font-weight: 700;">${totalInvoices}</div>
+                                <div style="font-size: 10px; opacity: 0.8; margin-top: 4px;">${invoicesPaid} Paid</div>
                             </div>
                         </div>
                     </div>
 
-                    <div style="margin-top: 12px; padding-top: 8px; border-top: 2px solid #dee2e6; text-align: center;">
-                        <div style="color: #6c757d; font-size: 9px; margin-bottom: 3px;"><strong>MDSJEDPR</strong> - Corporate Sites Management System</div>
-                        <div style="color: #495057; font-size: 8px; font-style: italic;">Report generated on ${dateStr} at ${timeStr}</div>
+                    <div style="margin-top: 15px; padding-top: 10px; border-top: 2px solid #dee2e6; text-align: center;">
+                        <div style="color: #6c757d; font-size: 10px; margin-bottom: 4px;"><strong>MDSJEDPR</strong> - Corporate Sites Management System</div>
+                        <div style="color: #495057; font-size: 9px; font-style: italic;">Report generated on ${dateStr} at ${timeStr}</div>
                     </div>
                 </div>
             `;
 
             document.body.appendChild(tempDiv);
 
-            // إعدادات PDF
+            // Enhanced PDF settings
             const opt = {
-                margin: 0,
-                filename: `Project_${prNumber}_Report.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
+                margin: [5, 5, 5, 5],
+                filename: `Project_PR${prNumber}_${projectName.replace(/\s+/g, '_')}.pdf`,
+                image: {
+                    type: 'jpeg',
+                    quality: 0.95
+                },
                 html2canvas: {
                     scale: 2,
                     useCORS: true,
                     letterRendering: true,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    windowWidth: 794, // A4 width in pixels at 96 DPI
+                    windowHeight: 1123 // A4 height in pixels at 96 DPI
                 },
                 jsPDF: {
                     unit: 'mm',
                     format: 'a4',
-                    orientation: 'portrait'
+                    orientation: 'portrait',
+                    compress: true
                 }
             };
 
-            // توليد وتحميل PDF
-            html2pdf().set(opt).from(tempDiv).save().then(function() {
-                document.body.removeChild(tempDiv);
-            }).catch(function(error) {
-                console.error('PDF Error:', error);
-                document.body.removeChild(tempDiv);
-                alert('حدث خطأ في توليد PDF. الرجاء المحاولة مرة أخرى.');
-            });
+            // Display loading message
+            const loadingMsg = document.createElement('div');
+            loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px 40px; border-radius: 10px; z-index: 10000; font-size: 16px;';
+            loadingMsg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            document.body.appendChild(loadingMsg);
+
+            // Generate and download PDF
+            html2pdf()
+                .set(opt)
+                .from(tempDiv)
+                .save()
+                .then(function() {
+                    // Remove temporary elements
+                    if (tempDiv && tempDiv.parentNode) {
+                        document.body.removeChild(tempDiv);
+                    }
+                    if (loadingMsg && loadingMsg.parentNode) {
+                        document.body.removeChild(loadingMsg);
+                    }
+                    console.log('✅ PDF created successfully');
+                })
+                .catch(function(error) {
+                    console.error('❌ PDF Error:', error);
+                    // Remove temporary elements even in case of error
+                    if (tempDiv && tempDiv.parentNode) {
+                        document.body.removeChild(tempDiv);
+                    }
+                    if (loadingMsg && loadingMsg.parentNode) {
+                        document.body.removeChild(loadingMsg);
+                    }
+                    alert('An error occurred while generating PDF:\n' + error.message + '\n\nPlease try again.');
+                });
         }
 
         // Generate HTML for Progress Report
-        function generateProgressHTML(projectName, prNumber, customer, pm, value, poDate, completed, total, progress, totalTasksCount, tasksCompleted, totalRisks, highRisks, totalMilestones, milestonesDone, totalInvoices, invoicesPaid, dateStr, timeStr, isPDF) {
+        function generateProgressHTML(projectName, prNumber, customer, pm, value, poDate, completed, total, progress, totalTasksCount, tasksCompleted, totalRisks, highRisks, totalMilestones, milestonesDone, totalInvoices, invoicesPaid, assignedNames, riskNames, closedRisks, milestoneNames, invoiceNumbers, dateStr, timeStr, isPDF) {
             return `
                 <!DOCTYPE html>
                 <html>
@@ -1438,28 +1519,28 @@
                         }
 
                         .project-header {
-                            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                            padding: 10px 15px;
-                            border-radius: 6px;
-                            margin-bottom: 12px;
-                            border-left: 4px solid #007bff;
+                            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+                            padding: 15px 20px;
+                            border-radius: 10px;
+                            margin-bottom: 15px;
+                            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
                         }
 
                         .project-header h2 {
-                            color: #2c3e50;
-                            font-size: 16px;
-                            margin: 0 0 4px 0;
+                            color: white;
+                            font-size: 18px;
+                            margin: 0 0 5px 0;
                             font-weight: 700;
                         }
 
                         .project-header .pr-badge {
                             display: inline-block;
-                            background: #007bff;
-                            color: white;
-                            padding: 3px 10px;
-                            border-radius: 4px;
-                            font-weight: 600;
-                            font-size: 11px;
+                            background: white;
+                            color: #007bff;
+                            padding: 4px 12px;
+                            border-radius: 5px;
+                            font-weight: 700;
+                            font-size: 12px;
                         }
 
                         .project-details {
@@ -1469,67 +1550,65 @@
                         .details-grid {
                             display: grid;
                             grid-template-columns: 1fr 1fr 1fr 1fr;
-                            gap: 8px;
+                            gap: 10px;
                         }
 
                         .detail-item {
-                            background: #f8f9fa;
-                            border-radius: 6px;
-                            padding: 8px 10px;
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                            border: 1px solid #e9ecef;
+                            background: white;
+                            border-radius: 8px;
+                            padding: 12px 15px;
+                            text-align: center;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                         }
 
-                        .detail-icon {
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 6px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: white;
-                            font-size: 14px;
-                            flex-shrink: 0;
+                        .detail-item.customer {
+                            border-left: 5px solid #007bff;
                         }
 
-                        .detail-content {
-                            flex: 1;
+                        .detail-item.pm {
+                            border-left: 5px solid #28a745;
+                        }
+
+                        .detail-item.value {
+                            border-left: 5px solid #ffc107;
+                        }
+
+                        .detail-item.po-date {
+                            border-left: 5px solid #dc3545;
                         }
 
                         .detail-label {
-                            font-size: 9px;
+                            font-size: 10px;
                             color: #6c757d;
                             text-transform: uppercase;
-                            letter-spacing: 0.3px;
-                            margin-bottom: 2px;
+                            letter-spacing: 0.5px;
+                            margin-bottom: 5px;
                             font-weight: 600;
                         }
 
                         .detail-value {
-                            font-size: 11px;
+                            font-size: 13px;
                             color: #2c3e50;
                             font-weight: 700;
                         }
 
                         .progress-section {
                             background: white;
-                            padding: 12px;
-                            border-radius: 8px;
-                            border: 2px solid #e9ecef;
-                            margin-bottom: 10px;
+                            padding: 0;
+                            border-radius: 0;
+                            border: none;
+                            margin-bottom: 15px;
                         }
 
                         .progress-header-row {
                             display: flex;
                             justify-content: space-between;
                             align-items: center;
-                            margin-bottom: 10px;
+                            margin-bottom: 15px;
                         }
 
                         .progress-title-text {
-                            font-size: 14px;
+                            font-size: 16px;
                             color: #2c3e50;
                             font-weight: 700;
                         }
@@ -1537,42 +1616,47 @@
                         .progress-badge {
                             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
                             color: white;
-                            font-size: 18px;
+                            font-size: 28px;
                             font-weight: 700;
-                            padding: 6px 16px;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+                            padding: 10px 25px;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+                            min-width: 120px;
+                            text-align: center;
                         }
 
                         .progress-bar-wrapper {
                             background: #e9ecef;
-                            height: 20px;
-                            border-radius: 10px;
+                            height: 35px;
+                            border-radius: 20px;
                             overflow: hidden;
-                            margin-bottom: 12px;
+                            margin-bottom: 15px;
                             position: relative;
+                            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
                         }
 
                         .progress-bar-inner {
                             background: linear-gradient(90deg, #28a745 0%, #34ce57 100%);
                             height: 100%;
-                            border-radius: 10px;
+                            border-radius: 20px;
                             width: ${progress}%;
-                            transition: width 0.5s ease;
+                            transition: width 0.6s ease;
+                            box-shadow: 0 2px 10px rgba(40, 167, 69, 0.5);
                         }
 
                         .stats-grid {
                             display: grid;
                             grid-template-columns: 1fr 1fr;
-                            gap: 10px;
-                            margin-top: 10px;
+                            gap: 15px;
+                            margin-top: 0;
                         }
 
                         .stat-card {
-                            padding: 10px;
-                            border-radius: 6px;
-                            border-left: 3px solid;
+                            padding: 20px;
+                            border-radius: 12px;
+                            border-left: 5px solid;
                             position: relative;
+                            box-shadow: 0 3px 12px rgba(0,0,0,0.12);
                         }
 
                         .stat-card.completed {
@@ -1586,11 +1670,11 @@
                         }
 
                         .stat-label {
-                            font-size: 9px;
-                            font-weight: 600;
-                            margin-bottom: 4px;
+                            font-size: 11px;
+                            font-weight: 700;
+                            margin-bottom: 8px;
                             text-transform: uppercase;
-                            letter-spacing: 0.3px;
+                            letter-spacing: 0.5px;
                         }
 
                         .stat-card.completed .stat-label {
@@ -1602,7 +1686,7 @@
                         }
 
                         .stat-number {
-                            font-size: 24px;
+                            font-size: 36px;
                             font-weight: 700;
                             line-height: 1;
                         }
@@ -1616,52 +1700,46 @@
                         }
 
                         .additional-stats {
-                            margin-top: 10px;
+                            margin-top: 20px;
                         }
 
                         .stats-title {
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            color: white;
-                            padding: 8px 12px;
-                            border-radius: 6px;
-                            margin-bottom: 10px;
-                        }
-
-                        .stats-title h3 {
-                            margin: 0;
-                            font-size: 13px;
-                            display: flex;
-                            align-items: center;
+                            display: none;
                         }
 
                         .additional-stats-grid {
                             display: grid;
                             grid-template-columns: 1fr 1fr 1fr 1fr;
-                            gap: 8px;
+                            gap: 12px;
                         }
 
                         .stat-box {
                             color: white;
-                            padding: 10px;
-                            border-radius: 6px;
+                            padding: 20px 15px;
+                            border-radius: 12px;
+                            text-align: center;
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
                         }
 
                         .stat-box-header {
-                            font-size: 9px;
-                            opacity: 0.9;
-                            margin-bottom: 3px;
+                            font-size: 11px;
+                            opacity: 0.95;
+                            margin-bottom: 8px;
+                            font-weight: 600;
+                            text-transform: uppercase;
                         }
 
                         .stat-box-number {
-                            font-size: 20px;
+                            font-size: 32px;
                             font-weight: 700;
                             line-height: 1;
+                            margin: 5px 0;
                         }
 
                         .stat-box-footer {
-                            font-size: 9px;
-                            opacity: 0.8;
-                            margin-top: 3px;
+                            font-size: 10px;
+                            opacity: 0.9;
+                            margin-top: 5px;
                         }
 
                         .report-footer {
@@ -1713,41 +1791,21 @@
 
                         <div class="project-details">
                             <div class="details-grid">
-                                <div class="detail-item">
-                                    <div class="detail-icon" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
-                                        <i class="fas fa-building"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">Customer</div>
-                                        <div class="detail-value">${customer}</div>
-                                    </div>
+                                <div class="detail-item customer">
+                                    <div class="detail-label"><i class="fas fa-building"></i> Customer</div>
+                                    <div class="detail-value">${customer}</div>
                                 </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
-                                        <i class="fas fa-user-tie"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">Project Manager</div>
-                                        <div class="detail-value">${pm}</div>
-                                    </div>
+                                <div class="detail-item pm">
+                                    <div class="detail-label"><i class="fas fa-user-tie"></i> Project Manager</div>
+                                    <div class="detail-value">${pm}</div>
                                 </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);">
-                                        <i class="fas fa-dollar-sign"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">Project Value</div>
-                                        <div class="detail-value">${value} SAR</div>
-                                    </div>
+                                <div class="detail-item value">
+                                    <div class="detail-label"><i class="fas fa-dollar-sign"></i> Project Value</div>
+                                    <div class="detail-value">${value} SAR</div>
                                 </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">PO Date</div>
-                                        <div class="detail-value">${poDate}</div>
-                                    </div>
+                                <div class="detail-item po-date">
+                                    <div class="detail-label"><i class="fas fa-calendar-alt"></i> PO Date</div>
+                                    <div class="detail-value">${poDate}</div>
                                 </div>
                             </div>
                         </div>
@@ -1755,7 +1813,7 @@
                         <div class="progress-section">
                             <div class="progress-header-row">
                                 <div class="progress-title-text">
-                                    <i class="fas fa-tasks" style="color: #28a745;"></i> Progress Overview
+                                    <i class="fas fa-chart-line" style="color: #28a745;"></i> Project Progress
                                 </div>
                                 <div class="progress-badge">${progress}%</div>
                             </div>
@@ -1767,13 +1825,13 @@
                             <div class="stats-grid">
                                 <div class="stat-card completed">
                                     <div class="stat-label">
-                                        <i class="fas fa-check-circle"></i> Completed Tasks
+                                        <i class="fas fa-check-circle"></i> COMPLETED
                                     </div>
                                     <div class="stat-number">${completed}</div>
                                 </div>
                                 <div class="stat-card total">
                                     <div class="stat-label">
-                                        <i class="fas fa-list"></i> Total Tasks
+                                        <i class="fas fa-list"></i> TOTAL TASKS
                                     </div>
                                     <div class="stat-number">${total}</div>
                                 </div>
@@ -1787,27 +1845,35 @@
 
                             <div class="additional-stats-grid">
                                 <div class="stat-box" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);">
-                                    <div class="stat-box-header">Tasks</div>
-                                    <div class="stat-box-number">${totalTasksCount}</div>
-                                    <div class="stat-box-footer">${tasksCompleted} Completed</div>
+                                    <div class="stat-box-header">Assigned To</div>
+                                    <div class="stat-box-number" style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto;">
+                                        ${assignedNames ? assignedNames.split('|').map(name => '• ' + name).join('<br>') : 'No assignments'}
+                                    </div>
+                                    <div class="stat-box-footer">${tasksCompleted}/${totalTasksCount} Completed</div>
                                 </div>
 
                                 <div class="stat-box" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);">
-                                    <div class="stat-box-header">Risks</div>
-                                    <div class="stat-box-number">${totalRisks}</div>
-                                    <div class="stat-box-footer">${highRisks} High</div>
+                                    <div class="stat-box-header">Risk/Issue</div>
+                                    <div class="stat-box-number" style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto;">
+                                        ${riskNames ? riskNames.split('|').map(risk => '• ' + risk).join('<br>') : 'No risks'}
+                                    </div>
+                                    <div class="stat-box-footer">${closedRisks}/${totalRisks} Closed</div>
                                 </div>
 
                                 <div class="stat-box" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);">
-                                    <div class="stat-box-header">Milestones</div>
-                                    <div class="stat-box-number">${totalMilestones}</div>
-                                    <div class="stat-box-footer">${milestonesDone} Done</div>
+                                    <div class="stat-box-header">Milestone</div>
+                                    <div class="stat-box-number" style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto;">
+                                        ${milestoneNames ? milestoneNames.split('|').map(milestone => '• ' + milestone).join('<br>') : 'No milestones'}
+                                    </div>
+                                    <div class="stat-box-footer">${milestonesDone}/${totalMilestones} Done</div>
                                 </div>
 
                                 <div class="stat-box" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);">
-                                    <div class="stat-box-header">Invoices</div>
-                                    <div class="stat-box-number">${totalInvoices}</div>
-                                    <div class="stat-box-footer">${invoicesPaid} Paid</div>
+                                    <div class="stat-box-header">Invoice Number</div>
+                                    <div class="stat-box-number" style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto;">
+                                        ${invoiceNumbers ? invoiceNumbers.split('|').map(invoice => '• ' + invoice).join('<br>') : 'No invoices'}
+                                    </div>
+                                    <div class="stat-box-footer">${invoicesPaid}/${totalInvoices} Paid</div>
                                 </div>
                             </div>
                         </div>
