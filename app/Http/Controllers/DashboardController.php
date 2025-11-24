@@ -136,6 +136,7 @@ class DashboardController extends Controller
 
         // Calculate statistics
         $totalTasks = $project->tasks->count();
+        $pendingTasks = $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->count();
         $completedTasks = $project->tasks->whereIn('status', ['Completed', 'completed'])->count();
         $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
 
@@ -158,6 +159,7 @@ class DashboardController extends Controller
             'project',
             'progress',
             'totalTasks',
+            'pendingTasks',
             'completedTasks',
             'totalRisks',
             'highRisks',
@@ -184,6 +186,7 @@ class DashboardController extends Controller
 
         // Calculate statistics
         $totalTasks = $project->tasks->count();
+        $pendingTasks = $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->count();
         $completedTasks = $project->tasks->whereIn('status', ['Completed', 'completed'])->count();
         $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
 
@@ -197,7 +200,7 @@ class DashboardController extends Controller
         $totalInvoices = $project->invoices->count();
         $invoicesPaid = $project->invoices->whereIn('status', ['paid', 'Paid'])->count();
 
-        $assignedNames = $project->tasks->pluck('assigned')->filter()->unique();
+        $assignedNames = $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->pluck('assigned')->filter()->unique();
         $riskNames = $project->risks->pluck('risk')->filter()->unique();
         $milestoneNames = $project->milestones->pluck('milestone')->filter()->unique();
         $invoiceNumbers = $project->invoices->pluck('invoice_number')->filter()->unique();
@@ -207,6 +210,7 @@ class DashboardController extends Controller
             'project',
             'progress',
             'totalTasks',
+            'pendingTasks',
             'completedTasks',
             'totalRisks',
             'highRisks',

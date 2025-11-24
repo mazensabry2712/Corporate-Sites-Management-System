@@ -166,6 +166,11 @@
             box-shadow: 0 3px 12px rgba(0,0,0,0.12);
         }
 
+        .stat-card.pending {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+            border-left-color: #ffc107;
+        }
+
         .stat-card.completed {
             background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             border-left-color: #28a745;
@@ -183,6 +188,7 @@
             text-transform: uppercase;
         }
 
+        .stat-card.pending .stat-label { color: #856404; }
         .stat-card.completed .stat-label { color: #155724; }
         .stat-card.total .stat-label { color: #495057; }
 
@@ -191,6 +197,7 @@
             font-weight: 700;
         }
 
+        .stat-card.pending .stat-number { color: #ffc107; }
         .stat-card.completed .stat-number { color: #28a745; }
         .stat-card.total .stat-number { color: #495057; }
 
@@ -324,11 +331,11 @@
             </div>
 
             <div class="stats-grid">
-                <div class="stat-card completed">
+                <div class="stat-card pending">
                     <div class="stat-label">
-                        <i class="fas fa-check-circle"></i> Completed Tasks
+                        <i class="fas fa-clock"></i> Pending Tasks
                     </div>
-                    <div class="stat-number">{{ $completedTasks }}</div>
+                    <div class="stat-number">{{ $pendingTasks }}</div>
                 </div>
                 <div class="stat-card total">
                     <div class="stat-label">
@@ -356,7 +363,7 @@
                             No assignments
                         @endif
                     </div>
-                    <div class="stat-box-footer">{{ $completedTasks }}/{{ $totalTasks }} Completed</div>
+                    <div class="stat-box-footer">{{ $pendingTasks }}/{{ $totalTasks }} Pending</div>
                 </div>
 
                 <div class="stat-box risks-box">

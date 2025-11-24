@@ -889,6 +889,7 @@
                                             {{-- Progress Bar - Always Show --}}
                                             @php
                                                 $totalTasks = $project->tasks->count();
+                                                $pendingTasks = $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->count();
                                                 $completedTasks = $project->tasks->whereIn('status', ['Completed', 'completed'])->count();
                                                 $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
 
@@ -901,7 +902,7 @@
                                                 $milestonesDone = $project->milestones->whereIn('status', ['Completed', 'completed', 'on track'])->count();
                                                 $totalInvoices = $project->invoices->count();
                                                 $invoicesPaid = $project->invoices->whereIn('status', ['paid', 'Paid'])->count();
-                                                $assignedNames = $project->tasks->pluck('assigned')->filter()->unique()->implode('|');
+                                                $assignedNames = $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->pluck('assigned')->filter()->unique()->implode('|');
                                                 $riskNames = $project->risks->pluck('risk')->filter()->unique()->implode('|');
                                                 $closedRisks = $project->risks->whereIn('status', ['closed'])->count();
                                                 $milestoneNames = $project->milestones->pluck('milestone')->filter()->unique()->implode('|');
@@ -983,21 +984,21 @@
                                                 {{-- Completed and Total Boxes - Always Show --}}
                                                 <div class="row mt-4">
                                                     <div class="col-6">
-                                                        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                                                        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
                                                                     padding: 20px;
                                                                     border-radius: 12px;
-                                                                    border-left: 4px solid #28a745;
-                                                                    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.15);">
+                                                                    border-left: 4px solid #ffc107;
+                                                                    box-shadow: 0 2px 10px rgba(255, 193, 7, 0.15);">
                                                             <div class="d-flex align-items-center justify-content-between">
                                                                 <div>
-                                                                    <div style="color: #155724; font-size: 13px; font-weight: 600; margin-bottom: 5px;">
-                                                                        <i class="fas fa-check-circle"></i> COMPLETED
+                                                                    <div style="color: #856404; font-size: 13px; font-weight: 600; margin-bottom: 5px;">
+                                                                        <i class="fas fa-clock"></i> PENDING
                                                                     </div>
-                                                                    <div style="color: #28a745; font-size: 32px; font-weight: 700;">
-                                                                        {{ $completedTasks }}
+                                                                    <div style="color: #ffc107; font-size: 32px; font-weight: 700;">
+                                                                        {{ $pendingTasks }}
                                                                     </div>
                                                                 </div>
-                                                                <i class="fas fa-check-double" style="font-size: 40px; color: #28a745; opacity: 0.2;"></i>
+                                                                <i class="fas fa-hourglass-half" style="font-size: 40px; color: #ffc107; opacity: 0.2;"></i>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1033,17 +1034,17 @@
                                                                 <small style="opacity: 0.9;">Tasks Assigned To</small>
                                                                 <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
                                                                     @php
-                                                                        $assignedNames = $project->tasks->pluck('assigned')->filter()->unique();
+                                                                        $assignedNamesPending = $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->pluck('assigned')->filter()->unique();
                                                                     @endphp
-                                                                    @if($assignedNames->count() > 0)
-                                                                        @foreach($assignedNames as $name)
+                                                                    @if($assignedNamesPending->count() > 0)
+                                                                        @foreach($assignedNamesPending as $name)
                                                                             <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $name }}</div>
                                                                         @endforeach
                                                                     @else
-                                                                        <div style="opacity: 0.7;">No tasks</div>
+                                                                        <div style="opacity: 0.7;">No pending tasks</div>
                                                                     @endif
                                                                 </div>
-                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->tasks->whereIn('status', ['Completed', 'completed'])->count() }}/{{ $project->tasks->count() }} Completed</small>
+                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->count() }}/{{ $project->tasks->count() }} Pending</small>
                                                             </div>
                                                         </div>
                                                     </div>
