@@ -7,159 +7,320 @@
 <!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    .customer-filter-card {
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        padding: 30px;
+    /* Filter Sidebar Styles - Exact Dashboard Match */
+    .filter-sidebar {
+        width: 280px;
+        flex-shrink: 0;
+        height: fit-content;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 5px 30px rgba(0, 123, 255, 0.15);
+        border: 2px solid rgba(0, 123, 255, 0.15);
+        position: relative;
         margin-bottom: 30px;
     }
 
-    .customer-filter-card h4 {
-        color: #007bff;
-        font-weight: 700;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    .filter-sidebar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+        border-radius: 15px 15px 0 0;
     }
 
-    .customer-select-wrapper {
+    .sidebar-header {
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+        border-bottom: 3px solid #007bff;
         position: relative;
+    }
+
+    .sidebar-header::after {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: #0056b3;
+    }
+
+    .sidebar-header h5 {
+        color: #007bff;
+        font-weight: 800;
+        font-size: 16px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .filter-card {
+        background: white;
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .filter-card:hover {
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.15);
+    }
+
+    .filter-card .card-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: none;
+        border-radius: 10px 10px 0 0;
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .filter-card .card-header h6 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 700;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-card .card-header h6 i {
+        color: #007bff;
+        font-size: 14px;
+    }
+
+    .filter-card .card-body {
+        padding: 10px;
+    }
+
+    .filter-card label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 6px;
     }
 
     .select2-container--default .select2-selection--single {
         background: #f8f9fa;
-        border: 2px solid #007bff;
-        border-radius: 10px;
-        height: 50px;
-        padding: 8px 15px;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        height: 38px;
+        padding: 5px 10px;
+        transition: all 0.3s ease;
+    }
+
+    .select2-container--default .select2-selection--single:hover {
+        background: #ffffff;
+        border-color: #e9ecef;
     }
 
     .select2-container--default.select2-container--focus .select2-selection--single {
-        border-color: #0056b3;
-        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+        background: white;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
     }
 
     .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 32px;
-        font-size: 15px;
+        line-height: 26px;
+        font-size: 13px;
         color: #495057;
     }
 
-    .btn-search-customer {
+    .btn-filter-submit {
         background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        border: none;
         color: white;
-        padding: 12px 30px;
+        border: none;
+        padding: 10px;
         border-radius: 10px;
         font-weight: 600;
+        font-size: 14px;
+        width: 100%;
         transition: all 0.3s ease;
-        margin-top: 0;
+        box-shadow: 0 3px 10px rgba(0, 123, 255, 0.2);
     }
 
-    .btn-search-customer:hover {
+    .btn-filter-submit:hover {
+        background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
         transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(0, 123, 255, 0.4);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-filter-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-reset-filters {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        width: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(108, 117, 125, 0.2);
+    }
+
+    .btn-reset-filters:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #545b62 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
         color: white;
     }
 
-    .customer-info-card {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        color: white;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 10px 15px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-left: 4px solid #007bff;
     }
 
-    .customer-info-card h3 {
+    .info-card.customer {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-left-color: #007bff;
+    }
+
+    .info-card.vendor {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-left-color: #28a745;
+    }
+
+    .info-card h3 {
+        color: #007bff;
+        font-size: 16px;
         font-weight: 700;
-        margin-bottom: 15px;
+        margin-bottom: 8px;
     }
 
-    .customer-info-item {
+    .info-card.vendor h3 {
+        color: #28a745;
+    }
+
+    .info-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-        font-size: 16px;
+        gap: 6px;
+        padding: 6px 8px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 8px;
+        margin-bottom: 5px;
+        font-size: 12px;
     }
 
-    .customer-info-item i {
-        width: 25px;
-        text-align: center;
+    .info-item i {
+        color: #007bff;
+        font-size: 14px;
+    }
+
+    .info-card.vendor .info-item i {
+        color: #28a745;
     }
 
     .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
     }
 
     .stat-card {
+        flex: 1;
         background: white;
         border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        text-align: center;
+        padding: 8px 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         transition: all 0.3s ease;
     }
 
     .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .stat-card.projects {
+        border-left: 4px solid #007bff;
+    }
+
+    .stat-card.value {
+        border-left: 4px solid #28a745;
     }
 
     .stat-card .icon {
-        width: 60px;
-        height: 60px;
-        margin: 0 auto 15px;
-        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
-        color: white;
-    }
-
-    .stat-card.projects .icon {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        flex-shrink: 0;
     }
 
     .stat-card.value .icon {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: linear-gradient(135deg, #28a745, #218838);
+    }
+
+    .stat-card .icon i {
+        font-size: 16px;
+        color: white;
+    }
+
+    .stat-card-content {
+        flex: 1;
     }
 
     .stat-card h5 {
         color: #6c757d;
-        font-size: 14px;
+        font-size: 11px;
         font-weight: 600;
-        margin-bottom: 10px;
+        margin-bottom: 3px;
+        text-transform: uppercase;
     }
 
     .stat-card .number {
-        font-size: 32px;
+        font-size: 16px;
         font-weight: 700;
         color: #007bff;
+        line-height: 1;
+    }
+
+    .stat-card.value .number {
+        color: #28a745;
     }
 
     .projects-table-card {
         background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         overflow: hidden;
+        margin-bottom: 25px;
     }
 
     .projects-table-card .card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
         color: white;
-        padding: 20px;
+        padding: 12px 20px;
+        border: none;
     }
 
     .projects-table-card .card-header h4 {
         margin: 0;
+        font-size: 16px;
         font-weight: 700;
     }
 
@@ -169,12 +330,14 @@
 
     .table-modern thead th {
         background: #f8f9fa;
-        font-weight: 600;
+        color: #495057;
+        font-weight: 700;
         text-transform: uppercase;
-        font-size: 12px;
-        letter-spacing: 0.5px;
+        font-size: 11px;
+        letter-spacing: 0.3px;
+        padding: 10px 12px;
         border: none;
-        padding: 15px;
+        white-space: nowrap;
     }
 
     .table-modern tbody tr {
@@ -183,43 +346,50 @@
 
     .table-modern tbody tr:hover {
         background-color: #f8f9fa;
-        transform: scale(1.01);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .table-modern td {
         vertical-align: middle;
-        padding: 15px;
+        padding: 10px 12px;
         border-top: 1px solid #e9ecef;
+        font-size: 13px;
     }
 
     .empty-state {
         text-align: center;
-        padding: 80px 40px;
+        padding: 40px 30px;
         color: #6c757d;
         background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
     }
 
     .empty-state i {
-        font-size: 64px;
-        margin-bottom: 20px;
+        font-size: 48px;
+        margin-bottom: 15px;
         color: #dee2e6;
     }
 
     .empty-state h4 {
         color: #495057;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+        font-size: 18px;
+    }
+
+    .empty-state p {
+        font-size: 14px;
+        margin: 0;
     }
 
     .loading-spinner {
         text-align: center;
-        padding: 50px;
+        padding: 30px;
         display: none;
         background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
     }
 
     .loading-spinner.active {
@@ -227,9 +397,14 @@
     }
 
     .loading-spinner i {
-        font-size: 48px;
+        font-size: 36px;
         color: #007bff;
         animation: spin 1s linear infinite;
+    }
+
+    .loading-spinner p {
+        font-size: 14px;
+        margin-top: 15px;
     }
 
     @keyframes spin {
@@ -308,15 +483,44 @@
         }
     }
 
-    .btn-search-customer:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+    /* Print Styles */
+    @media print {
+        .filter-sidebar,
+        .btn-filter-submit,
+        .btn-reset-filters,
+        .toast-container,
+        .breadcrumb-header {
+            display: none !important;
+        }
+
+        .col-lg-9 {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .info-card,
+        .projects-table-card,
+        .stat-card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            page-break-inside: avoid;
+        }
+
+        .table-modern {
+            font-size: 11px !important;
+        }
+
+        .table-modern td,
+        .table-modern th {
+            padding: 6px 8px !important;
+        }
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-        .btn-search-customer {
-            margin-top: 15px;
+        .filter-sidebar {
+            width: 100%;
+            margin-bottom: 20px;
         }
 
         .toast-container {
@@ -327,6 +531,14 @@
         .toast-message {
             min-width: auto;
         }
+
+        .stats-row {
+            flex-direction: column;
+        }
+
+        .stats-row {
+            flex-direction: column;
+        }
     }
 </style>
 @endsection
@@ -336,7 +548,7 @@
     <div class="my-auto">
         <div class="d-flex">
             <h4 class="content-title mb-0 my-auto">Dashboard</h4>
-            <span class="text-muted mt-1 tx-13 ml-2 mb-0">/ Customer Projects Filter</span>
+            <span class="text-muted mt-1 tx-13 ml-2 mb-0">/ Projects Filters</span>
         </div>
     </div>
 </div>
@@ -347,32 +559,113 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="row">
-    <div class="col-12">
-        {{-- Customer Filter Card --}}
-        <div class="customer-filter-card">
-            <h4>
-                <i class="fas fa-building"></i>
-                Select Customer to View Projects
-            </h4>
-            <div class="row align-items-end">
-                <div class="col-md-9">
-                    <label for="customerSelect" class="form-label">Customer Name</label>
-                    <div class="customer-select-wrapper">
-                        <select id="customerSelect" class="form-control select2" data-placeholder="-- Select Customer --">
-                            <option></option>
-                            @foreach($filterOptions['customerNames'] as $customerName)
-                                <option value="{{ $customerName }}">{{ $customerName }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+    {{-- Filter Sidebar --}}
+    <div class="col-lg-3 col-md-12 mb-4">
+        <div class="filter-sidebar">
+            <div class="sidebar-header">
+                <h5><i class="fas fa-filter"></i> Filters</h5>
+            </div>
+
+            {{-- Customer Filter Card --}}
+            <div class="filter-card">
+                <div class="card-header">
+                    <h6>
+                        <i class="fas fa-building"></i> Customer
+                    </h6>
                 </div>
-                <div class="col-md-3">
-                    <button id="btnSearchCustomer" class="btn btn-search-customer btn-block">
-                        <i class="fas fa-search mr-2"></i>Search Projects
-                    </button>
+                <div class="card-body">
+                    <label>Select Customer</label>
+                    <select id="customerSelect" class="form-control select2" data-placeholder="-- Select Customer --">
+                        <option></option>
+                        @foreach($filterOptions['customerNames'] as $customerName)
+                            <option value="{{ $customerName }}">{{ $customerName }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
+
+            {{-- Vendor Filter Card --}}
+            <div class="filter-card">
+                <div class="card-header">
+                    <h6>
+                        <i class="fas fa-briefcase"></i> Vendor
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <label>Select Vendor</label>
+                    <select id="vendorSelect" class="form-control select2" data-placeholder="-- Select Vendor --">
+                        <option></option>
+                        @foreach($filterOptions['vendorsList'] as $vendorName)
+                            <option value="{{ $vendorName }}">{{ $vendorName }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- Supplier Filter Card --}}
+            <div class="filter-card">
+                <div class="card-header">
+                    <h6>
+                        <i class="fas fa-truck"></i> Supplier
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <label>Select Supplier</label>
+                    <select id="supplierSelect" class="form-control select2" data-placeholder="-- Select Supplier --">
+                        <option></option>
+                        @foreach($filterOptions['suppliers'] as $supplierName)
+                            <option value="{{ $supplierName }}">{{ $supplierName }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- PM Filter Card --}}
+            <div class="filter-card">
+                <div class="card-header">
+                    <h6>
+                        <i class="fas fa-user-tie"></i> Project Manager
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <label>Select PM</label>
+                    <select id="pmSelect" class="form-control select2" data-placeholder="-- Select PM --">
+                        <option></option>
+                        @foreach($filterOptions['projectManagers'] as $pmName)
+                            <option value="{{ $pmName }}">{{ $pmName }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- Unified Action Buttons --}}
+            <div class="mt-4">
+                <button id="btnApplyFilters" class="btn btn-filter-submit mb-2">
+                    <i class="fas fa-search mr-1"></i> Apply Filters
+                </button>
+                <button id="btnResetFilters" class="btn btn-reset-filters">
+                    <i class="fas fa-undo mr-1"></i> Reset Filters
+                </button>
+            </div>
         </div>
+    </div>
+
+    {{-- Results Column --}}
+    <div class="col-lg-9 col-md-12">
+
+        {{-- Welcome Message --}}
+        <div class="alert alert-info" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: none; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 3px 10px rgba(0, 123, 255, 0.1);">
+            <h5 style="color: #0d47a1; font-weight: 700; margin-bottom: 10px;">
+                <i class="fas fa-chart-bar mr-2"></i>Projects Reports & Analytics
+            </h5>
+            <p style="color: #1565c0; margin-bottom: 0; font-size: 14px;">
+                <i class="fas fa-info-circle mr-1"></i>
+                Use the filters on the left to view detailed project information, financial statistics, and delivery notes for customers or vendors.
+            </p>
+        </div>
+
+<div class="row">
+    <div class="col-12">
 
         {{-- Loading Spinner --}}
         <div id="loadingSpinner" class="loading-spinner">
@@ -381,17 +674,17 @@
         </div>
 
         {{-- Customer Info Card --}}
-        <div id="customerInfoCard" class="customer-info-card" style="display: none;">
+        <div id="customerInfoCard" class="info-card customer" style="display: none;">
             <h3 id="customerName"><i class="fas fa-building mr-2"></i></h3>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="customer-info-item">
+                    <div class="info-item">
                         <i class="fas fa-tag"></i>
                         <span>Abbreviation: <strong id="customerAbb"></strong></span>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="customer-info-item">
+                    <div class="info-item">
                         <i class="fas fa-list"></i>
                         <span>Type: <strong id="customerType"></strong></span>
                     </div>
@@ -405,15 +698,19 @@
                 <div class="icon">
                     <i class="fas fa-project-diagram"></i>
                 </div>
-                <h5>Total Projects</h5>
-                <div class="number" id="totalProjects">0</div>
+                <div class="stat-card-content">
+                    <h5>Total Projects</h5>
+                    <div class="number" id="totalProjects">0</div>
+                </div>
             </div>
             <div class="stat-card value">
                 <div class="icon">
                     <i class="fas fa-dollar-sign"></i>
                 </div>
-                <h5>Total Value</h5>
-                <div class="number" id="totalValue">$0</div>
+                <div class="stat-card-content">
+                    <h5>Total Value</h5>
+                    <div class="number" id="totalValue">$0</div>
+                </div>
             </div>
         </div>
 
@@ -430,7 +727,7 @@
                             <th><i class="fas fa-hashtag mr-1"></i>PR Number</th>
                             <th><i class="fas fa-briefcase mr-1"></i>Project Name</th>
                             <th><i class="fas fa-dollar-sign mr-1"></i>Value</th>
-                            <th><i class="fas fa-file-invoice mr-1"></i>PO Number</th>
+                            <th><i class="fas fa-file-invoice mr-1"></i>Customer PO</th>
                             <th><i class="fas fa-calendar mr-1"></i>Deadline</th>
                         </tr>
                     </thead>
@@ -446,8 +743,242 @@
             <h4>No Projects Found</h4>
             <p>This customer doesn't have any projects yet.</p>
         </div>
-    </div>
-</div>
+
+        {{-- Separator between Customer and Vendor Results --}}
+        <hr class="results-separator" style="display: none; margin: 30px 0; border: 0; height: 2px; background: linear-gradient(to right, transparent, #dee2e6, transparent);">
+
+        {{-- Loading Spinner for Vendor --}}
+        <div id="loadingSpinnerVendor" class="loading-spinner" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="mt-3">Loading vendor projects...</p>
+        </div>
+
+        {{-- Vendor Info Card --}}
+        <div id="vendorInfoCard" class="info-card vendor" style="display: none;">
+            <h3 id="vendorName"><i class="fas fa-briefcase mr-2"></i></h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <i class="fas fa-tag"></i>
+                        <span>Abbreviation: <strong id="vendorAbb"></strong></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <i class="fas fa-list"></i>
+                        <span>Type: <strong id="vendorType"></strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Statistics Cards for Vendor --}}
+        <div id="statsRowVendor" class="stats-row" style="display: none;">
+            <div class="stat-card projects">
+                <div class="icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h5>Total Projects</h5>
+                    <div class="number" id="totalProjectsVendor">0</div>
+                </div>
+            </div>
+            <div class="stat-card value">
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h5>Total Value</h5>
+                    <div class="number" id="totalValueVendor">$0</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Vendor Projects Table --}}
+        <div id="projectsTableCardVendor" class="projects-table-card" style="display: none;">
+            <div class="card-header" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%);">
+                <h4><i class="fas fa-list mr-2"></i>Vendor Projects</h4>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-modern table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th><i class="fas fa-hashtag mr-1"></i>PR Number</th>
+                            <th><i class="fas fa-briefcase mr-1"></i>Project Name</th>
+                            <th><i class="fas fa-building mr-1"></i>Customer</th>
+                            <th><i class="fas fa-dollar-sign mr-1"></i>Value</th>
+                            <th><i class="fas fa-file-invoice mr-1"></i>PO Number</th>
+                            <th><i class="fas fa-calendar mr-1"></i>Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBodyVendor">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Empty State for Vendor --}}
+        <div id="emptyStateVendor" class="empty-state" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <h4>No Projects Found</h4>
+            <p>This vendor doesn't have any projects yet.</p>
+        </div>
+
+        {{-- Separator before Supplier Results --}}
+        <hr class="results-separator" style="display: none; margin: 30px 0; border: 0; height: 2px; background: linear-gradient(to right, transparent, #dee2e6, transparent);">
+
+        {{-- Loading Spinner for Supplier --}}
+        <div id="loadingSpinnerSupplier" class="loading-spinner" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="mt-3">Loading supplier projects...</p>
+        </div>
+
+        {{-- Supplier Info Card --}}
+        <div id="supplierInfoCard" class="info-card supplier" style="display: none;">
+            <h3 id="supplierName"><i class="fas fa-truck mr-2"></i></h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <i class="fas fa-tag"></i>
+                        <span>Abbreviation: <strong id="supplierAbb"></strong></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <i class="fas fa-list"></i>
+                        <span>Type: <strong id="supplierType"></strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Statistics Cards for Supplier --}}
+        <div id="statsRowSupplier" class="stats-row" style="display: none;">
+            <div class="stat-card projects">
+                <div class="icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h5>Total Projects</h5>
+                    <div class="number" id="totalProjectsSupplier">0</div>
+                </div>
+            </div>
+            <div class="stat-card value">
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h5>Total Value</h5>
+                    <div class="number" id="totalValueSupplier">$0</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Supplier Projects Table --}}
+        <div id="projectsTableCardSupplier" class="projects-table-card" style="display: none;">
+            <div class="card-header" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                <h4><i class="fas fa-list mr-2"></i>Supplier Projects & POs</h4>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-modern table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th><i class="fas fa-hashtag mr-1"></i>PR Number</th>
+                            <th><i class="fas fa-briefcase mr-1"></i>Project Name</th>
+                            <th><i class="fas fa-file-invoice mr-1"></i>PO Number</th>
+                            <th><i class="fas fa-dollar-sign mr-1"></i>PO Value</th>
+                            <th><i class="fas fa-users mr-1"></i>All DS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBodySupplier">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Empty State for Supplier --}}
+        <div id="emptyStateSupplier" class="empty-state" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <h4>No Projects Found</h4>
+            <p>This supplier doesn't have any projects yet.</p>
+        </div>
+
+        {{-- Separator before PM Results --}}
+        <hr class="results-separator" style="display: none; margin: 30px 0; border: 0; height: 2px; background: linear-gradient(to right, transparent, #dee2e6, transparent);">
+
+        {{-- Loading Spinner for PM --}}
+        <div id="loadingSpinnerPM" class="loading-spinner" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="mt-3">Loading PM projects...</p>
+        </div>
+
+        {{-- PM Info Card --}}
+        <div id="pmInfoCard" class="info-card pm" style="display: none;">
+            <h3 id="pmName"><i class="fas fa-user-tie mr-2"></i></h3>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="info-item">
+                        <i class="fas fa-list"></i>
+                        <span>Role: <strong>Project Manager</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Statistics Cards for PM --}}
+        <div id="statsRowPM" class="stats-row" style="display: none;">
+            <div class="stat-card projects">
+                <div class="icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h5>Total Projects</h5>
+                    <div class="number" id="totalProjectsPM">0</div>
+                </div>
+            </div>
+            <div class="stat-card value">
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h5>Total Value</h5>
+                    <div class="number" id="totalValuePM">$0</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- PM Projects Table --}}
+        <div id="projectsTableCardPM" class="projects-table-card" style="display: none;">
+            <div class="card-header" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);">
+                <h4><i class="fas fa-list mr-2"></i>PM Projects</h4>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-modern table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th><i class="fas fa-hashtag mr-1"></i>PR Number</th>
+                            <th><i class="fas fa-briefcase mr-1"></i>Project Name</th>
+                            <th><i class="fas fa-building mr-1"></i>Customer</th>
+                            <th><i class="fas fa-dollar-sign mr-1"></i>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBodyPM">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Empty State for PM --}}
+        <div id="emptyStatePM" class="empty-state" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <h4>No Projects Found</h4>
+            <p>This PM doesn't have any projects yet.</p>
+        </div>
+    </div> {{-- Close col-lg-9 --}}
+</div> {{-- Close main row --}}
 @endsection
 
 @section('js')
@@ -481,7 +1012,7 @@ $(document).ready(function() {
         }, 4000);
     }
 
-    // Initialize Select2
+    // Initialize Select2 for Customer
     $('#customerSelect').select2({
         theme: 'default',
         width: '100%',
@@ -489,31 +1020,80 @@ $(document).ready(function() {
         allowClear: true
     });
 
-    // Search button click
-    $('#btnSearchCustomer').on('click', function() {
-        const customerName = $('#customerSelect').val();
+    // Initialize Select2 for Vendor
+    $('#vendorSelect').select2({
+        theme: 'default',
+        width: '100%',
+        placeholder: '-- Select Vendor --',
+        allowClear: true
+    });
 
-        if (!customerName) {
-            showToast('Please select a customer first', 'warning');
-            $('#customerSelect').select2('open');
+    // Initialize Select2 for Supplier
+    $('#supplierSelect').select2({
+        theme: 'default',
+        width: '100%',
+        placeholder: '-- Select Supplier --',
+        allowClear: true
+    });
+
+    // Initialize Select2 for PM
+    $('#pmSelect').select2({
+        theme: 'default',
+        width: '100%',
+        placeholder: '-- Select PM --',
+        allowClear: true
+    });
+
+    // Apply Filters button
+    $('#btnApplyFilters').on('click', function() {
+        const customerName = $('#customerSelect').val();
+        const vendorName = $('#vendorSelect').val();
+        const supplierName = $('#supplierSelect').val();
+        const pmName = $('#pmSelect').val();
+
+        // Check if at least one filter is selected
+        if (!customerName && !vendorName && !supplierName && !pmName) {
+            showToast('Please select at least one filter', 'warning');
             return;
         }
 
-        loadCustomerProjects(customerName);
-    });
-
-    // Also trigger on Enter key
-    $('#customerSelect').on('select2:select', function() {
-        const customerName = $(this).val();
+        // Load based on selected filter(s)
         if (customerName) {
             loadCustomerProjects(customerName);
         }
+        if (vendorName) {
+            loadVendorProjects(vendorName);
+        }
+        if (supplierName) {
+            loadSupplierProjects(supplierName);
+        }
+        if (pmName) {
+            loadPMProjects(pmName);
+        }
+    });
+
+    // Reset Filters button
+    $('#btnResetFilters').on('click', function() {
+        // Clear all selections
+        $('#customerSelect').val(null).trigger('change');
+        $('#vendorSelect').val(null).trigger('change');
+        $('#supplierSelect').val(null).trigger('change');
+        $('#pmSelect').val(null).trigger('change');
+
+        // Hide all result sections
+        $('#loadingSpinner, #customerInfoCard, #statsRow, #projectsTableCard, #emptyState').hide();
+        $('#loadingSpinnerVendor, #vendorInfoCard, #statsRowVendor, #projectsTableCardVendor, #emptyStateVendor').hide();
+        $('#loadingSpinnerSupplier, #supplierInfoCard, #statsRowSupplier, #projectsTableCardSupplier, #emptyStateSupplier').hide();
+        $('#loadingSpinnerPM, #pmInfoCard, #statsRowPM, #projectsTableCardPM, #emptyStatePM').hide();
+        $('.results-separator').hide();
+
+        showToast('Filters have been reset', 'success');
     });
 
     // Function to load customer projects
     function loadCustomerProjects(customerName) {
         // Disable button during loading
-        $('#btnSearchCustomer').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Loading...');
+        $('#btnApplyFilters').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Loading...');
 
         // Show loading
         $('#loadingSpinner').addClass('active');
@@ -526,7 +1106,7 @@ $(document).ready(function() {
             data: { customer_name: customerName },
             success: function(response) {
                 $('#loadingSpinner').removeClass('active');
-                $('#btnSearchCustomer').prop('disabled', false).html('<i class="fas fa-search mr-2"></i>Search Projects');
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
 
                 if (response.success) {
                     // Show success message based on project count
@@ -572,13 +1152,18 @@ $(document).ready(function() {
                         // Show empty state for customers with no projects
                         $('#emptyState').fadeIn(300);
                     }
+
+                    // Show separator if vendor results are visible
+                    if ($('#vendorInfoCard').is(':visible') || $('#projectsTableCardVendor').is(':visible') || $('#emptyStateVendor').is(':visible')) {
+                        $('.results-separator').fadeIn();
+                    }
                 } else {
                     showToast(response.message || 'Failed to load customer projects', 'error');
                 }
             },
             error: function(xhr) {
                 $('#loadingSpinner').removeClass('active');
-                $('#btnSearchCustomer').prop('disabled', false).html('<i class="fas fa-search mr-2"></i>Search Projects');
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
 
                 let errorMessage = 'An error occurred while loading customer projects';
                 if (xhr.status === 404) {
@@ -610,6 +1195,274 @@ $(document).ready(function() {
     // Helper function to format currency
     function formatCurrency(value) {
         return Number(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    // Function to load vendor projects
+    function loadVendorProjects(vendorName) {
+        // Disable button during loading
+        $('#btnApplyFilters').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Loading...');
+
+        // Show loading
+        $('#loadingSpinnerVendor').show();
+        $('#vendorInfoCard, #statsRowVendor, #projectsTableCardVendor, #emptyStateVendor').hide();
+
+        // Make AJAX request
+        $.ajax({
+            url: '{{ route("reports.vendor.projects") }}',
+            method: 'GET',
+            data: { vendor_name: vendorName },
+            success: function(response) {
+                $('#loadingSpinnerVendor').hide();
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
+
+                if (response.success) {
+                    // Show success message
+                    if (response.total_projects > 0) {
+                        showToast(`Found ${response.total_projects} projects for ${vendorName}`, 'success');
+                    } else {
+                        showToast(`No projects found for ${vendorName}`, 'warning');
+                    }
+
+                    // Display vendor info
+                    $('#vendorName').html('<i class="fas fa-briefcase mr-2"></i>' + escapeHtml(response.vendor.name));
+                    $('#vendorAbb').text(response.vendor.abb || 'N/A');
+                    $('#vendorType').text(response.vendor.type || 'N/A');
+                    $('#vendorInfoCard').fadeIn();
+
+                    // Display statistics
+                    $('#totalProjectsVendor').text(response.total_projects);
+                    $('#totalValueVendor').text('$' + formatCurrency(response.total_value));
+                    $('#statsRowVendor').fadeIn();
+
+                    // Hide both table and empty state first
+                    $('#projectsTableCardVendor').hide();
+                    $('#emptyStateVendor').hide();
+
+                    // Display projects table or empty state
+                    if (response.projects && response.projects.length > 0) {
+                        let tableRows = '';
+                        response.projects.forEach((project, index) => {
+                            tableRows += `
+                                <tr>
+                                    <td><span class="badge badge-success">${index + 1}</span></td>
+                                    <td><strong>${escapeHtml(project.pr_number)}</strong></td>
+                                    <td>${escapeHtml(project.name)}</td>
+                                    <td><span class="badge badge-info">${escapeHtml(project.customer_name || 'N/A')}</span></td>
+                                    <td><strong class="text-success">$${escapeHtml(project.value)}</strong></td>
+                                    <td>${escapeHtml(project.customer_po || 'N/A')}</td>
+                                    <td>${escapeHtml(project.deadline || 'N/A')}</td>
+                                </tr>
+                            `;
+                        });
+                        $('#projectsTableBodyVendor').html(tableRows);
+                        $('#projectsTableCardVendor').fadeIn(300);
+                    } else {
+                        $('#emptyStateVendor').fadeIn(300);
+                    }
+
+                    // Show separator if customer results are visible
+                    if ($('#customerInfoCard').is(':visible') || $('#projectsTableCard').is(':visible') || $('#emptyState').is(':visible')) {
+                        $('.results-separator').fadeIn();
+                    }
+                } else {
+                    showToast(response.message || 'Failed to load vendor projects', 'error');
+                }
+            },
+            error: function(xhr) {
+                $('#loadingSpinnerVendor').hide();
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
+
+                let errorMessage = 'An error occurred while loading vendor projects';
+                if (xhr.status === 404) {
+                    errorMessage = 'Vendor not found';
+                } else if (xhr.status === 400) {
+                    errorMessage = 'Invalid request';
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                showToast(errorMessage, 'error');
+                console.error('AJAX Error:', xhr);
+            }
+        });
+    }
+
+    // Function to load supplier projects
+    function loadSupplierProjects(supplierName) {
+        // Disable button during loading
+        $('#btnApplyFilters').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Loading...');
+
+        // Show loading
+        $('#loadingSpinnerSupplier').show();
+        $('#supplierInfoCard, #statsRowSupplier, #projectsTableCardSupplier, #emptyStateSupplier').hide();
+
+        // Make AJAX request
+        $.ajax({
+            url: '{{ route("reports.supplier.projects") }}',
+            method: 'GET',
+            data: { supplier_name: supplierName },
+            success: function(response) {
+                $('#loadingSpinnerSupplier').hide();
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
+
+                if (response.success) {
+                    // Show success message
+                    if (response.total_projects > 0) {
+                        showToast(`Found ${response.total_projects} projects for ${supplierName}`, 'success');
+                    } else {
+                        showToast(`No projects found for ${supplierName}`, 'warning');
+                    }
+
+                    // Display supplier info
+                    $('#supplierName').html('<i class="fas fa-truck mr-2"></i>' + escapeHtml(response.supplier.name));
+                    $('#supplierAbb').text(response.supplier.abb || 'N/A');
+                    $('#supplierType').text(response.supplier.type || 'N/A');
+                    $('#supplierInfoCard').fadeIn();
+
+                    // Display statistics
+                    $('#totalProjectsSupplier').text(response.total_projects);
+                    $('#totalValueSupplier').text('$' + formatCurrency(response.total_value));
+                    $('#statsRowSupplier').fadeIn();
+
+                    // Hide both table and empty state first
+                    $('#projectsTableCardSupplier').hide();
+                    $('#emptyStateSupplier').hide();
+
+                    // Display projects table or empty state
+                    if (response.projects && response.projects.length > 0) {
+                        let tableRows = '';
+                        response.projects.forEach((project, index) => {
+                            tableRows += `
+                                <tr>
+                                    <td><span class="badge badge-warning">${index + 1}</span></td>
+                                    <td><strong class="text-primary">${escapeHtml(project.pr_number)}</strong></td>
+                                    <td><strong>${escapeHtml(project.name)}</strong></td>
+                                    <td><span class="badge badge-info">${escapeHtml(project.customer_po)}</span></td>
+                                    <td><strong class="text-success" style="font-size: 1.1em;">$${escapeHtml(project.po_value)}</strong></td>
+                                    <td><small class="text-muted">${escapeHtml(project.all_ds || 'N/A')}</small></td>
+                                </tr>
+                            `;
+                        });
+                        $('#projectsTableBodySupplier').html(tableRows);
+                        $('#projectsTableCardSupplier').fadeIn(300);
+                    } else {
+                        $('#emptyStateSupplier').fadeIn(300);
+                    }
+
+                    // Show separator if other results are visible
+                    if ($('#customerInfoCard').is(':visible') || $('#projectsTableCard').is(':visible') || $('#emptyState').is(':visible') ||
+                        $('#vendorInfoCard').is(':visible') || $('#projectsTableCardVendor').is(':visible') || $('#emptyStateVendor').is(':visible')) {
+                        $('.results-separator').fadeIn();
+                    }
+                } else {
+                    showToast(response.message || 'Failed to load supplier projects', 'error');
+                }
+            },
+            error: function(xhr) {
+                $('#loadingSpinnerSupplier').hide();
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
+
+                let errorMessage = 'An error occurred while loading supplier projects';
+                if (xhr.status === 404) {
+                    errorMessage = 'Supplier not found';
+                } else if (xhr.status === 400) {
+                    errorMessage = 'Invalid request';
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                showToast(errorMessage, 'error');
+                console.error('AJAX Error:', xhr);
+            }
+        });
+    }
+
+    // Function to load PM projects
+    function loadPMProjects(pmName) {
+        // Disable button during loading
+        $('#btnApplyFilters').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Loading...');
+
+        // Show loading
+        $('#loadingSpinnerPM').show();
+        $('#pmInfoCard, #statsRowPM, #projectsTableCardPM, #emptyStatePM').hide();
+
+        // Make AJAX request
+        $.ajax({
+            url: '{{ route("reports.pm.projects") }}',
+            method: 'GET',
+            data: { pm_name: pmName },
+            success: function(response) {
+                $('#loadingSpinnerPM').hide();
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
+
+                if (response.success) {
+                    // Show success message
+                    if (response.total_projects > 0) {
+                        showToast(`Found ${response.total_projects} projects for ${pmName}`, 'success');
+                    } else {
+                        showToast(`No projects found for ${pmName}`, 'warning');
+                    }
+
+                    // Display PM info
+                    $('#pmName').html('<i class="fas fa-user-tie mr-2"></i>' + escapeHtml(response.pm.name));
+                    $('#pmInfoCard').fadeIn();
+
+                    // Display statistics
+                    $('#totalProjectsPM').text(response.total_projects);
+                    $('#totalValuePM').text('$' + formatCurrency(response.total_value));
+                    $('#statsRowPM').fadeIn();
+
+                    // Hide both table and empty state first
+                    $('#projectsTableCardPM').hide();
+                    $('#emptyStatePM').hide();
+
+                    // Display projects table or empty state
+                    if (response.projects && response.projects.length > 0) {
+                        let tableRows = '';
+                        response.projects.forEach((project, index) => {
+                            tableRows += `
+                                <tr>
+                                    <td><span class="badge badge-secondary">${index + 1}</span></td>
+                                    <td><strong class="text-primary">${escapeHtml(project.pr_number)}</strong></td>
+                                    <td><strong>${escapeHtml(project.name)}</strong></td>
+                                    <td><span class="badge badge-info">${escapeHtml(project.customer_name)}</span></td>
+                                    <td><strong class="text-success" style="font-size: 1.1em;">$${escapeHtml(project.value)}</strong></td>
+                                </tr>
+                            `;
+                        });
+                        $('#projectsTableBodyPM').html(tableRows);
+                        $('#projectsTableCardPM').fadeIn(300);
+                    } else {
+                        $('#emptyStatePM').fadeIn(300);
+                    }
+
+                    // Show separator if other results are visible
+                    if ($('#customerInfoCard').is(':visible') || $('#projectsTableCard').is(':visible') || $('#emptyState').is(':visible') ||
+                        $('#vendorInfoCard').is(':visible') || $('#projectsTableCardVendor').is(':visible') || $('#emptyStateVendor').is(':visible') ||
+                        $('#supplierInfoCard').is(':visible') || $('#projectsTableCardSupplier').is(':visible') || $('#emptyStateSupplier').is(':visible')) {
+                        $('.results-separator').fadeIn();
+                    }
+                } else {
+                    showToast(response.message || 'Failed to load PM projects', 'error');
+                }
+            },
+            error: function(xhr) {
+                $('#loadingSpinnerPM').hide();
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
+
+                let errorMessage = 'An error occurred while loading PM projects';
+                if (xhr.status === 404) {
+                    errorMessage = 'PM not found';
+                } else if (xhr.status === 400) {
+                    errorMessage = 'Invalid request';
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                showToast(errorMessage, 'error');
+                console.error('AJAX Error:', xhr);
+            }
+        });
     }
 });
 </script>

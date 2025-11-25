@@ -136,6 +136,241 @@ class ReportController extends Controller
     }
 
     /**
+     * Get vendor projects via AJAX
+     */
+    public function getVendorProjects(Request $request)
+    {
+        try {
+            // Validate input
+            $request->validate([
+                'vendor_name' => 'required|string|max:255'
+            ]);
+
+            $vendorName = $request->input('vendor_name');
+
+            // Get vendor - field name is 'vendors' not 'name'
+            $vendor = vendors::where('vendors', $vendorName)->first();
+
+            if (!$vendor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vendor not found: ' . $vendorName
+                ], 404);
+            }
+
+            // Get projects for this vendor with customer info
+            $projects = Project::where('vendors_id', $vendor->id)
+                ->with('cust:id,name')
+                ->select('id', 'pr_number', 'name', 'value', 'customer_po', 'customer_po_deadline', 'cust_id')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Calculate total value
+            $totalValue = $projects->sum('value');
+
+            // Format projects
+            $formattedProjects = $projects->map(function($project) {
+                return [
+                    'id' => $project->id,
+                    'pr_number' => $project->pr_number ?? 'N/A',
+                    'name' => $project->name ?? 'Untitled Project',
+                    'customer_name' => $project->cust->name ?? 'N/A',
+                    'value' => number_format($project->value ?? 0, 2),
+                    'customer_po' => $project->customer_po,
+                    'deadline' => $project->customer_po_deadline
+                        ? \Carbon\Carbon::parse($project->customer_po_deadline)->format('Y-m-d')
+                        : null,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'vendor' => [
+                    'id' => $vendor->id,
+                    'name' => $vendor->vendors,
+                    'abb' => 'N/A',
+                    'type' => 'Vendor',
+                ],
+                'projects' => $formattedProjects,
+                'total_projects' => $projects->count(),
+                'total_value' => $totalValue
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error getting vendor projects', [
+                'vendor_name' => $request->input('vendor_name'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching vendor projects. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get supplier (delivery specialist) projects via AJAX
+     */
+    public function getSupplierProjects(Request $request)
+    {
+        try {
+            // Validate input
+            $request->validate([
+                'supplier_name' => 'required|string|max:255'
+            ]);
+
+            $supplierName = $request->input('supplier_name');
+
+            // Get supplier (DS) - note: DS table uses 'dsname' not 'name'
+            $supplier = Ds::where('dsname', $supplierName)->first();
+
+            if (!$supplier) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Supplier not found: ' . $supplierName
+                ], 404);
+            }
+
+            // Get projects for this supplier through pivot table
+            $projects = Project::whereHas('deliverySpecialists', function($query) use ($supplier) {
+                $query->where('ds_id', $supplier->id);
+            })
+            ->with(['cust:id,name', 'deliverySpecialists:id,dsname'])
+            ->select('id', 'pr_number', 'name', 'value', 'customer_po', 'customer_po_deadline', 'cust_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+            // Calculate total value
+            $totalValue = $projects->sum('value');
+
+            // Format projects
+            $formattedProjects = $projects->map(function($project) {
+                return [
+                    'id' => $project->id,
+                    'pr_number' => $project->pr_number ?? 'N/A',
+                    'name' => $project->name ?? 'Untitled Project',
+                    'customer_name' => $project->cust->name ?? 'N/A',
+                    'value' => number_format($project->value ?? 0, 2),
+                    'customer_po' => $project->customer_po ?? 'N/A',
+                    'po_value' => number_format($project->value ?? 0, 2),
+                    'all_ds' => $project->deliverySpecialists->pluck('dsname')->implode(', '),
+                    'deadline' => $project->customer_po_deadline
+                        ? \Carbon\Carbon::parse($project->customer_po_deadline)->format('Y-m-d')
+                        : null,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'supplier' => [
+                    'id' => $supplier->id,
+                    'name' => $supplier->dsname,
+                    'abb' => 'N/A',
+                    'type' => 'Supplier',
+                ],
+                'projects' => $formattedProjects,
+                'total_projects' => $projects->count(),
+                'total_value' => $totalValue
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error getting supplier projects', [
+                'supplier_name' => $request->input('supplier_name'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching supplier projects. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get PM (Project Manager) projects via AJAX
+     */
+    public function getPMProjects(Request $request)
+    {
+        try {
+            // Validate input
+            $request->validate([
+                'pm_name' => 'required|string|max:255'
+            ]);
+
+            $pmName = $request->input('pm_name');
+
+            // Get PM
+            $pm = ppms::where('name', $pmName)->first();
+
+            if (!$pm) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PM not found: ' . $pmName
+                ], 404);
+            }
+
+            // Get projects for this PM with customer info
+            $projects = Project::where('ppms_id', $pm->id)
+                ->with('cust:id,name')
+                ->select('id', 'pr_number', 'name', 'value', 'cust_id')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Calculate total value
+            $totalValue = $projects->sum('value');
+
+            // Format projects
+            $formattedProjects = $projects->map(function($project) {
+                return [
+                    'id' => $project->id,
+                    'pr_number' => $project->pr_number ?? 'N/A',
+                    'name' => $project->name ?? 'Untitled Project',
+                    'customer_name' => $project->cust->name ?? 'N/A',
+                    'value' => number_format($project->value ?? 0, 2),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'pm' => [
+                    'id' => $pm->id,
+                    'name' => $pm->name,
+                ],
+                'projects' => $formattedProjects,
+                'total_projects' => $projects->count(),
+                'total_value' => $totalValue
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error getting PM projects', [
+                'pm_name' => $request->input('pm_name'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching PM projects. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
      * Clear reports cache
      */
     public function clearCache()
