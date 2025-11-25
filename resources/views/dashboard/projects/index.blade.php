@@ -268,8 +268,7 @@
                                     <th class="border-bottom-0">All Vendors</th>
                                     <th class="border-bottom-0">Primary DS</th>
                                     <th class="border-bottom-0">All DS</th>
-                                    <th class="border-bottom-0">Primary Customer</th>
-                                    <th class="border-bottom-0">All Customers</th>
+                                    <th class="border-bottom-0">Customer</th>
                                     <th class="border-bottom-0">Customer PO</th>
                                     <th class="border-bottom-0 text-center">Value</th>
                                     <th class="border-bottom-0">AC Manager</th>
@@ -360,21 +359,6 @@
                                             @endif
                                         </td>
                                         <td>{{ $project->cust->name ?? 'N/A' }}</td>
-                                        <td>
-                                            @if ($project->customers && $project->customers->count() > 0)
-                                                @foreach ($project->customers as $customer)
-                                                    <span
-                                                        class="badge badge-{{ $customer->pivot->is_primary ? 'success' : 'warning' }} badge-custom mr-1">
-                                                        {{ $customer->name }}
-                                                        @if ($customer->pivot->is_primary)
-                                                            <i class="fas fa-star ml-1" title="Primary"></i>
-                                                        @endif
-                                                    </span>
-                                                @endforeach
-                                            @else
-                                                <span class="text-muted">N/A</span>
-                                            @endif
-                                        </td>
                                         <td>{{ $project->customer_po ?? 'N/A' }}</td>
                                         <td class="text-center">
                                             @if ($project->value)

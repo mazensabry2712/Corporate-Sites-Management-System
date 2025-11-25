@@ -523,7 +523,6 @@
                         <!-- Hidden fields for backward compatibility -->
                         <input type="hidden" id="vendors_id" name="vendors_id">
                         <input type="hidden" id="ds_id" name="ds_id">
-                        <input type="hidden" id="cust_id" name="cust_id">
 
                         <!-- Submit Buttons -->
                         <div class="form-group mt-4">
@@ -576,15 +575,6 @@
                     $('#ds_id').val(selected[0]); // First selected becomes lead
                 } else {
                     $('#ds_id').val('');
-                }
-            });
-
-            $('#customers').on('change', function() {
-                var selected = $(this).val();
-                if (selected && selected.length > 0) {
-                    $('#cust_id').val(selected[0]); // First selected becomes primary
-                } else {
-                    $('#cust_id').val('');
                 }
             });
 

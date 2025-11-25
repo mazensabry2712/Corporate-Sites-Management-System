@@ -42,58 +42,9 @@ class ReportController extends Controller
             // Get filter options (cached) - always needed for dropdowns
             $filterOptions = $this->reportService->getFilterOptions();
 
-            // Check if filters are applied
-            $hasFilters = $request->hasActiveFilters();
-
-            // Initialize empty collections
-            $reports = collect();
-            $tablesData = [
-                'allVendors' => collect(),
-                'allCustomers' => collect(),
-                'allProjectManagers' => collect(),
-                'allAccountManagers' => collect(),
-                'allDeliverySpecialists' => collect(),
-                'projectCustomers' => collect(),
-                'projectVendors' => collect(),
-                'projectDS' => collect(),
-            ];
-            $statistics = null;
-
-            // Only load data if filters are applied (Performance optimization)
-            if ($hasFilters) {
-                $filters = $request->input('filter', []);
-                $reports = $this->reportService->getFilteredReports($filters);
-
-                // Get all additional tables data (cached)
-                $tablesData = $this->reportService->getAllTablesData();
-
-                // Get statistics
-                $statistics = $this->reportService->getReportsStatistics();
-
-                // Log filter usage for analytics
-                Log::info('Reports filtered', [
-                    'filters_count' => $request->getActiveFiltersCount(),
-                    'active_filters' => array_keys($request->getActiveFilters()),
-                    'results_count' => $reports->count()
-                ]);
-            }
-
-            return view('dashboard.reports.index', array_merge(
-                [
-                    'reports' => $reports,
-                    'prNumbers' => $filterOptions['prNumbers'],
-                    'projectNames' => $filterOptions['projectNames'],
-                    'projectManagers' => $filterOptions['projectManagers'],
-                    'technologies' => $filterOptions['technologies'],
-                    'customerNames' => $filterOptions['customerNames'],
-                    'customerPos' => $filterOptions['customerPos'],
-                    'vendorsList' => $filterOptions['vendorsList'],
-                    'suppliers' => $filterOptions['suppliers'],
-                    'ams' => $filterOptions['ams'],
-                    'statistics' => $statistics,
-                ],
-                $tablesData
-            ));
+            return view('dashboard.reports.index', [
+                'filterOptions' => $filterOptions
+            ]);
         } catch (\Exception $e) {
             Log::error('Error in ReportController@index: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
@@ -102,6 +53,85 @@ class ReportController extends Controller
             return back()
                 ->with('error', 'An error occurred while loading reports. Please try again.')
                 ->withInput();
+        }
+    }
+
+
+
+    /**
+     * Get customer projects via AJAX
+     */
+    public function getCustomerProjects(Request $request)
+    {
+        try {
+            // Validate input
+            $request->validate([
+                'customer_name' => 'required|string|max:255'
+            ]);
+
+            $customerName = $request->input('customer_name');
+
+            // Get customer with projects count
+            $customer = Cust::where('name', $customerName)->first();
+
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer not found: ' . $customerName
+                ], 404);
+            }
+
+            // Get projects for this customer with eager loading if needed
+            $projects = Project::where('cust_id', $customer->id)
+                ->select('id', 'pr_number', 'name', 'value', 'customer_po', 'customer_po_deadline')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Calculate total value
+            $totalValue = $projects->sum('value');
+
+            // Format projects
+            $formattedProjects = $projects->map(function($project) {
+                return [
+                    'id' => $project->id,
+                    'pr_number' => $project->pr_number ?? 'N/A',
+                    'name' => $project->name ?? 'Untitled Project',
+                    'value' => number_format($project->value ?? 0, 2),
+                    'customer_po' => $project->customer_po,
+                    'deadline' => $project->customer_po_deadline
+                        ? \Carbon\Carbon::parse($project->customer_po_deadline)->format('Y-m-d')
+                        : null,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'customer' => [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'abb' => $customer->abb ?? 'N/A',
+                    'type' => $customer->tybe ?? 'N/A',
+                ],
+                'projects' => $formattedProjects,
+                'total_projects' => $projects->count(),
+                'total_value' => $totalValue
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error getting customer projects', [
+                'customer_name' => $request->input('customer_name'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching customer projects. Please try again.'
+            ], 500);
         }
     }
 

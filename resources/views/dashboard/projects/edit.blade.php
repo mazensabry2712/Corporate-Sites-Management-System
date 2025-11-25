@@ -545,7 +545,6 @@
                         <!-- Hidden fields for backward compatibility -->
                         <input type="hidden" id="vendors_id" name="vendors_id" value="{{ old('vendors_id', $project->vendors_id) }}">
                         <input type="hidden" id="ds_id" name="ds_id" value="{{ old('ds_id', $project->ds_id) }}">
-                        <input type="hidden" id="cust_id" name="cust_id" value="{{ old('cust_id', $project->cust_id) }}">
 
                         <!-- Submit Buttons -->
                         <div class="form-group mt-4">
@@ -601,20 +600,10 @@
                 }
             });
 
-            $('#customers').on('change', function() {
-                var selected = $(this).val();
-                if (selected && selected.length > 0) {
-                    $('#cust_id').val(selected[0]); // First selected becomes primary
-                } else {
-                    $('#cust_id').val('');
-                }
-            });
-
             // Initialize hidden fields with current selections on page load
             setTimeout(function() {
                 $('#vendors').trigger('change');
                 $('#delivery_specialists').trigger('change');
-                $('#customers').trigger('change');
             }, 100);
 
             // Calculate deadline based on PO date and duration

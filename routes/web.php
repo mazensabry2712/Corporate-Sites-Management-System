@@ -135,6 +135,7 @@ Route::group(
         Route::resource('roles', RoleController::class);
         Route::resource('users', UserController::class);
         Route::resource('reports', ReportController::class);
+        Route::get('reports/customer/projects', [ReportController::class, 'getCustomerProjects'])->name('reports.customer.projects');
         Route::get('reports/export/csv', [ReportController::class, 'export'])->name('reports.export');
         Route::post('reports/cache/clear', [ReportController::class, 'clearCache'])->name('reports.cache.clear');
     }

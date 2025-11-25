@@ -1,375 +1,229 @@
 @extends('layouts.master')
 @section('title')
-    Reports | MDSJEDPR
+  Reports | MDSJEDPR
 @stop
 
 @section('css')
 <!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    .reports-container {
-        display: flex;
-        gap: 20px;
-        position: relative;
+    .customer-filter-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
     }
 
-    .filter-sidebar {
-        width: 320px;
-        flex-shrink: 0;
-        position: sticky;
-        top: 80px;
-        height: fit-content;
-        max-height: calc(100vh - 120px);
-        overflow-y: auto;
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-    }
-
-    .filter-sidebar::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .filter-sidebar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .filter-sidebar::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        border-radius: 10px;
-        transition: background 0.3s ease;
-    }
-
-    .filter-sidebar::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
-    }
-
-    .sidebar-header {
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #dee2e6;
-    }
-
-    .sidebar-header h5 {
-        color: #495057;
+    .customer-filter-card h4 {
+        color: #007bff;
         font-weight: 700;
-        font-size: 18px;
-        margin: 0;
+        margin-bottom: 20px;
         display: flex;
         align-items: center;
         gap: 10px;
     }
 
-    .sidebar-header h5 i {
-        color: #007bff;
-        font-size: 20px;
-    }
-
-    .active-filters-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 15px;
-        font-size: 11px;
-        font-weight: 600;
-        margin-left: 10px;
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-    }
-
-    .active-filters-summary {
-        background: #f8f9fa;
-        padding: 10px;
-        border-radius: 6px;
-        border-left: 3px solid #007bff;
-    }
-
-    .active-filters-summary .badge {
-        font-size: 10px;
-        padding: 5px 10px;
-        font-weight: 500;
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        border: none;
-    }
-
-    .active-filters-summary .badge strong {
-        font-weight: 700;
-    }
-
-    .reports-content {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .filter-card {
-        background: white;
-        border: none;
-        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
-        margin-bottom: 15px;
-        border-radius: 8px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .filter-card:hover {
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.25);
-        transform: translateY(-2px);
-    }
-
-    .filter-card .card-header {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        border: none;
-        padding: 12px 15px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .filter-card .card-header:hover {
-        background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
-    }
-
-    .filter-card .card-header h6 {
-        color: white;
-        font-weight: 600;
-        margin: 0;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .filter-card .card-header h6 i:first-child {
-        margin-right: 8px;
-    }
-
-    .filter-card .card-header .toggle-icon {
-        transition: transform 0.3s ease;
-        font-size: 12px;
-    }
-
-    .filter-card .card-header.collapsed .toggle-icon {
-        transform: rotate(180deg);
-    }
-
-    .filter-card .card-body {
-        padding: 15px;
-        background: #ffffff;
-    }
-
-    .filter-card label {
-        color: #495057;
-        font-weight: 600;
-        margin-bottom: 6px;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .filter-card label i {
-        color: #007bff;
-        font-size: 10px;
-    }
-
-    .filter-card .form-control {
-        background: #f8f9fa;
-        border: 2px solid transparent;
-        border-radius: 6px;
-        font-size: 13px;
-        padding: 10px 12px;
-        transition: all 0.3s ease;
-    }
-
-    .filter-card .form-control:hover {
-        background: #ffffff;
-        border-color: #e9ecef;
-    }
-
-    .filter-card .form-control:focus {
-        background: white;
-        border-color: #007bff;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-    }
-
-    .filter-card .form-control::placeholder {
-        color: #adb5bd;
-        font-size: 12px;
-    }
-
-    .filter-card select.form-control {
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23007bff' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 12px;
-        padding-right: 35px;
-    }
-
-    .filter-card select.form-control option {
-        padding: 10px;
+    .customer-select-wrapper {
+        position: relative;
     }
 
     .select2-container--default .select2-selection--single {
         background: #f8f9fa;
-        border: 2px solid transparent;
-        border-radius: 6px;
-        height: 42px;
-        padding: 6px 12px;
-    }
-
-    .select2-container--default .select2-selection--single:hover {
-        background: #ffffff;
-        border-color: #e9ecef;
+        border: 2px solid #007bff;
+        border-radius: 10px;
+        height: 50px;
+        padding: 8px 15px;
     }
 
     .select2-container--default.select2-container--focus .select2-selection--single {
-        background: white;
-        border-color: #007bff;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        border-color: #0056b3;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
     }
 
     .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 32px;
+        font-size: 15px;
         color: #495057;
-        line-height: 28px;
-        font-size: 13px;
     }
 
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 40px;
-    }
-
-    .select2-dropdown {
-        border: 2px solid #007bff;
-        border-radius: 6px;
-    }
-
-    .select2-container--default .select2-results__option--highlighted[aria-selected] {
-        background-color: #007bff;
-    }
-
-    .filter-card .form-group {
-        margin-bottom: 12px;
-        position: relative;
-    }
-
-    .filter-card .form-group:last-child {
-        margin-bottom: 0;
-    }
-
-    .filter-card .input-icon {
-        position: absolute;
-        right: 12px;
-        top: 35px;
-        color: #adb5bd;
-        pointer-events: none;
-        font-size: 12px;
-    }
-
-    .filter-actions {
-        position: sticky;
-        bottom: 0;
-        background: white;
-        padding: 15px;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        margin-top: 15px;
-        z-index: 10;
-    }
-
-    .btn-filter {
-        width: 100%;
-        margin-bottom: 10px;
-        padding: 12px 20px;
+    .btn-search-customer {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 13px;
         transition: all 0.3s ease;
+        margin-top: 0;
     }
 
-    .btn-filter:hover {
+    .btn-search-customer:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 123, 255, 0.4);
+        color: white;
     }
 
-    .btn-filter i {
-        margin-right: 8px;
+    .customer-info-card {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
     }
 
-    .btn-reset {
-        width: 100%;
-        padding: 10px 20px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 12px;
+    .customer-info-card h3 {
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .customer-info-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .customer-info-item i {
+        width: 25px;
+        text-align: center;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        text-align: center;
         transition: all 0.3s ease;
     }
 
-    .btn-reset:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
 
-    .btn-reset i {
-        margin-right: 8px;
-    }
-
-    .badge-completion {
-        font-size: 11px;
-        padding: 5px 10px;
-    }
-
-    .export-buttons .btn {
-        margin-left: 5px;
-    }
-
-    /* Collapse Animation */
-    .collapse {
-        transition: height 0.35s ease;
-    }
-
-    @media (max-width: 992px) {
-        .reports-container {
-            flex-direction: column;
-        }
-
-        .filter-sidebar {
-            width: 100%;
-            position: relative;
-            max-height: none;
-            top: 0;
-        }
-    }
-
-    /* Loading Overlay */
-    .loading-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.9);
-        z-index: 9999;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .loading-overlay.active {
+    .stat-card .icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 15px;
+        border-radius: 50%;
         display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+
+    .stat-card.projects .icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stat-card.value .icon {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .stat-card h5 {
+        color: #6c757d;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .stat-card .number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #007bff;
+    }
+
+    .projects-table-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .projects-table-card .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+    }
+
+    .projects-table-card .card-header h4 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .table-modern {
+        margin: 0;
+    }
+
+    .table-modern thead th {
+        background: #f8f9fa;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+        border: none;
+        padding: 15px;
+    }
+
+    .table-modern tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.01);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-modern td {
+        vertical-align: middle;
+        padding: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        color: #6c757d;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+
+    .empty-state h4 {
+        color: #495057;
+        margin-bottom: 10px;
     }
 
     .loading-spinner {
         text-align: center;
+        padding: 50px;
+        display: none;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .loading-spinner.active {
+        display: block;
     }
 
     .loading-spinner i {
@@ -383,712 +237,380 @@
         100% { transform: rotate(360deg); }
     }
 
-    .loading-spinner p {
-        margin-top: 15px;
-        color: #495057;
-        font-weight: 600;
+    /* Toast Notifications */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
     }
 
-    /* Empty State Message */
-    .empty-state-message {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        border-radius: 15px;
-        padding: 80px 40px;
-        text-align: center;
-        box-shadow: 0 10px 40px rgba(0, 123, 255, 0.3);
-        animation: fadeIn 0.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .empty-state-message .icon-wrapper {
+    .toast-message {
         background: white;
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 10px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         display: flex;
         align-items: center;
-        justify-content: center;
-        margin: 0 auto 30px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        gap: 15px;
+        min-width: 300px;
+        animation: slideIn 0.3s ease;
     }
 
-    .empty-state-message .icon-wrapper i {
-        font-size: 60px;
-        color: #007bff;
+    .toast-message.success {
+        border-left: 4px solid #28a745;
     }
 
-    .empty-state-message h3 {
-        color: white;
-        font-weight: 700;
-        font-size: 28px;
-        margin-bottom: 15px;
+    .toast-message.error {
+        border-left: 4px solid #dc3545;
     }
 
-    .empty-state-message p {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 18px;
-        margin-bottom: 10px;
-        line-height: 1.6;
+    .toast-message.warning {
+        border-left: 4px solid #ffc107;
     }
 
-    .empty-state-message .hint {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 15px 25px;
-        border-radius: 10px;
-        display: inline-block;
-        margin-top: 20px;
+    .toast-message i {
+        font-size: 24px;
     }
 
-    .empty-state-message .hint i {
-        margin-right: 8px;
-        font-size: 16px;
+    .toast-message.success i {
+        color: #28a745;
+    }
+
+    .toast-message.error i {
+        color: #dc3545;
+    }
+
+    .toast-message.warning i {
+        color: #ffc107;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+
+    .btn-search-customer:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .btn-search-customer {
+            margin-top: 15px;
+        }
+
+        .toast-container {
+            right: 10px;
+            left: 10px;
+        }
+
+        .toast-message {
+            min-width: auto;
+        }
     }
 </style>
 @endsection
 
 @section('page-header')
-<!-- breadcrumb -->
 <div class="breadcrumb-header justify-content-between">
     <div class="my-auto">
         <div class="d-flex">
-            <h4 class="content-title mb-0 my-auto">Dashboard</h4><span class="text-muted mt-1 tx-13 ml-2 mb-0">/ Reports with Advanced Filters</span>
+            <h4 class="content-title mb-0 my-auto">Dashboard</h4>
+            <span class="text-muted mt-1 tx-13 ml-2 mb-0">/ Customer Projects Filter</span>
         </div>
     </div>
 </div>
-<!-- breadcrumb -->
 @endsection
 
 @section('content')
-    {{-- Loading Overlay --}}
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading Reports...</p>
-        </div>
-    </div>
+{{-- Toast Container --}}
+<div class="toast-container" id="toastContainer"></div>
 
-    <div class="reports-container">
-        {{-- Sidebar Filters --}}
-        <div class="filter-sidebar">
-            {{-- Sidebar Header --}}
-            <div class="sidebar-header">
-                <h5>
-                    <i class="fas fa-filter"></i>
-                    Advanced Filters
-                    @if(request()->has('filter'))
-                        <span class="active-filters-badge">{{ count(array_filter(request('filter', []))) }} Active</span>
-                    @endif
-                </h5>
-
-                {{-- Display Active Filters --}}
-                @if(request()->has('filter') && count(array_filter(request('filter', []))) > 0)
-                    <div class="active-filters-summary mt-2">
-                        <small class="text-muted d-block mb-1"><i class="fas fa-info-circle"></i> Active Filters:</small>
-                        @foreach(request('filter', []) as $filterKey => $filterValue)
-                            @if(!empty($filterValue))
-                                <span class="badge badge-primary mr-1 mb-1">
-                                    {{ ucfirst(str_replace('_', ' ', $filterKey)) }}: <strong>{{ is_array($filterValue) ? implode(', ', $filterValue) : $filterValue }}</strong>
-                                </span>
-                            @endif
-                        @endforeach
+<div class="row">
+    <div class="col-12">
+        {{-- Customer Filter Card --}}
+        <div class="customer-filter-card">
+            <h4>
+                <i class="fas fa-building"></i>
+                Select Customer to View Projects
+            </h4>
+            <div class="row align-items-end">
+                <div class="col-md-9">
+                    <label for="customerSelect" class="form-label">Customer Name</label>
+                    <div class="customer-select-wrapper">
+                        <select id="customerSelect" class="form-control select2" data-placeholder="-- Select Customer --">
+                            <option></option>
+                            @foreach($filterOptions['customerNames'] as $customerName)
+                                <option value="{{ $customerName }}">{{ $customerName }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                @endif
+                </div>
+                <div class="col-md-3">
+                    <button id="btnSearchCustomer" class="btn btn-search-customer btn-block">
+                        <i class="fas fa-search mr-2"></i>Search Projects
+                    </button>
+                </div>
             </div>
-
-            <form action="{{ route('reports.index') }}" method="GET" id="filterForm">
-                {{-- Filter 1: Project Information --}}
-                <div class="card filter-card">
-                    <div class="card-header" data-toggle="collapse" data-target="#projectInfo">
-                        <h6>
-                            <span><i class="fas fa-project-diagram"></i> Project Information</span>
-                            <i class="fas fa-chevron-up toggle-icon"></i>
-                        </h6>
-                    </div>
-                    <div id="projectInfo" class="collapse show">
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label><i class="fas fa-hashtag"></i> PR Number</label>
-                                <select name="filter[pr_number]" class="form-control select2" data-placeholder="-- Select PR Number --">
-                                    <option></option>
-                                    @foreach($prNumbers as $prNumber)
-                                        <option value="{{ $prNumber }}" {{ request('filter.pr_number') == $prNumber ? 'selected' : '' }}>
-                                            {{ $prNumber }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-briefcase"></i> Project Name</label>
-                                <select name="filter[name]" class="form-control select2" data-placeholder="-- Select Project --">
-                                    <option></option>
-                                    @foreach($projectNames as $projectName)
-                                        <option value="{{ $projectName }}" {{ request('filter.name') == $projectName ? 'selected' : '' }}>
-                                            {{ $projectName }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-code"></i> Technologies</label>
-                                <select name="filter[technologies]" class="form-control select2" data-placeholder="-- Select Technology --">
-                                    <option></option>
-                                    @foreach($technologies as $technology)
-                                        <option value="{{ $technology }}" {{ request('filter.technologies') == $technology ? 'selected' : '' }}>
-                                            {{ $technology }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-user-tie"></i> Project Manager</label>
-                                <select name="filter[project_manager]" class="form-control select2" data-placeholder="-- Select PM --">
-                                    <option></option>
-                                    @foreach($projectManagers as $pm)
-                                        <option value="{{ $pm }}" {{ request('filter.project_manager') == $pm ? 'selected' : '' }}>
-                                            {{ $pm }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Filter 2: Customer & Partners --}}
-                <div class="card filter-card">
-                    <div class="card-header" data-toggle="collapse" data-target="#customerPartners">
-                        <h6>
-                            <span><i class="fas fa-users"></i> Customer & Partners</span>
-                            <i class="fas fa-chevron-up toggle-icon"></i>
-                        </h6>
-                    </div>
-                    <div id="customerPartners" class="collapse show">
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label><i class="fas fa-building"></i> Customer Name</label>
-                                <select name="filter[customer_name]" class="form-control select2" data-placeholder="-- Select Customer --">
-                                    <option></option>
-                                    @foreach($customerNames as $customerName)
-                                        <option value="{{ $customerName }}" {{ request('filter.customer_name') == $customerName ? 'selected' : '' }}>
-                                            {{ $customerName }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-file-invoice"></i> Customer PO</label>
-                                <select name="filter[customer_po]" class="form-control select2" data-placeholder="-- Select PO --">
-                                    <option></option>
-                                    @foreach($customerPos as $customerPo)
-                                        <option value="{{ $customerPo }}" {{ request('filter.customer_po') == $customerPo ? 'selected' : '' }}>
-                                            {{ $customerPo }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-handshake"></i> Vendors</label>
-                                <select name="filter[vendors]" class="form-control select2" data-placeholder="-- Select Vendor --">
-                                    <option></option>
-                                    @foreach($vendorsList as $vendor)
-                                        <option value="{{ $vendor }}" {{ request('filter.vendors') == $vendor ? 'selected' : '' }}>
-                                            {{ $vendor }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-truck"></i> Suppliers</label>
-                                <select name="filter[suppliers]" class="form-control select2" data-placeholder="-- Select Supplier --">
-                                    <option></option>
-                                    @foreach($suppliers as $supplier)
-                                        <option value="{{ $supplier }}" {{ request('filter.suppliers') == $supplier ? 'selected' : '' }}>
-                                            {{ $supplier }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-user-cog"></i> Account Manager</label>
-                                <select name="filter[am]" class="form-control select2" data-placeholder="-- Select AM --">
-                                    <option></option>
-                                    @foreach($ams as $am)
-                                        <option value="{{ $am }}" {{ request('filter.am') == $am ? 'selected' : '' }}>
-                                            {{ $am }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Filter 3: Financial --}}
-                <div class="card filter-card">
-                    <div class="card-header" data-toggle="collapse" data-target="#financial">
-                        <h6>
-                            <span><i class="fas fa-dollar-sign"></i> Financial</span>
-                            <i class="fas fa-chevron-up toggle-icon"></i>
-                        </h6>
-                    </div>
-                    <div id="financial" class="collapse show">
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label><i class="fas fa-arrow-down"></i> Value Min ($)</label>
-                                <input type="number" step="0.01" name="filter[value_min]" class="form-control" placeholder="e.g., 50000" value="{{ request('filter.value_min') }}">
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-arrow-up"></i> Value Max ($)</label>
-                                <input type="number" step="0.01" name="filter[value_max]" class="form-control" placeholder="e.g., 500000" value="{{ request('filter.value_max') }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Filter 4: Completion & Deadline --}}
-                <div class="card filter-card">
-                    <div class="card-header" data-toggle="collapse" data-target="#completion">
-                        <h6>
-                            <span><i class="fas fa-calendar-check"></i> Completion & Deadline</span>
-                            <i class="fas fa-chevron-up toggle-icon"></i>
-                        </h6>
-                    </div>
-                    <div id="completion" class="collapse show">
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label><i class="fas fa-calendar-alt"></i> Deadline From</label>
-                                <input type="date" name="filter[deadline_from]" class="form-control" value="{{ request('filter.deadline_from') }}">
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-calendar-alt"></i> Deadline To</label>
-                                <input type="date" name="filter[deadline_to]" class="form-control" value="{{ request('filter.deadline_to') }}">
-                            </div>
-                            {{-- TODO: Enable after adding completion_percentage column to projects table --}}
-                            {{-- <div class="form-group">
-                                <label><i class="fas fa-percent"></i> Completion Min (%)</label>
-                                <input type="number" step="0.01" name="filter[completion_min]" class="form-control" placeholder="e.g., 0" value="{{ request('filter.completion_min') }}" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-percent"></i> Completion Max (%)</label>
-                                <input type="number" step="0.01" name="filter[completion_max]" class="form-control" placeholder="e.g., 100" value="{{ request('filter.completion_max') }}" disabled>
-                            </div> --}}
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Filter Actions --}}
-                <div class="filter-actions">
-                    <button type="submit" class="btn btn-primary btn-filter">
-                        <i class="fas fa-search"></i> Apply Filters
-                    </button>
-                    <a href="{{ route('reports.index') }}" class="btn btn-secondary btn-reset">
-                        <i class="fas fa-redo"></i> Reset All
-                    </a>
-                </div>
-            </form>
         </div>
 
-        {{-- Results Content --}}
-        <div class="reports-content">
-            {{-- Success/Error Messages --}}
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> {{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @endif
+        {{-- Loading Spinner --}}
+        <div id="loadingSpinner" class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="mt-3">Loading customer projects...</p>
+        </div>
 
-            {{-- Validation Errors --}}
-            @if($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle"></i> <strong>Validation Errors:</strong>
-                    <ul class="mb-0 mt-2">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @endif
-
-            @php
-                $hasActiveFilters = request()->has('filter') && count(array_filter(request('filter', []))) > 0;
-            @endphp
-
-            @if(!$hasActiveFilters)
-                {{-- Show beautiful message when no filters applied --}}
-                <div class="empty-state-message">
-                    <div class="icon-wrapper">
-                        <i class="fas fa-filter"></i>
-                    </div>
-                    <h3>Apply Filters to View Reports</h3>
-                    <p>
-                        Use the advanced filters on the left sidebar to search and display<br>
-                        specific data from the database tables.
-                    </p>
-                    <div class="hint">
-                        <i class="fas fa-lightbulb"></i>
-                        <strong>Tip:</strong> Select any filter criteria and click "Apply Filters" button to view results
+        {{-- Customer Info Card --}}
+        <div id="customerInfoCard" class="customer-info-card" style="display: none;">
+            <h3 id="customerName"><i class="fas fa-building mr-2"></i></h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="customer-info-item">
+                        <i class="fas fa-tag"></i>
+                        <span>Abbreviation: <strong id="customerAbb"></strong></span>
                     </div>
                 </div>
-            @else
-                {{-- Show all tables when filters are applied --}}
-
-                {{-- Projects --}}
-                <h5>Projects ({{ $reports->count() }})</h5>
-                @if($reports->count() > 0)
-                    <table class="table table-bordered">
-                        <tbody>
-                            @foreach($reports as $i => $r)
-                            <tr>
-                                <td>{{ $i+1 }}</td>
-                                <td>{{ $r->pr_number }}</td>
-                                <td>{{ $r->name }}</td>
-                                <td>{{ $r->ppms->name ?? '' }}</td>
-                                <td>{{ $r->technologies }}</td>
-                                <td>{{ $r->cust->name ?? '' }}</td>
-                                <td>{{ $r->customer_po }}</td>
-                                <td>${{ $r->value }}</td>
-                                <td>{{ $r->customer_po_deadline }}</td>
-                                <td>{{ $r->vendor->vendors ?? '' }}</td>
-                                <td>{{ $r->ds->dsname ?? '' }}</td>
-                                <td>{{ $r->aams->name ?? '' }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @else
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> No projects found matching your filters.
+                <div class="col-md-6">
+                    <div class="customer-info-item">
+                        <i class="fas fa-list"></i>
+                        <span>Type: <strong id="customerType"></strong></span>
                     </div>
-                @endif
+                </div>
+            </div>
+        </div>
 
-                {{-- Vendors --}}
-                <h5 class="mt-4">Vendors ({{ $allVendors->count() }})</h5>
-                @if($allVendors->count() > 0)
-                    <table class="table table-bordered">
-                        <tbody>
-                            @foreach($allVendors as $i => $v)
-                            <tr>
-                                <td>{{ $i+1 }}</td>
-                                <td>{{ $v->vendors }}</td>
-                                <td>{{ $v->vendor_am_details }}</td>
-                                <td>{{ $v->created_at }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @else
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> No vendors found.
-                    </div>
-                @endif
+        {{-- Statistics Cards --}}
+        <div id="statsRow" class="stats-row" style="display: none;">
+            <div class="stat-card projects">
+                <div class="icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h5>Total Projects</h5>
+                <div class="number" id="totalProjects">0</div>
+            </div>
+            <div class="stat-card value">
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <h5>Total Value</h5>
+                <div class="number" id="totalValue">$0</div>
+            </div>
+        </div>
 
-                {{-- Customers --}}
-                <h5 class="mt-4">Customers ({{ $allCustomers->count() }})</h5>
-                @if($allCustomers->count() > 0)
-                    <table class="table table-bordered">
-                        <tbody>
-                            @foreach($allCustomers as $i => $c)
-                            <tr>
-                                <td>{{ $i+1 }}</td>
-                                <td>{{ $c->name }}</td>
-                                <td>{{ $c->abb }}</td>
-                                <td>{{ $c->tybe }}</td>
-                                <td>{{ $c->phone }}</td>
-                                <td>{{ $c->email }}</td>
-                                <td>{{ $c->created_at }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @else
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> No customers found.
-                    </div>
-                @endif
-
-                {{-- Project Managers --}}
-                <h5 class="mt-4">Project Managers ({{ $allProjectManagers->count() }})</h5>
-                <table class="table table-bordered">
-                    <tbody>
-                        @foreach($allProjectManagers as $i => $pm)
+        {{-- Projects Table --}}
+        <div id="projectsTableCard" class="projects-table-card" style="display: none;">
+            <div class="card-header">
+                <h4><i class="fas fa-list mr-2"></i>Customer Projects</h4>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-modern table-hover mb-0">
+                    <thead>
                         <tr>
-                            <td>{{ $i+1 }}</td>
-                            <td>{{ $pm->name }}</td>
-                            <td>{{ $pm->email }}</td>
-                            <td>{{ $pm->phone }}</td>
-                            <td>{{ $pm->created_at }}</td>
+                            <th>#</th>
+                            <th><i class="fas fa-hashtag mr-1"></i>PR Number</th>
+                            <th><i class="fas fa-briefcase mr-1"></i>Project Name</th>
+                            <th><i class="fas fa-dollar-sign mr-1"></i>Value</th>
+                            <th><i class="fas fa-file-invoice mr-1"></i>PO Number</th>
+                            <th><i class="fas fa-calendar mr-1"></i>Deadline</th>
                         </tr>
-                        @endforeach
+                    </thead>
+                    <tbody id="projectsTableBody">
                     </tbody>
                 </table>
+            </div>
+        </div>
 
-                {{-- Account Managers --}}
-                <h5 class="mt-4">Account Managers ({{ $allAccountManagers->count() }})</h5>
-                <table class="table table-bordered">
-                    <tbody>
-                        @foreach($allAccountManagers as $i => $am)
-                        <tr>
-                            <td>{{ $i+1 }}</td>
-                            <td>{{ $am->name }}</td>
-                            <td>{{ $am->email }}</td>
-                            <td>{{ $am->phone }}</td>
-                            <td>{{ $am->created_at }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                {{-- Delivery Specialists --}}
-                <h5 class="mt-4">Delivery Specialists ({{ $allDeliverySpecialists->count() }})</h5>
-                <table class="table table-bordered">
-                    <tbody>
-                        @foreach($allDeliverySpecialists as $i => $ds)
-                        <tr>
-                            <td>{{ $i+1 }}</td>
-                            <td>{{ $ds->dsname }}</td>
-                            <td>{{ $ds->ds_contact }}</td>
-                            <td>{{ $ds->created_at }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                {{-- Project-Customer Relations --}}
-                <h5 class="mt-4">Project-Customer Relations ({{ $projectCustomers->count() }})</h5>
-                <table class="table table-bordered">
-                    <tbody>
-                        @foreach($projectCustomers as $i => $pc)
-                        <tr>
-                            <td>{{ $i+1 }}</td>
-                            <td>{{ $pc->pr_number }}</td>
-                            <td>{{ $pc->project_name }}</td>
-                            <td>{{ $pc->customer_name }}</td>
-                            <td>{{ $pc->is_primary }}</td>
-                            <td>{{ $pc->role }}</td>
-                            <td>{{ $pc->notes }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                {{-- Project-Vendor Relations --}}
-                <h5 class="mt-4">Project-Vendor Relations ({{ $projectVendors->count() }})</h5>
-                <table class="table table-bordered">
-                    <tbody>
-                        @foreach($projectVendors as $i => $pv)
-                        <tr>
-                            <td>{{ $i+1 }}</td>
-                            <td>{{ $pv->pr_number }}</td>
-                            <td>{{ $pv->project_name }}</td>
-                            <td>{{ $pv->vendor_name }}</td>
-                            <td>{{ $pv->is_primary }}</td>
-                            <td>{{ $pv->service_type }}</td>
-                            <td>${{ $pv->contract_value }}</td>
-                            <td>{{ $pv->notes }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                {{-- Project-DS Relations --}}
-                <h5 class="mt-4">Project-DS Relations ({{ $projectDS->count() }})</h5>
-                <table class="table table-bordered">
-                    <tbody>
-                        @foreach($projectDS as $i => $pds)
-                        <tr>
-                            <td>{{ $i+1 }}</td>
-                            <td>{{ $pds->pr_number }}</td>
-                            <td>{{ $pds->project_name }}</td>
-                            <td>{{ $pds->dsname }}</td>
-                            <td>{{ $pds->is_lead }}</td>
-                            <td>{{ $pds->responsibility }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
-
-
+        {{-- Empty State --}}
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <h4>No Projects Found</h4>
+            <p>This customer doesn't have any projects yet.</p>
         </div>
     </div>
+</div>
 @endsection
 
 @section('js')
-<!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Initialize Select2 for all select boxes
-        $('.select2').each(function() {
-            var placeholder = $(this).data('placeholder') || 'Select an option';
-            $(this).select2({
-                theme: 'default',
-                width: '100%',
-                placeholder: placeholder,
-                allowClear: true
-            });
-        });
+$(document).ready(function() {
+    // Setup CSRF token for AJAX
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
 
-        // Initialize DataTable
-        $('#example1').DataTable({
-            dom: 'Bfrtip',
-            buttons: []
-        });
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toast = $(`
+            <div class="toast-message ${type}">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+                <div>
+                    <strong>${type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Warning'}!</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 14px;">${message}</p>
+                </div>
+            </div>
+        `);
 
-        // Collapse/Expand Filter Sections
-        $('.filter-card .card-header').on('click', function() {
-            $(this).toggleClass('collapsed');
-            var target = $(this).data('target');
-            $(target).collapse('toggle');
-        });
+        $('#toastContainer').append(toast);
 
-        // Show loading overlay on form submit
-        $('#filterForm').on('submit', function(e) {
-            // Validate at least one filter is selected
-            var hasFilter = false;
-            $('input[name^="filter"], select[name^="filter"]').each(function() {
-                if ($(this).val() !== '' && $(this).val() !== null) {
-                    hasFilter = true;
-                    return false;
+        setTimeout(() => {
+            toast.css('animation', 'slideOut 0.3s ease');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // Initialize Select2
+    $('#customerSelect').select2({
+        theme: 'default',
+        width: '100%',
+        placeholder: '-- Select Customer --',
+        allowClear: true
+    });
+
+    // Search button click
+    $('#btnSearchCustomer').on('click', function() {
+        const customerName = $('#customerSelect').val();
+
+        if (!customerName) {
+            showToast('Please select a customer first', 'warning');
+            $('#customerSelect').select2('open');
+            return;
+        }
+
+        loadCustomerProjects(customerName);
+    });
+
+    // Also trigger on Enter key
+    $('#customerSelect').on('select2:select', function() {
+        const customerName = $(this).val();
+        if (customerName) {
+            loadCustomerProjects(customerName);
+        }
+    });
+
+    // Function to load customer projects
+    function loadCustomerProjects(customerName) {
+        // Disable button during loading
+        $('#btnSearchCustomer').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Loading...');
+
+        // Show loading
+        $('#loadingSpinner').addClass('active');
+        $('#customerInfoCard, #statsRow, #projectsTableCard, #emptyState').hide();
+
+        // Make AJAX request
+        $.ajax({
+            url: '{{ route("reports.customer.projects") }}',
+            method: 'GET',
+            data: { customer_name: customerName },
+            success: function(response) {
+                $('#loadingSpinner').removeClass('active');
+                $('#btnSearchCustomer').prop('disabled', false).html('<i class="fas fa-search mr-2"></i>Search Projects');
+
+                if (response.success) {
+                    // Show success message based on project count
+                    if (response.total_projects > 0) {
+                        showToast(`Found ${response.total_projects} projects for ${customerName}`, 'success');
+                    } else {
+                        showToast(`No projects found for ${customerName}`, 'warning');
+                    }
+
+                    // Display customer info
+                    $('#customerName').html('<i class="fas fa-building mr-2"></i>' + escapeHtml(response.customer.name));
+                    $('#customerAbb').text(response.customer.abb || 'N/A');
+                    $('#customerType').text(response.customer.type || 'N/A');
+                    $('#customerInfoCard').fadeIn();
+
+                    // Display statistics
+                    $('#totalProjects').text(response.total_projects);
+                    $('#totalValue').text('$' + formatCurrency(response.total_value));
+                    $('#statsRow').fadeIn();
+
+                    // Hide both table and empty state first
+                    $('#projectsTableCard').hide();
+                    $('#emptyState').hide();
+
+                    // Display projects table or empty state
+                    if (response.projects && response.projects.length > 0) {
+                        let tableRows = '';
+                        response.projects.forEach((project, index) => {
+                            tableRows += `
+                                <tr>
+                                    <td><span class="badge badge-primary">${index + 1}</span></td>
+                                    <td><strong>${escapeHtml(project.pr_number)}</strong></td>
+                                    <td>${escapeHtml(project.name)}</td>
+                                    <td><strong class="text-success">$${escapeHtml(project.value)}</strong></td>
+                                    <td>${escapeHtml(project.customer_po || 'N/A')}</td>
+                                    <td>${escapeHtml(project.deadline || 'N/A')}</td>
+                                </tr>
+                            `;
+                        });
+                        $('#projectsTableBody').html(tableRows);
+                        $('#projectsTableCard').fadeIn(300);
+                    } else {
+                        // Show empty state for customers with no projects
+                        $('#emptyState').fadeIn(300);
+                    }
+                } else {
+                    showToast(response.message || 'Failed to load customer projects', 'error');
                 }
-            });
+            },
+            error: function(xhr) {
+                $('#loadingSpinner').removeClass('active');
+                $('#btnSearchCustomer').prop('disabled', false).html('<i class="fas fa-search mr-2"></i>Search Projects');
 
-            $('#loadingOverlay').addClass('active');
+                let errorMessage = 'An error occurred while loading customer projects';
+                if (xhr.status === 404) {
+                    errorMessage = 'Customer not found';
+                } else if (xhr.status === 400) {
+                    errorMessage = 'Invalid request';
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
 
-            // Show a message if filtering
-            if (hasFilter) {
-                $('#loadingOverlay .loading-spinner p').text('Applying filters...');
-            } else {
-                $('#loadingOverlay .loading-spinner p').text('Loading all records...');
+                showToast(errorMessage, 'error');
+                console.error('AJAX Error:', xhr);
             }
         });
-
-        // Auto-hide loading after page load
-        $(window).on('load', function() {
-            setTimeout(function() {
-                $('#loadingOverlay').removeClass('active');
-            }, 300);
-        });
-
-        // Highlight active filters for select boxes
-        $('.select2').on('change', function() {
-            if ($(this).val() === '' || $(this).val() === null) {
-                $(this).next('.select2-container').find('.select2-selection').css('border-color', 'transparent');
-            } else {
-                $(this).next('.select2-container').find('.select2-selection').css('border-color', '#007bff');
-            }
-        });
-
-        // Highlight already selected filters on page load
-        $('.select2').each(function() {
-            if ($(this).val() !== '' && $(this).val() !== null) {
-                $(this).next('.select2-container').find('.select2-selection').css('border-color', '#007bff');
-            }
-        });
-
-        // Clear individual filter on input clear
-        $('.form-control:not(.select2)').on('input', function() {
-            if ($(this).val() === '') {
-                $(this).css('border-color', 'transparent');
-            } else {
-                $(this).css('border-color', '#007bff');
-            }
-        });
-
-        // Highlight active filters for regular inputs
-        $('.form-control:not(.select2)').each(function() {
-            if ($(this).val() !== '') {
-                $(this).css('border-color', '#007bff');
-            }
-        });
-    });
-
-    function exportToPDF() {
-        alert('PDF Export functionality - integrate with library like jsPDF');
     }
 
-    function exportToExcel() {
-        alert('Excel Export functionality - integrate with library');
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    function printTable() {
-        window.print();
+    // Helper function to format currency
+    function formatCurrency(value) {
+        return Number(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     }
-
-    // Validate number inputs
-    $('input[type="number"]').on('input', function() {
-        var value = parseFloat($(this).val());
-        var min = parseFloat($(this).attr('min')) || 0;
-        var max = parseFloat($(this).attr('max'));
-
-        if (value < min) {
-            $(this).val(min);
-            showValidationMessage(this, 'Minimum value is ' + min);
-        }
-        if (max && value > max) {
-            $(this).val(max);
-            showValidationMessage(this, 'Maximum value is ' + max);
-        }
-    });
-
-    // Date validation
-    $('input[name="filter[deadline_from]"]').on('change', function() {
-        var deadlineTo = $('input[name="filter[deadline_to]"]').val();
-        if (deadlineTo && $(this).val() > deadlineTo) {
-            showValidationMessage(this, 'From date cannot be after To date');
-            $(this).val('');
-        }
-    });
-
-    $('input[name="filter[deadline_to]"]').on('change', function() {
-        var deadlineFrom = $('input[name="filter[deadline_from]"]').val();
-        if (deadlineFrom && $(this).val() < deadlineFrom) {
-            showValidationMessage(this, 'To date cannot be before From date');
-            $(this).val('');
-        }
-    });
-
-    function showValidationMessage(element, message) {
-        var $elem = $(element);
-        var pos = $elem.offset();
-
-        var $msg = $('<div class="validation-tooltip">' + message + '</div>');
-        $msg.css({
-            position: 'absolute',
-            top: pos.top - 35,
-            left: pos.left,
-            background: '#dc3545',
-            color: 'white',
-            padding: '5px 10px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            zIndex: 9999
-        });
-
-        $('body').append($msg);
-        setTimeout(function() {
-            $msg.fadeOut(function() {
-                $msg.remove();
-            });
-        }, 3000);
-    }
+});
 </script>
 @endsection
