@@ -858,30 +858,51 @@
                                         <div class="card-body" style="padding: 30px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
                                             {{-- Project Info Grid --}}
                                             <div class="row mb-4">
-                                                <div class="col-md-3 col-sm-6 mb-3">
-                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #007bff; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
-                                                        <small class="text-muted d-block mb-2"><i class="fas fa-building"></i> Customer</small>
-                                                        <h5 class="mb-0" style="color: #007bff;">{{ $project->cust->name ?? 'N/A' }}</h5>
+                                                <div class="col-lg col-md-4 col-sm-6 mb-3">
+                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 8px; border-top: 3px solid #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%; transition: all 0.3s;">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <i class="fas fa-building" style="color: #667eea; font-size: 20px;"></i>
+                                                            <small class="ml-2" style="color: #6c757d; font-weight: 600; font-size: 10px; text-transform: uppercase;">Customer</small>
+                                                        </div>
+                                                        <h5 class="mb-0" style="color: #2c3e50; font-weight: 600; font-size: 15px;">{{ $project->cust->name ?? 'N/A' }}</h5>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3 col-sm-6 mb-3">
-                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #28a745; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
-                                                        <small class="text-muted d-block mb-2"><i class="fas fa-user-tie"></i> Project Manager</small>
-                                                        <h5 class="mb-0" style="color: #28a745;">{{ $project->ppms->name ?? 'N/A' }}</h5>
+                                                <div class="col-lg col-md-4 col-sm-6 mb-3">
+                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 8px; border-top: 3px solid #28a745; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%; transition: all 0.3s;">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <i class="fas fa-user-tie" style="color: #28a745; font-size: 20px;"></i>
+                                                            <small class="ml-2" style="color: #6c757d; font-weight: 600; font-size: 10px; text-transform: uppercase;">PM</small>
+                                                        </div>
+                                                        <h5 class="mb-0" style="color: #2c3e50; font-weight: 600; font-size: 15px;">{{ $project->ppms->name ?? 'N/A' }}</h5>
                                                     </div>
                                                 </div>
                                                 @if(!request('filter.pr_number_no_invoice'))
-                                                <div class="col-md-3 col-sm-6 mb-3">
-                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #ffc107; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
-                                                        <small class="text-muted d-block mb-2"><i class="fas fa-dollar-sign"></i> Project Value</small>
-                                                        <h5 class="mb-0" style="color: #ffc107;">{{ number_format($project->value ?? 0, 2) }} SAR</h5>
+                                                <div class="col-lg col-md-4 col-sm-6 mb-3">
+                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 8px; border-top: 3px solid #ffc107; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%; transition: all 0.3s;">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <i class="fas fa-dollar-sign" style="color: #ffc107; font-size: 20px;"></i>
+                                                            <small class="ml-2" style="color: #6c757d; font-weight: 600; font-size: 10px; text-transform: uppercase;">Value</small>
+                                                        </div>
+                                                        <h5 class="mb-0" style="color: #2c3e50; font-weight: 600; font-size: 15px;">{{ number_format($project->value ?? 0, 0) }} SAR</h5>
                                                     </div>
                                                 </div>
                                                 @endif
-                                                <div class="col-md-3 col-sm-6 mb-3">
-                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #dc3545; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
-                                                        <small class="text-muted d-block mb-2"><i class="fas fa-calendar-alt"></i> PO Date</small>
-                                                        <h5 class="mb-0" style="color: #dc3545;">{{ $project->customer_po_date ?? 'N/A' }}</h5>
+                                                <div class="col-lg col-md-4 col-sm-6 mb-3">
+                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 8px; border-top: 3px solid #17a2b8; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%; transition: all 0.3s;">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <i class="fas fa-calendar-alt" style="color: #17a2b8; font-size: 20px;"></i>
+                                                            <small class="ml-2" style="color: #6c757d; font-weight: 600; font-size: 10px; text-transform: uppercase;">PO Date</small>
+                                                        </div>
+                                                        <h5 class="mb-0" style="color: #2c3e50; font-weight: 600; font-size: 15px;">{{ $project->customer_po_date ?? 'N/A' }}</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg col-md-4 col-sm-6 mb-3">
+                                                    <div class="info-box" style="background: white; padding: 20px; border-radius: 8px; border-top: 3px solid #6f42c1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%; transition: all 0.3s;">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <i class="fas fa-code" style="color: #6f42c1; font-size: 20px;"></i>
+                                                            <small class="ml-2" style="color: #6c757d; font-weight: 600; font-size: 10px; text-transform: uppercase;">Technologies</small>
+                                                        </div>
+                                                        <h5 class="mb-0" style="color: #2c3e50; font-weight: 600; font-size: 15px;">{{ $project->technologies ?? 'N/A' }}</h5>
                                                     </div>
                                                 </div>
                                             </div>
@@ -978,6 +999,17 @@
                                                                 transition: width 0.6s ease;
                                                                 position: relative;
                                                                 box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);">
+                                                    </div>
+                                                </div>
+
+                                                {{-- Expected Completion Date --}}
+                                                <div class="mt-3 mb-3" style="background: white; padding: 15px 20px; border-radius: 10px; border-left: 4px solid #17a2b8; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-calendar-check" style="color: #17a2b8; font-size: 20px; margin-right: 12px;"></i>
+                                                        <div>
+                                                            <small style="color: #6c757d; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Expected Completion Date</small>
+                                                            <h6 class="mb-0 mt-1" style="color: #2c3e50; font-weight: 600; font-size: 16px;">{{ $project->customer_po_deadline ?? 'Not Set' }}</h6>
+                                                        </div>
                                                     </div>
                                                 </div>
 
