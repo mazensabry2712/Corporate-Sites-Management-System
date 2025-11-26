@@ -638,6 +638,24 @@
                 </div>
             </div>
 
+            {{-- AM Filter Card --}}
+            <div class="filter-card">
+                <div class="card-header">
+                    <h6>
+                        <i class="fas fa-user-shield"></i> Account Manager
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <label>Select AM</label>
+                    <select id="amSelect" class="form-control select2" data-placeholder="-- Select AM --">
+                        <option></option>
+                        @foreach($filterOptions['ams'] as $amName)
+                            <option value="{{ $amName }}">{{ $amName }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
             {{-- Unified Action Buttons --}}
             <div class="mt-4">
                 <button id="btnApplyFilters" class="btn btn-filter-submit mb-2">
@@ -977,6 +995,79 @@
             <h4>No Projects Found</h4>
             <p>This PM doesn't have any projects yet.</p>
         </div>
+
+        {{-- Separator before AM Results --}}
+        <hr class="results-separator" style="display: none; margin: 30px 0; border: 0; height: 2px; background: linear-gradient(to right, transparent, #dee2e6, transparent);">
+
+        {{-- Loading Spinner for AM --}}
+        <div id="loadingSpinnerAM" class="loading-spinner" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="mt-3">Loading AM projects...</p>
+        </div>
+
+        {{-- AM Info Card --}}
+        <div id="amInfoCard" class="info-card am" style="display: none;">
+            <h3 id="amName"><i class="fas fa-user-shield mr-2"></i></h3>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="info-item">
+                        <i class="fas fa-list"></i>
+                        <span>Role: <strong>Account Manager</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Statistics Cards for AM --}}
+        <div id="statsRowAM" class="stats-row" style="display: none;">
+            <div class="stat-card projects">
+                <div class="icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h5>Total Projects</h5>
+                    <div class="number" id="totalProjectsAM">0</div>
+                </div>
+            </div>
+            <div class="stat-card value">
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h5>Total Value</h5>
+                    <div class="number" id="totalValueAM">$0</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- AM Projects Table --}}
+        <div id="projectsTableCardAM" class="projects-table-card" style="display: none;">
+            <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                <h4><i class="fas fa-list mr-2"></i>AM Projects</h4>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-modern table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th><i class="fas fa-hashtag mr-1"></i>PR Number</th>
+                            <th><i class="fas fa-briefcase mr-1"></i>Project Name</th>
+                            <th><i class="fas fa-building mr-1"></i>Customer</th>
+                            <th><i class="fas fa-dollar-sign mr-1"></i>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBodyAM">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Empty State for AM --}}
+        <div id="emptyStateAM" class="empty-state" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <h4>No Projects Found</h4>
+            <p>This AM doesn't have any projects yet.</p>
+        </div>
     </div> {{-- Close col-lg-9 --}}
 </div> {{-- Close main row --}}
 @endsection
@@ -1044,15 +1135,24 @@ $(document).ready(function() {
         allowClear: true
     });
 
+    // Initialize Select2 for AM
+    $('#amSelect').select2({
+        theme: 'default',
+        width: '100%',
+        placeholder: '-- Select AM --',
+        allowClear: true
+    });
+
     // Apply Filters button
     $('#btnApplyFilters').on('click', function() {
         const customerName = $('#customerSelect').val();
         const vendorName = $('#vendorSelect').val();
         const supplierName = $('#supplierSelect').val();
         const pmName = $('#pmSelect').val();
+        const amName = $('#amSelect').val();
 
         // Check if at least one filter is selected
-        if (!customerName && !vendorName && !supplierName && !pmName) {
+        if (!customerName && !vendorName && !supplierName && !pmName && !amName) {
             showToast('Please select at least one filter', 'warning');
             return;
         }
@@ -1070,6 +1170,9 @@ $(document).ready(function() {
         if (pmName) {
             loadPMProjects(pmName);
         }
+        if (amName) {
+            loadAMProjects(amName);
+        }
     });
 
     // Reset Filters button
@@ -1079,12 +1182,14 @@ $(document).ready(function() {
         $('#vendorSelect').val(null).trigger('change');
         $('#supplierSelect').val(null).trigger('change');
         $('#pmSelect').val(null).trigger('change');
+        $('#amSelect').val(null).trigger('change');
 
         // Hide all result sections
         $('#loadingSpinner, #customerInfoCard, #statsRow, #projectsTableCard, #emptyState').hide();
         $('#loadingSpinnerVendor, #vendorInfoCard, #statsRowVendor, #projectsTableCardVendor, #emptyStateVendor').hide();
         $('#loadingSpinnerSupplier, #supplierInfoCard, #statsRowSupplier, #projectsTableCardSupplier, #emptyStateSupplier').hide();
         $('#loadingSpinnerPM, #pmInfoCard, #statsRowPM, #projectsTableCardPM, #emptyStatePM').hide();
+        $('#loadingSpinnerAM, #amInfoCard, #statsRowAM, #projectsTableCardAM, #emptyStateAM').hide();
         $('.results-separator').hide();
 
         showToast('Filters have been reset', 'success');
@@ -1453,6 +1558,95 @@ $(document).ready(function() {
                 let errorMessage = 'An error occurred while loading PM projects';
                 if (xhr.status === 404) {
                     errorMessage = 'PM not found';
+                } else if (xhr.status === 400) {
+                    errorMessage = 'Invalid request';
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                showToast(errorMessage, 'error');
+                console.error('AJAX Error:', xhr);
+            }
+        });
+    }
+
+    // Function to load AM projects
+    function loadAMProjects(amName) {
+        // Disable button during loading
+        $('#btnApplyFilters').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Loading...');
+
+        // Show loading
+        $('#loadingSpinnerAM').show();
+        $('#amInfoCard, #statsRowAM, #projectsTableCardAM, #emptyStateAM').hide();
+
+        // Make AJAX request
+        $.ajax({
+            url: '{{ route("reports.am.projects") }}',
+            method: 'GET',
+            data: { am_name: amName },
+            success: function(response) {
+                $('#loadingSpinnerAM').hide();
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
+
+                if (response.success) {
+                    // Show success message
+                    if (response.total_projects > 0) {
+                        showToast(`Found ${response.total_projects} projects for ${amName}`, 'success');
+                    } else {
+                        showToast(`No projects found for ${amName}`, 'warning');
+                    }
+
+                    // Display AM info
+                    $('#amName').html('<i class="fas fa-user-shield mr-2"></i>' + escapeHtml(response.am.name));
+                    $('#amInfoCard').fadeIn();
+
+                    // Display statistics
+                    $('#totalProjectsAM').text(response.total_projects);
+                    $('#totalValueAM').text('$' + formatCurrency(response.total_value));
+                    $('#statsRowAM').fadeIn();
+
+                    // Hide both table and empty state first
+                    $('#projectsTableCardAM').hide();
+                    $('#emptyStateAM').hide();
+
+                    // Display projects table or empty state
+                    if (response.projects && response.projects.length > 0) {
+                        let tableRows = '';
+                        response.projects.forEach((project, index) => {
+                            tableRows += `
+                                <tr>
+                                    <td><span class="badge badge-info">${index + 1}</span></td>
+                                    <td><strong class="text-primary">${escapeHtml(project.pr_number)}</strong></td>
+                                    <td><strong>${escapeHtml(project.name)}</strong></td>
+                                    <td><span class="badge badge-info">${escapeHtml(project.customer_name)}</span></td>
+                                    <td><strong class="text-success" style="font-size: 1.1em;">$${escapeHtml(project.value)}</strong></td>
+                                </tr>
+                            `;
+                        });
+                        $('#projectsTableBodyAM').html(tableRows);
+                        $('#projectsTableCardAM').fadeIn(300);
+                    } else {
+                        $('#emptyStateAM').fadeIn(300);
+                    }
+
+                    // Show separator if other results are visible
+                    if ($('#customerInfoCard').is(':visible') || $('#projectsTableCard').is(':visible') || $('#emptyState').is(':visible') ||
+                        $('#vendorInfoCard').is(':visible') || $('#projectsTableCardVendor').is(':visible') || $('#emptyStateVendor').is(':visible') ||
+                        $('#supplierInfoCard').is(':visible') || $('#projectsTableCardSupplier').is(':visible') || $('#emptyStateSupplier').is(':visible') ||
+                        $('#pmInfoCard').is(':visible') || $('#projectsTableCardPM').is(':visible') || $('#emptyStatePM').is(':visible')) {
+                        $('.results-separator').fadeIn();
+                    }
+                } else {
+                    showToast(response.message || 'Failed to load AM projects', 'error');
+                }
+            },
+            error: function(xhr) {
+                $('#loadingSpinnerAM').hide();
+                $('#btnApplyFilters').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Apply Filters');
+
+                let errorMessage = 'An error occurred while loading AM projects';
+                if (xhr.status === 404) {
+                    errorMessage = 'AM not found';
                 } else if (xhr.status === 400) {
                     errorMessage = 'Invalid request';
                 } else if (xhr.responseJSON && xhr.responseJSON.message) {

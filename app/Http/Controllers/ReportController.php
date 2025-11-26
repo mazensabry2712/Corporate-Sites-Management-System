@@ -371,6 +371,79 @@ class ReportController extends Controller
     }
 
     /**
+     * Get AM (Account Manager) projects via AJAX
+     */
+    public function getAMProjects(Request $request)
+    {
+        try {
+            // Validate input
+            $request->validate([
+                'am_name' => 'required|string|max:255'
+            ]);
+
+            $amName = $request->input('am_name');
+
+            // Get AM
+            $am = aams::where('name', $amName)->first();
+
+            if (!$am) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AM not found: ' . $amName
+                ], 404);
+            }
+
+            // Get projects for this AM with customer info
+            $projects = Project::where('aams_id', $am->id)
+                ->with('cust:id,name')
+                ->select('id', 'pr_number', 'name', 'value', 'cust_id')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Calculate total value
+            $totalValue = $projects->sum('value');
+
+            // Format projects
+            $formattedProjects = $projects->map(function($project) {
+                return [
+                    'id' => $project->id,
+                    'pr_number' => $project->pr_number ?? 'N/A',
+                    'name' => $project->name ?? 'Untitled Project',
+                    'customer_name' => $project->cust->name ?? 'N/A',
+                    'value' => number_format($project->value ?? 0, 2),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'am' => [
+                    'id' => $am->id,
+                    'name' => $am->name,
+                ],
+                'projects' => $formattedProjects,
+                'total_projects' => $projects->count(),
+                'total_value' => $totalValue
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error getting AM projects', [
+                'am_name' => $request->input('am_name'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching AM projects. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
      * Clear reports cache
      */
     public function clearCache()
