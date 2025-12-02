@@ -1059,72 +1059,84 @@
                                             {{-- Statistics Cards --}}
                                             <div class="row">
                                                 {{-- Tasks Statistics --}}
-                                                <div class="col-md-3 col-sm-6 mb-3">
+                                                <div class="col-md-4 col-sm-6 mb-3">
                                                     <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <div style="width: 100%;">
-                                                                <small style="opacity: 0.9;">Tasks Assigned To</small>
-                                                                <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
+                                                                <small style="opacity: 0.9; font-weight: 600; font-size: 12px;">Tasks</small>
+                                                                <div style="font-size: 13px; line-height: 1.6; max-height: 100px; overflow-y: auto; margin-top: 10px;">
                                                                     @php
-                                                                        $assignedNamesPending = $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->pluck('assigned')->filter()->unique();
+                                                                        $pendingTasks = $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress']);
                                                                     @endphp
-                                                                    @if($assignedNamesPending->count() > 0)
-                                                                        @foreach($assignedNamesPending as $name)
-                                                                            <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $name }}</div>
+                                                                    @if($pendingTasks->count() > 0)
+                                                                        @foreach($pendingTasks as $task)
+                                                                            <div style="padding: 6px 0; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.15);">
+                                                                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                                                                    <span style="font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $task->details ?? 'Task' }}</span>
+                                                                                    <i class="fas fa-long-arrow-alt-right" style="font-size: 11px; opacity: 0.7; flex-shrink: 0;"></i>
+                                                                                    <span style="background: rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; flex-shrink: 0; white-space: nowrap;">{{ $task->assigned ?? 'N/A' }}</span>
+                                                                                </div>
+                                                                            </div>
                                                                         @endforeach
                                                                     @else
-                                                                        <div style="opacity: 0.7;">No pending tasks</div>
+                                                                        <div style="opacity: 0.7; padding: 10px 0;">No pending tasks</div>
                                                                     @endif
                                                                 </div>
-                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->count() }}/{{ $project->tasks->count() }} Pending</small>
+                                                                <small style="opacity: 0.85; display: block; margin-top: 10px; font-weight: 600;">{{ $project->tasks->whereIn('status', ['Pending', 'pending', 'In Progress', 'in progress'])->count() }}/{{ $project->tasks->count() }} Pending</small>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {{-- Risks Statistics --}}
-                                                <div class="col-md-3 col-sm-6 mb-3">
+                                                <div class="col-md-4 col-sm-6 mb-3">
                                                     <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <div style="width: 100%;">
-                                                                <small style="opacity: 0.9;">Risk/Issue</small>
-                                                                <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
-                                                                    @php
-                                                                        $riskNames = $project->risks->pluck('risk')->filter()->unique();
-                                                                    @endphp
-                                                                    @if($riskNames->count() > 0)
-                                                                        @foreach($riskNames as $risk)
-                                                                            <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $risk }}</div>
+                                                                <small style="opacity: 0.9; font-weight: 600; font-size: 12px;">Risk/Issue</small>
+                                                                <div style="font-size: 13px; line-height: 1.6; max-height: 100px; overflow-y: auto; margin-top: 10px;">
+                                                                    @if($project->risks->count() > 0)
+                                                                        @foreach($project->risks as $risk)
+                                                                            <div style="padding: 6px 0; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.15);">
+                                                                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                                                                    <span style="font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $risk->risk }}</span>
+                                                                                    <i class="fas fa-long-arrow-alt-right" style="font-size: 11px; opacity: 0.7; flex-shrink: 0;"></i>
+                                                                                    <span style="background: rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; flex-shrink: 0; white-space: nowrap;">{{ $risk->impact ?? 'N/A' }}</span>
+                                                                                </div>
+                                                                            </div>
                                                                         @endforeach
                                                                     @else
-                                                                        <div style="opacity: 0.7;">No risks</div>
+                                                                        <div style="opacity: 0.7; padding: 10px 0;">No risks</div>
                                                                     @endif
                                                                 </div>
-                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->risks->whereIn('status', ['closed'])->count() }}/{{ $project->risks->count() }} Closed</small>
+                                                                <small style="opacity: 0.85; display: block; margin-top: 10px; font-weight: 600;">{{ $project->risks->whereIn('status', ['closed'])->count() }}/{{ $project->risks->count() }} Closed</small>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {{-- Milestones Statistics --}}
-                                                <div class="col-md-3 col-sm-6 mb-3">
+                                                <div class="col-md-4 col-sm-6 mb-3">
                                                     <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <div style="width: 100%;">
-                                                                <small style="opacity: 0.9;">Milestone</small>
-                                                                <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
-                                                                    @php
-                                                                        $milestoneNames = $project->milestones->pluck('milestone')->filter()->unique();
-                                                                    @endphp
-                                                                    @if($milestoneNames->count() > 0)
-                                                                        @foreach($milestoneNames as $milestone)
-                                                                            <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $milestone }}</div>
+                                                                <small style="opacity: 0.9; font-weight: 600; font-size: 12px;">Milestones</small>
+                                                                <div style="font-size: 13px; line-height: 1.6; max-height: 100px; overflow-y: auto; margin-top: 10px;">
+                                                                    @if($project->milestones->count() > 0)
+                                                                        @foreach($project->milestones as $milestone)
+                                                                            <div style="padding: 6px 0; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.15);">
+                                                                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                                                                    <span style="font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $milestone->milestone }}</span>
+                                                                                    <i class="fas fa-long-arrow-alt-right" style="font-size: 11px; opacity: 0.7; flex-shrink: 0;"></i>
+                                                                                    <span style="background: rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; flex-shrink: 0; white-space: nowrap;">{{ $milestone->status ?? 'N/A' }}</span>
+                                                                                </div>
+                                                                            </div>
                                                                         @endforeach
                                                                     @else
-                                                                        <div style="opacity: 0.7;">No milestones</div>
+                                                                        <div style="opacity: 0.7; padding: 10px 0;">No milestones</div>
                                                                     @endif
                                                                 </div>
-                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->milestones->whereIn('status', ['Completed', 'completed', 'on track'])->count() }}/{{ $project->milestones->count() }} Done</small>
+                                                                <small style="opacity: 0.85; display: block; margin-top: 10px; font-weight: 600;">{{ $project->milestones->whereIn('status', ['Completed', 'completed', 'on track'])->count() }}/{{ $project->milestones->count() }} Done</small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1132,29 +1144,81 @@
 
                                                 {{-- Invoices Statistics --}}
                                                 @if(!request('filter.pr_number_no_invoice'))
-                                                <div class="col-md-3 col-sm-6 mb-3">
+                                                <div class="col-md-4 col-sm-6 mb-3">
                                                     <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <div style="width: 100%;">
-                                                                <small style="opacity: 0.9;">Invoice Number</small>
-                                                                <div style="font-size: 14px; line-height: 1.6; max-height: 80px; overflow-y: auto; margin-top: 8px;">
-                                                                    @php
-                                                                        $invoiceNumbers = $project->invoices->pluck('invoice_number')->filter()->unique();
-                                                                    @endphp
-                                                                    @if($invoiceNumbers->count() > 0)
-                                                                        @foreach($invoiceNumbers as $invoice)
-                                                                            <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">• {{ $invoice }}</div>
+                                                                <small style="opacity: 0.9; font-weight: 600; font-size: 12px;">Invoices</small>
+                                                                <div style="font-size: 13px; line-height: 1.6; max-height: 100px; overflow-y: auto; margin-top: 10px;">
+                                                                    @if($project->invoices->count() > 0)
+                                                                        @foreach($project->invoices as $invoice)
+                                                                            <div style="padding: 6px 0; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.15);">
+                                                                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                                                                    <span style="font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $invoice->invoice_number ?? 'N/A' }}</span>
+                                                                                    <i class="fas fa-long-arrow-alt-right" style="font-size: 11px; opacity: 0.7; flex-shrink: 0;"></i>
+                                                                                    <span style="background: rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; flex-shrink: 0; white-space: nowrap;">{{ number_format($invoice->value ?? 0, 0) }} SAR</span>
+                                                                                </div>
+                                                                            </div>
                                                                         @endforeach
                                                                     @else
-                                                                        <div style="opacity: 0.7;">No invoices</div>
+                                                                        <div style="opacity: 0.7; padding: 10px 0;">No invoices</div>
                                                                     @endif
                                                                 </div>
-                                                                <small style="opacity: 0.8; display: block; margin-top: 8px;">{{ $project->invoices->whereIn('status', ['paid', 'Paid'])->count() }}/{{ $project->invoices->count() }} Paid</small>
+                                                                <small style="opacity: 0.85; display: block; margin-top: 10px; font-weight: 600;">{{ $project->invoices->whereIn('status', ['paid', 'Paid'])->count() }}/{{ $project->invoices->count() }} Paid</small>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 @endif
+
+                                                {{-- DN Statistics --}}
+                                                <div class="col-md-4 col-sm-6 mb-3">
+                                                    <div class="stat-card" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div style="width: 100%;">
+                                                                <small style="opacity: 0.9; font-weight: 600; font-size: 12px;">DNs</small>
+                                                                <div style="margin-top: 10px;">
+                                                                    @if($project->dns->count() > 0)
+                                                                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                                                            @foreach($project->dns as $dn)
+                                                                                <div style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; flex: 0 0 calc(25% - 6px); text-align: center;">
+                                                                                    {{ $dn->dn_number ?? 'N/A' }}
+                                                                                </div>
+                                                                            @endforeach
+                                                                        </div>
+                                                                    @else
+                                                                        <div style="opacity: 0.7; padding: 10px 0;">No DNs</div>
+                                                                    @endif
+                                                                </div>
+                                                                <small style="opacity: 0.85; display: block; margin-top: 10px; font-weight: 600;">{{ $project->dns->count() }} Total</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Escalation (Customer Contact - AM) --}}
+                                                <div class="col-md-4 col-sm-6 mb-3">
+                                                    <div class="stat-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div style="width: 100%;">
+                                                                <small style="opacity: 0.9; font-weight: 600; font-size: 12px;">Escalation</small>
+                                                                <div style="font-size: 13px; line-height: 1.6; max-height: 100px; overflow-y: auto; margin-top: 10px;">
+                                                                    @if($project->customer_contact_details || $project->aams)
+                                                                        <div style="padding: 6px 0; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.15);">
+                                                                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                                                                <span style="font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $project->customer_contact_details ?? 'N/A' }}</span>
+                                                                                <i class="fas fa-long-arrow-alt-right" style="font-size: 11px; opacity: 0.7; flex-shrink: 0;"></i>
+                                                                                <span style="background: rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; flex-shrink: 0; white-space: nowrap;">{{ $project->aams->name ?? 'N/A' }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    @else
+                                                                        <div style="opacity: 0.7; padding: 10px 0; text-align: center;">No contact info</div>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -90,6 +90,11 @@ class Project extends Model
         return $this->hasMany(Risks::class, 'pr_number', 'id');
     }
 
+    public function dns()
+    {
+        return $this->hasMany(Dn::class, 'pr_number', 'id');
+    }
+
     // --------------------------------------------------------------------------------
 
     /**
